@@ -1,6 +1,7 @@
 package com.sudokuMaster.domain
 
 interface GameRepositoryInterface {
+
     suspend fun saveGame(
         elapsedTime:Long,
         onSuccess: (Unit) -> Unit,
@@ -23,7 +24,13 @@ interface GameRepositoryInterface {
     )
 
     suspend fun getCurrentGame(
-        onSuccess: (currentGame: SudokuPuzzle, isComplete: Boolean) -> Unit
+        onSuccess: (currentGame: SudokuPuzzle, isComplete: Boolean) -> Unit,
+        onError: (Exception) -> Unit
+    )
+
+    suspend fun createNewGame(
+        settings: Settings,
+        onSuccess: (Unit) -> Unit,
         onError: (Exception) -> Unit
     )
 

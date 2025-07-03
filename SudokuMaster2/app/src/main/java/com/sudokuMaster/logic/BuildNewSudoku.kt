@@ -46,7 +46,7 @@ fun buildNewSudoku(
                     graph[row] = rowList
                 }
 
-                val puzzle = SudokuPuzzle(difficulty, graph)
+                val puzzle = SudokuPuzzle(1, difficulty, graph)
                 onSuccess(puzzle)
 
             } catch (e: Exception) {

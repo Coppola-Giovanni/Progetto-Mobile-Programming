@@ -1,13 +1,23 @@
+import com.google.protobuf.gradle.*
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 
+    id("com.google.devtools.ksp")
+    id("com.google.protobuf") version "0.9.4"
+
 }
+
+
 
 android {
     namespace = "com.SudokuMaster"
     compileSdk = 35
+
+
+
 
     defaultConfig {
         applicationId = "com.SudokuMaster"
@@ -38,6 +48,19 @@ android {
     buildFeatures {
         compose = true
     }
+
+    sourceSets {
+        getByName("main") {
+            proto {
+                srcDir("src/main/proto")
+            }
+        }
+    }
+    //@Suppress("DEPRECATION")
+    //sourceSets.getByName("main").java.srcDirs +=
+     //   files("$buildDir/generated/source/proto/debug/kotlin/com/sudokuMaster")
+
+
 }
 
 dependencies {
@@ -55,6 +78,7 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.volley)
     implementation(libs.androidx.tools.core)
+    implementation(libs.androidx.datastore.core.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -62,5 +86,32 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.androidx.datastore)
+
+    implementation(libs.protobuf.javalite)
+    implementation(libs.protobuf.kotlin.lite)
+    protobuf(libs.protoc)
+
+    //ROOM
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 
 }
+
+protobuf {
+    //backend per la generazione del codice Kotlin (o Java)
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.25.1"
+    }
+    generateProtoTasks {
+        all().forEach { task ->
+            task.plugins {
+                create("java") {
+                    option("lite")
+                }
+            }
+        }
+    }
+}
+

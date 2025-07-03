@@ -6,6 +6,7 @@ interface SettingStorageInterface {
 }
 
 sealed class SettingsStorageResult {
-    data class onSuccess(val settings: Settings): SettingsStorageResult()
-    data class onError(val exception: Exception): SettingsStorageResult()
+    data class OnSuccess(val settings: Settings): SettingsStorageResult()
+    object onComplete : SettingsStorageResult()
+    data class OnError(val exception: Exception): SettingsStorageResult()
 }
