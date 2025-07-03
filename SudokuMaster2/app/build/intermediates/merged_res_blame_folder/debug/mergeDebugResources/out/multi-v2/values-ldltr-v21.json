@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.SudokuMaster.app-mergeDebugResources-65:/values-ldltr-v21/values-ldltr-v21.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\Valerio\\.gradle\\caches\\8.11.1\\transforms\\def61561db15b049eddccdd7b2cfb8af\\transformed\\appcompat-1.6.1\\res\\values-ldltr-v21\\values-ldltr-v21.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "112",
+                        "endOffsets": "163"
+                    }
+                }
+            ]
+        }
+    ]
+}
