@@ -1,3 +1,4 @@
+C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\SudokuMaster2\app\src\main\java\com\sudokuMaster\ui\components\LoadingScreen.kt
 C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\SudokuMaster2\app\build\generated\ksp\debug\kotlin\com\sudokuMaster\data\database\AppDatabase_Impl.kt
 C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\SudokuMaster2\app\build\generated\ksp\debug\kotlin\com\sudokuMaster\data\dao\GameSessionDao_Impl.kt
 C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\SudokuMaster2\app\src\main\java\com\sudokuMaster\logic\BuildNewSudoku.kt
@@ -9,12 +10,12 @@ C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\Sudoku
 C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\SudokuMaster2\app\src\main\java\com\sudokuMaster\domain\UserPreferencesRepositoryInterface.kt
 C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\SudokuMaster2\app\src\main\java\com\sudokuMaster\data\database\AppDatabase.kt
 C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\SudokuMaster2\app\src\main\java\com\sudokuMaster\common\ProductionDispatcherProvider.kt
-C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\SudokuMaster2\app\src\main\java\com\sudokuMaster\ui\theme\Theme.kt
 C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\SudokuMaster2\app\src\main\java\com\sudokuMaster\domain\UserStatistics.kt
 C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\SudokuMaster2\app\src\main\java\com\sudokuMaster\logic\sudokuUtilities.kt
 C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\SudokuMaster2\app\src\main\java\com\sudokuMaster\common\BaseLogic.kt
 C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\SudokuMaster2\app\src\main\java\com\sudokuMaster\ui\activegame\ActiveGameViewModel.kt
 C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\SudokuMaster2\app\src\main\java\com\sudokuMaster\data\dao\GameSessionDAO.kt
+C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\SudokuMaster2\app\src\main\java\com\sudokuMaster\ui\components\AppToolbar.kt
 C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\SudokuMaster2\app\src\main\java\com\sudokuMaster\data\converter\SudokuGraphConverter.kt
 C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\SudokuMaster2\app\src\main\java\com\sudokuMaster\ui\theme\Color.kt
 C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\SudokuMaster2\app\src\main\java\com\sudokuMaster\domain\GameRepositoryInterface.kt
@@ -25,5 +26,11 @@ C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\Sudoku
 C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\SudokuMaster2\app\src\main\java\com\sudokuMaster\MainActivity.kt
 C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\SudokuMaster2\app\src\main\java\com\sudokuMaster\ui\activegame\ActiveGameEvent.kt
 C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\SudokuMaster2\app\src\main\java\com\sudokuMaster\domain\Settings.kt
+C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\SudokuMaster2\app\src\main\java\com\sudokuMaster\ui\theme\GraphSudokuTheme.kt
+C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\SudokuMaster2\app\src\main\java\com\sudokuMaster\ui\theme\Shape.kt
+C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\SudokuMaster2\app\src\main\java\com\sudokuMaster\ui\activegame\ActiveGameScreen.kt
+C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\SudokuMaster2\app\src\main\java\com\sudokuMaster\data\source\SudokuRemoteDataSource.kt
+C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\SudokuMaster2\app\src\main\java\com\sudokuMaster\ui\activegame\buildlogic\BuildActiveGameLogic.kt
 C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\SudokuMaster2\app\src\main\java\com\sudokuMaster\common\DispatcherProvider.kt
+C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\SudokuMaster2\app\src\main\java\com\sudokuMaster\ui\activegame\ActiveGameActivity.kt
 C:\Users\Valerio\StudioProjects\Progetto-Mobile-Programming\SudokuMaster2\SudokuMaster2\app\src\main\java\com\sudokuMaster\ui\activegame\ActiveGameContainer.kt

@@ -37,29 +37,29 @@ public class GameSessionDao_Impl(
     this.__db = __db
     this.__insertAdapterOfGameSession = object : EntityInsertAdapter<GameSession>() {
       protected override fun createQuery(): String =
-          "INSERT OR ABORT INTO `game_sessions` (`id`,`difficulty`,`start_time_millis`,`end_time_millis`,`duration_seconds`,`points_scored`,`is_solved`,`initial_grid`,`current_grid`,`date_played_millis`) VALUES (nullif(?, 0),?,?,?,?,?,?,?,?,?)"
+          "INSERT OR ABORT INTO `game_sessions` (`id`,`difficulty`,`initial_grid`,`current_grid`,`start_time_millis`,`end_time_millis`,`duration_seconds`,`points_scored`,`is_solved`,`date_played_millis`) VALUES (nullif(?, 0),?,?,?,?,?,?,?,?,?)"
 
       protected override fun bind(statement: SQLiteStatement, entity: GameSession) {
         statement.bindLong(1, entity.id)
         statement.bindText(2, entity.difficulty)
-        statement.bindLong(3, entity.startTimeMillis)
+        statement.bindText(3, entity.initialGrid)
+        statement.bindText(4, entity.currentGrid)
+        statement.bindLong(5, entity.startTimeMillis)
         val _tmpEndTimeMillis: Long? = entity.endTimeMillis
         if (_tmpEndTimeMillis == null) {
-          statement.bindNull(4)
+          statement.bindNull(6)
         } else {
-          statement.bindLong(4, _tmpEndTimeMillis)
+          statement.bindLong(6, _tmpEndTimeMillis)
         }
         val _tmpDurationSeconds: Long? = entity.durationSeconds
         if (_tmpDurationSeconds == null) {
-          statement.bindNull(5)
+          statement.bindNull(7)
         } else {
-          statement.bindLong(5, _tmpDurationSeconds)
+          statement.bindLong(7, _tmpDurationSeconds)
         }
-        statement.bindLong(6, entity.score.toLong())
+        statement.bindLong(8, entity.score.toLong())
         val _tmp: Int = if (entity.isSolved) 1 else 0
-        statement.bindLong(7, _tmp.toLong())
-        statement.bindText(8, entity.initialGrid)
-        statement.bindText(9, entity.currentGrid)
+        statement.bindLong(9, _tmp.toLong())
         statement.bindLong(10, entity.datePlayedMillis)
       }
     }
@@ -72,29 +72,29 @@ public class GameSessionDao_Impl(
     }
     this.__updateAdapterOfGameSession = object : EntityDeleteOrUpdateAdapter<GameSession>() {
       protected override fun createQuery(): String =
-          "UPDATE OR ABORT `game_sessions` SET `id` = ?,`difficulty` = ?,`start_time_millis` = ?,`end_time_millis` = ?,`duration_seconds` = ?,`points_scored` = ?,`is_solved` = ?,`initial_grid` = ?,`current_grid` = ?,`date_played_millis` = ? WHERE `id` = ?"
+          "UPDATE OR ABORT `game_sessions` SET `id` = ?,`difficulty` = ?,`initial_grid` = ?,`current_grid` = ?,`start_time_millis` = ?,`end_time_millis` = ?,`duration_seconds` = ?,`points_scored` = ?,`is_solved` = ?,`date_played_millis` = ? WHERE `id` = ?"
 
       protected override fun bind(statement: SQLiteStatement, entity: GameSession) {
         statement.bindLong(1, entity.id)
         statement.bindText(2, entity.difficulty)
-        statement.bindLong(3, entity.startTimeMillis)
+        statement.bindText(3, entity.initialGrid)
+        statement.bindText(4, entity.currentGrid)
+        statement.bindLong(5, entity.startTimeMillis)
         val _tmpEndTimeMillis: Long? = entity.endTimeMillis
         if (_tmpEndTimeMillis == null) {
-          statement.bindNull(4)
+          statement.bindNull(6)
         } else {
-          statement.bindLong(4, _tmpEndTimeMillis)
+          statement.bindLong(6, _tmpEndTimeMillis)
         }
         val _tmpDurationSeconds: Long? = entity.durationSeconds
         if (_tmpDurationSeconds == null) {
-          statement.bindNull(5)
+          statement.bindNull(7)
         } else {
-          statement.bindLong(5, _tmpDurationSeconds)
+          statement.bindLong(7, _tmpDurationSeconds)
         }
-        statement.bindLong(6, entity.score.toLong())
+        statement.bindLong(8, entity.score.toLong())
         val _tmp: Int = if (entity.isSolved) 1 else 0
-        statement.bindLong(7, _tmp.toLong())
-        statement.bindText(8, entity.initialGrid)
-        statement.bindText(9, entity.currentGrid)
+        statement.bindLong(9, _tmp.toLong())
         statement.bindLong(10, entity.datePlayedMillis)
         statement.bindLong(11, entity.id)
       }
@@ -126,13 +126,13 @@ public class GameSessionDao_Impl(
         _stmt.bindLong(_argIndex, sessionId)
         val _columnIndexOfId: Int = getColumnIndexOrThrow(_stmt, "id")
         val _columnIndexOfDifficulty: Int = getColumnIndexOrThrow(_stmt, "difficulty")
+        val _columnIndexOfInitialGrid: Int = getColumnIndexOrThrow(_stmt, "initial_grid")
+        val _columnIndexOfCurrentGrid: Int = getColumnIndexOrThrow(_stmt, "current_grid")
         val _columnIndexOfStartTimeMillis: Int = getColumnIndexOrThrow(_stmt, "start_time_millis")
         val _columnIndexOfEndTimeMillis: Int = getColumnIndexOrThrow(_stmt, "end_time_millis")
         val _columnIndexOfDurationSeconds: Int = getColumnIndexOrThrow(_stmt, "duration_seconds")
         val _columnIndexOfScore: Int = getColumnIndexOrThrow(_stmt, "points_scored")
         val _columnIndexOfIsSolved: Int = getColumnIndexOrThrow(_stmt, "is_solved")
-        val _columnIndexOfInitialGrid: Int = getColumnIndexOrThrow(_stmt, "initial_grid")
-        val _columnIndexOfCurrentGrid: Int = getColumnIndexOrThrow(_stmt, "current_grid")
         val _columnIndexOfDatePlayedMillis: Int = getColumnIndexOrThrow(_stmt, "date_played_millis")
         val _result: GameSession?
         if (_stmt.step()) {
@@ -140,6 +140,10 @@ public class GameSessionDao_Impl(
           _tmpId = _stmt.getLong(_columnIndexOfId)
           val _tmpDifficulty: String
           _tmpDifficulty = _stmt.getText(_columnIndexOfDifficulty)
+          val _tmpInitialGrid: String
+          _tmpInitialGrid = _stmt.getText(_columnIndexOfInitialGrid)
+          val _tmpCurrentGrid: String
+          _tmpCurrentGrid = _stmt.getText(_columnIndexOfCurrentGrid)
           val _tmpStartTimeMillis: Long
           _tmpStartTimeMillis = _stmt.getLong(_columnIndexOfStartTimeMillis)
           val _tmpEndTimeMillis: Long?
@@ -160,14 +164,10 @@ public class GameSessionDao_Impl(
           val _tmp: Int
           _tmp = _stmt.getLong(_columnIndexOfIsSolved).toInt()
           _tmpIsSolved = _tmp != 0
-          val _tmpInitialGrid: String
-          _tmpInitialGrid = _stmt.getText(_columnIndexOfInitialGrid)
-          val _tmpCurrentGrid: String
-          _tmpCurrentGrid = _stmt.getText(_columnIndexOfCurrentGrid)
           val _tmpDatePlayedMillis: Long
           _tmpDatePlayedMillis = _stmt.getLong(_columnIndexOfDatePlayedMillis)
           _result =
-              GameSession(_tmpId,_tmpDifficulty,_tmpStartTimeMillis,_tmpEndTimeMillis,_tmpDurationSeconds,_tmpScore,_tmpIsSolved,_tmpInitialGrid,_tmpCurrentGrid,_tmpDatePlayedMillis)
+              GameSession(_tmpId,_tmpDifficulty,_tmpInitialGrid,_tmpCurrentGrid,_tmpStartTimeMillis,_tmpEndTimeMillis,_tmpDurationSeconds,_tmpScore,_tmpIsSolved,_tmpDatePlayedMillis)
         } else {
           _result = null
         }
@@ -185,13 +185,13 @@ public class GameSessionDao_Impl(
       try {
         val _columnIndexOfId: Int = getColumnIndexOrThrow(_stmt, "id")
         val _columnIndexOfDifficulty: Int = getColumnIndexOrThrow(_stmt, "difficulty")
+        val _columnIndexOfInitialGrid: Int = getColumnIndexOrThrow(_stmt, "initial_grid")
+        val _columnIndexOfCurrentGrid: Int = getColumnIndexOrThrow(_stmt, "current_grid")
         val _columnIndexOfStartTimeMillis: Int = getColumnIndexOrThrow(_stmt, "start_time_millis")
         val _columnIndexOfEndTimeMillis: Int = getColumnIndexOrThrow(_stmt, "end_time_millis")
         val _columnIndexOfDurationSeconds: Int = getColumnIndexOrThrow(_stmt, "duration_seconds")
         val _columnIndexOfScore: Int = getColumnIndexOrThrow(_stmt, "points_scored")
         val _columnIndexOfIsSolved: Int = getColumnIndexOrThrow(_stmt, "is_solved")
-        val _columnIndexOfInitialGrid: Int = getColumnIndexOrThrow(_stmt, "initial_grid")
-        val _columnIndexOfCurrentGrid: Int = getColumnIndexOrThrow(_stmt, "current_grid")
         val _columnIndexOfDatePlayedMillis: Int = getColumnIndexOrThrow(_stmt, "date_played_millis")
         val _result: MutableList<GameSession> = mutableListOf()
         while (_stmt.step()) {
@@ -200,6 +200,10 @@ public class GameSessionDao_Impl(
           _tmpId = _stmt.getLong(_columnIndexOfId)
           val _tmpDifficulty: String
           _tmpDifficulty = _stmt.getText(_columnIndexOfDifficulty)
+          val _tmpInitialGrid: String
+          _tmpInitialGrid = _stmt.getText(_columnIndexOfInitialGrid)
+          val _tmpCurrentGrid: String
+          _tmpCurrentGrid = _stmt.getText(_columnIndexOfCurrentGrid)
           val _tmpStartTimeMillis: Long
           _tmpStartTimeMillis = _stmt.getLong(_columnIndexOfStartTimeMillis)
           val _tmpEndTimeMillis: Long?
@@ -220,14 +224,10 @@ public class GameSessionDao_Impl(
           val _tmp: Int
           _tmp = _stmt.getLong(_columnIndexOfIsSolved).toInt()
           _tmpIsSolved = _tmp != 0
-          val _tmpInitialGrid: String
-          _tmpInitialGrid = _stmt.getText(_columnIndexOfInitialGrid)
-          val _tmpCurrentGrid: String
-          _tmpCurrentGrid = _stmt.getText(_columnIndexOfCurrentGrid)
           val _tmpDatePlayedMillis: Long
           _tmpDatePlayedMillis = _stmt.getLong(_columnIndexOfDatePlayedMillis)
           _item =
-              GameSession(_tmpId,_tmpDifficulty,_tmpStartTimeMillis,_tmpEndTimeMillis,_tmpDurationSeconds,_tmpScore,_tmpIsSolved,_tmpInitialGrid,_tmpCurrentGrid,_tmpDatePlayedMillis)
+              GameSession(_tmpId,_tmpDifficulty,_tmpInitialGrid,_tmpCurrentGrid,_tmpStartTimeMillis,_tmpEndTimeMillis,_tmpDurationSeconds,_tmpScore,_tmpIsSolved,_tmpDatePlayedMillis)
           _result.add(_item)
         }
         _result
@@ -245,13 +245,13 @@ public class GameSessionDao_Impl(
       try {
         val _columnIndexOfId: Int = getColumnIndexOrThrow(_stmt, "id")
         val _columnIndexOfDifficulty: Int = getColumnIndexOrThrow(_stmt, "difficulty")
+        val _columnIndexOfInitialGrid: Int = getColumnIndexOrThrow(_stmt, "initial_grid")
+        val _columnIndexOfCurrentGrid: Int = getColumnIndexOrThrow(_stmt, "current_grid")
         val _columnIndexOfStartTimeMillis: Int = getColumnIndexOrThrow(_stmt, "start_time_millis")
         val _columnIndexOfEndTimeMillis: Int = getColumnIndexOrThrow(_stmt, "end_time_millis")
         val _columnIndexOfDurationSeconds: Int = getColumnIndexOrThrow(_stmt, "duration_seconds")
         val _columnIndexOfScore: Int = getColumnIndexOrThrow(_stmt, "points_scored")
         val _columnIndexOfIsSolved: Int = getColumnIndexOrThrow(_stmt, "is_solved")
-        val _columnIndexOfInitialGrid: Int = getColumnIndexOrThrow(_stmt, "initial_grid")
-        val _columnIndexOfCurrentGrid: Int = getColumnIndexOrThrow(_stmt, "current_grid")
         val _columnIndexOfDatePlayedMillis: Int = getColumnIndexOrThrow(_stmt, "date_played_millis")
         val _result: GameSession?
         if (_stmt.step()) {
@@ -259,6 +259,10 @@ public class GameSessionDao_Impl(
           _tmpId = _stmt.getLong(_columnIndexOfId)
           val _tmpDifficulty: String
           _tmpDifficulty = _stmt.getText(_columnIndexOfDifficulty)
+          val _tmpInitialGrid: String
+          _tmpInitialGrid = _stmt.getText(_columnIndexOfInitialGrid)
+          val _tmpCurrentGrid: String
+          _tmpCurrentGrid = _stmt.getText(_columnIndexOfCurrentGrid)
           val _tmpStartTimeMillis: Long
           _tmpStartTimeMillis = _stmt.getLong(_columnIndexOfStartTimeMillis)
           val _tmpEndTimeMillis: Long?
@@ -279,14 +283,10 @@ public class GameSessionDao_Impl(
           val _tmp: Int
           _tmp = _stmt.getLong(_columnIndexOfIsSolved).toInt()
           _tmpIsSolved = _tmp != 0
-          val _tmpInitialGrid: String
-          _tmpInitialGrid = _stmt.getText(_columnIndexOfInitialGrid)
-          val _tmpCurrentGrid: String
-          _tmpCurrentGrid = _stmt.getText(_columnIndexOfCurrentGrid)
           val _tmpDatePlayedMillis: Long
           _tmpDatePlayedMillis = _stmt.getLong(_columnIndexOfDatePlayedMillis)
           _result =
-              GameSession(_tmpId,_tmpDifficulty,_tmpStartTimeMillis,_tmpEndTimeMillis,_tmpDurationSeconds,_tmpScore,_tmpIsSolved,_tmpInitialGrid,_tmpCurrentGrid,_tmpDatePlayedMillis)
+              GameSession(_tmpId,_tmpDifficulty,_tmpInitialGrid,_tmpCurrentGrid,_tmpStartTimeMillis,_tmpEndTimeMillis,_tmpDurationSeconds,_tmpScore,_tmpIsSolved,_tmpDatePlayedMillis)
         } else {
           _result = null
         }
@@ -304,13 +304,13 @@ public class GameSessionDao_Impl(
       try {
         val _columnIndexOfId: Int = getColumnIndexOrThrow(_stmt, "id")
         val _columnIndexOfDifficulty: Int = getColumnIndexOrThrow(_stmt, "difficulty")
+        val _columnIndexOfInitialGrid: Int = getColumnIndexOrThrow(_stmt, "initial_grid")
+        val _columnIndexOfCurrentGrid: Int = getColumnIndexOrThrow(_stmt, "current_grid")
         val _columnIndexOfStartTimeMillis: Int = getColumnIndexOrThrow(_stmt, "start_time_millis")
         val _columnIndexOfEndTimeMillis: Int = getColumnIndexOrThrow(_stmt, "end_time_millis")
         val _columnIndexOfDurationSeconds: Int = getColumnIndexOrThrow(_stmt, "duration_seconds")
         val _columnIndexOfScore: Int = getColumnIndexOrThrow(_stmt, "points_scored")
         val _columnIndexOfIsSolved: Int = getColumnIndexOrThrow(_stmt, "is_solved")
-        val _columnIndexOfInitialGrid: Int = getColumnIndexOrThrow(_stmt, "initial_grid")
-        val _columnIndexOfCurrentGrid: Int = getColumnIndexOrThrow(_stmt, "current_grid")
         val _columnIndexOfDatePlayedMillis: Int = getColumnIndexOrThrow(_stmt, "date_played_millis")
         val _result: MutableList<GameSession> = mutableListOf()
         while (_stmt.step()) {
@@ -319,6 +319,10 @@ public class GameSessionDao_Impl(
           _tmpId = _stmt.getLong(_columnIndexOfId)
           val _tmpDifficulty: String
           _tmpDifficulty = _stmt.getText(_columnIndexOfDifficulty)
+          val _tmpInitialGrid: String
+          _tmpInitialGrid = _stmt.getText(_columnIndexOfInitialGrid)
+          val _tmpCurrentGrid: String
+          _tmpCurrentGrid = _stmt.getText(_columnIndexOfCurrentGrid)
           val _tmpStartTimeMillis: Long
           _tmpStartTimeMillis = _stmt.getLong(_columnIndexOfStartTimeMillis)
           val _tmpEndTimeMillis: Long?
@@ -339,14 +343,10 @@ public class GameSessionDao_Impl(
           val _tmp: Int
           _tmp = _stmt.getLong(_columnIndexOfIsSolved).toInt()
           _tmpIsSolved = _tmp != 0
-          val _tmpInitialGrid: String
-          _tmpInitialGrid = _stmt.getText(_columnIndexOfInitialGrid)
-          val _tmpCurrentGrid: String
-          _tmpCurrentGrid = _stmt.getText(_columnIndexOfCurrentGrid)
           val _tmpDatePlayedMillis: Long
           _tmpDatePlayedMillis = _stmt.getLong(_columnIndexOfDatePlayedMillis)
           _item =
-              GameSession(_tmpId,_tmpDifficulty,_tmpStartTimeMillis,_tmpEndTimeMillis,_tmpDurationSeconds,_tmpScore,_tmpIsSolved,_tmpInitialGrid,_tmpCurrentGrid,_tmpDatePlayedMillis)
+              GameSession(_tmpId,_tmpDifficulty,_tmpInitialGrid,_tmpCurrentGrid,_tmpStartTimeMillis,_tmpEndTimeMillis,_tmpDurationSeconds,_tmpScore,_tmpIsSolved,_tmpDatePlayedMillis)
           _result.add(_item)
         }
         _result

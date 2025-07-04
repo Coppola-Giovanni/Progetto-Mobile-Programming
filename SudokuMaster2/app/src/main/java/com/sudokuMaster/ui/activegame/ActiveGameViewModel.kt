@@ -20,7 +20,7 @@ class ActiveGameViewModel {
 
     internal var difficulty = DifficultyLevel.MEDIUM
     internal var boardState: HashMap<Int, SudokuTile>
-    = HashMap()
+            = HashMap()
 
     internal var isCompleteState: Boolean = false
     internal var isNewRecordState: Boolean = false
@@ -29,7 +29,7 @@ class ActiveGameViewModel {
         puzzle: SudokuPuzzle,
         isComplete: Boolean
     ){
-        puzzle.graph.forEach{
+        puzzle.initialGraph.forEach{
             val node = it.value[0]
             boardState[it.key] = SudokuTile(
                 node.x,
@@ -44,7 +44,7 @@ class ActiveGameViewModel {
 
         if (isComplete) {
             isCompleteState = true
-            contentState = ActiveGameContentState.COMPLETE
+            contentState = ActiveGameContentState.COMPLETE   //da vedere
         } else {
             contentState = ActiveGameContentState.ACTIVE
         }

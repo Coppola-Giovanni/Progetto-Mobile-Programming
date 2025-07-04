@@ -30,20 +30,24 @@ interface GameRepositoryInterface {
      * @param sessionId L'ID della sessione di gioco.
      * @return Flow che emette la GameSession corrispondente (o null se non trovata).
      */
-    fun getGameSessionById(sessionId: Long): Flow<GameSession?>
+    suspend fun getGameSessionById(sessionId: Long): Flow<GameSession?>
 
     /**
      * Ottiene tutte le sessioni di gioco.
      * @return Flow che emette una lista di tutte le GameSession.
      */
-    fun getAllGameSessions(): Flow<List<GameSession>>
+    suspend fun getAllGameSessions(): Flow<List<GameSession>>
 
     /**
      * Ottiene l'ultima sessione di gioco non completata.
      * Utile per la funzione "riprendi partita".
      * @return Flow che emette l'ultima GameSession non completata (o null se nessuna).
      */
-    fun getLatestUnfinishedGameSession(): Flow<GameSession?>
+    suspend fun getLatestUnfinishedGameSession(): Flow<GameSession?>
+
+    suspend fun createNewGameAndSave(settings: Settings): Result<Long>
+
+    suspend fun updateGameNodeAndSave(gameId: Long, x: Int, y: Int, value: Int, newElapsedTime: Long): Result<Boolean>
 
     // --- Operazioni e accesso alle statistiche aggregate ---
 

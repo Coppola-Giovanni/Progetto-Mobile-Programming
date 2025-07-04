@@ -10,6 +10,12 @@ data class GameSession(
     val id: Long = 0,
     val difficulty: String,
 
+    @ColumnInfo(name = "initial_grid")
+    val initialGrid: String,
+
+    @ColumnInfo(name = "current_grid")
+    val currentGrid: String,
+
     @ColumnInfo(name = "start_time_millis")
     val startTimeMillis: Long,
 
@@ -24,12 +30,6 @@ data class GameSession(
 
     @ColumnInfo(name = "is_solved")
     val isSolved: Boolean,
-
-    @ColumnInfo(name = "initial_grid")
-    val initialGrid: String,
-
-    @ColumnInfo(name = "current_grid")
-    val currentGrid: String,
 
     @ColumnInfo(name = "date_played_millis")
     val datePlayedMillis: Long

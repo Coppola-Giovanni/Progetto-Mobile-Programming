@@ -11,7 +11,7 @@ data class Settings(
     val soundEnabled: Boolean,
     //val showTutorial: Boolean,              not implemented yet!
 
-    val lastUnfinishedGameId: Int,
+    val lastUnfinishedGameId: Long,
     val lastAccessTimestamp: Int
 )
 

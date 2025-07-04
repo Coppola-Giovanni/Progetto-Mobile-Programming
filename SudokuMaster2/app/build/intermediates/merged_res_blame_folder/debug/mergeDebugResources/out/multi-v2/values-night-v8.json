@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.SudokuMaster.app-mergeDebugResources-65:/values-night-v8/values-night-v8.xml",
+            "outputFile": "com.SudokuMaster.app-mergeDebugResources-66:/values-night-v8/values-night-v8.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\Valerio\\.gradle\\caches\\8.11.1\\transforms\\478e29bae0c955c58d42fa9b59c8a8f1\\transformed\\material-1.10.0\\res\\values-night-v8\\values-night-v8.xml",
+                    "source": "C:\\Users\\Valerio\\.gradle\\caches\\8.11.1\\transforms\\3d7a0240ff62ed676b8cb6205bb8fabb\\transformed\\material-1.10.0\\res\\values-night-v8\\values-night-v8.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
@@ -21,7 +21,7 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\Valerio\\.gradle\\caches\\8.11.1\\transforms\\54799d0c1fa4b367764e7dc25beb6d21\\transformed\\appcompat-1.6.1\\res\\values-night-v8\\values-night-v8.xml",
+                    "source": "C:\\Users\\Valerio\\.gradle\\caches\\8.11.1\\transforms\\c8115b2e0ae752966b77a95831d2a59f\\transformed\\appcompat-1.6.1\\res\\values-night-v8\\values-night-v8.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9",
                         "startColumns": "4,4,4,4,4,4,4,4",
