@@ -1,7 +1,10 @@
 package com.sudokuMaster.domain
 
 data class UserStatistics(
-    val Easy: Long = 0,
-    val Medium: Long = 0,
-    val Hard: Long = 0
+    val totalGamesPlayed: Int = 0,
+    val totalGamesSolved: Int = 0,
+    val averageSolveTimeMillis: Long = 0L,
+    val bestSolveTimeEasyMillis: Long? = null,
+    val bestSolveTimeMediumMillis: Long? = null,
+    val bestSolveTimeHardMillis: Long?
 )

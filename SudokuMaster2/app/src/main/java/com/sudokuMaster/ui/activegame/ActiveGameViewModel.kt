@@ -1,6 +1,6 @@
 package com.sudokuMaster.ui.activegame
 
-import com.sudokuMaster.domain.Difficulty
+import com.sudokuMaster.data.DifficultyLevel
 import com.sudokuMaster.domain.SudokuPuzzle
 import com.sudokuMaster.domain.getHash
 
@@ -18,7 +18,7 @@ class ActiveGameViewModel {
 
     internal var timerState: Long = 0L
 
-    internal var difficulty = Difficulty.MEDIUM
+    internal var difficulty = DifficultyLevel.MEDIUM
     internal var boardState: HashMap<Int, SudokuTile>
     = HashMap()
 
