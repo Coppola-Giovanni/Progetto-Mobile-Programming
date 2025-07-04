@@ -87,6 +87,12 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.androidx.datastore)
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.constraintlayout.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.material)
+    implementation(libs.androidx.material.icons.extended)
+
 
     //PROTOCOL BUFFER
     implementation(libs.protobuf.javalite)
@@ -98,8 +104,12 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
 
-    //for conversion
+    //RETROFIT and GSON
     implementation(libs.gson)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.okhttp)
+
 
 }
 

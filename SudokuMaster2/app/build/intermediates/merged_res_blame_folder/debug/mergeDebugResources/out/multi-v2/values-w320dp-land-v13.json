@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.SudokuMaster.app-mergeDebugResources-65:/values-w320dp-land-v13/values-w320dp-land-v13.xml",
+            "outputFile": "com.SudokuMaster.app-mergeDebugResources-66:/values-w320dp-land-v13/values-w320dp-land-v13.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\Valerio\\.gradle\\caches\\8.11.1\\transforms\\478e29bae0c955c58d42fa9b59c8a8f1\\transformed\\material-1.10.0\\res\\values-w320dp-land-v13\\values-w320dp-land-v13.xml",
+                    "source": "C:\\Users\\Valerio\\.gradle\\caches\\8.11.1\\transforms\\3d7a0240ff62ed676b8cb6205bb8fabb\\transformed\\material-1.10.0\\res\\values-w320dp-land-v13\\values-w320dp-land-v13.xml",
                     "from": {
                         "startLines": "2,3",
                         "startColumns": "4,4",

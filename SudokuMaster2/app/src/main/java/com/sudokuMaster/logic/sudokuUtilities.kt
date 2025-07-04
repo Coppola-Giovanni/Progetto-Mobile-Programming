@@ -28,9 +28,9 @@ internal fun puzzleIsValid(puzzle: SudokuPuzzle): Boolean {
 }
 
 internal fun rowsAreInvalid(puzzle: SudokuPuzzle): Boolean {
-    (1..puzzle.graph.size.sqrt).forEach { row ->
-        val nodeList = getNodesByRow(puzzle.graph, row)
-        (1..puzzle.graph.size.sqrt).forEach { value ->
+    (1..puzzle.currentGraph.size.sqrt).forEach { row ->
+        val nodeList = getNodesByRow(puzzle.currentGraph, row)
+        (1..puzzle.currentGraph.size.sqrt).forEach { value ->
             val occurrences = nodeList.count { it.color == value }
             if (occurrences > 1) return true
         }
@@ -39,9 +39,9 @@ internal fun rowsAreInvalid(puzzle: SudokuPuzzle): Boolean {
 }
 
 internal fun columnsAreInvalid(puzzle: SudokuPuzzle): Boolean {
-    (1..puzzle.graph.size.sqrt).forEach { col ->
-        val nodeList = getNodesByColumn(puzzle.graph, col)
-        (1..puzzle.graph.size.sqrt).forEach { value ->
+    (1..puzzle.currentGraph.size.sqrt).forEach { col ->
+        val nodeList = getNodesByColumn(puzzle.currentGraph, col)
+        (1..puzzle.currentGraph.size.sqrt).forEach { value ->
             val occurrences = nodeList.count { it.color == value }
             if (occurrences > 1) return true
         }
@@ -50,13 +50,13 @@ internal fun columnsAreInvalid(puzzle: SudokuPuzzle): Boolean {
 }
 
 internal fun subgridsAreInvalid(puzzle: SudokuPuzzle): Boolean {
-    val boundary = puzzle.graph.size.sqrt
+    val boundary = puzzle.currentGraph.size.sqrt
     val interval = boundary.sqrt
 
     (0 until interval).forEach { xIndex ->
         (0 until interval).forEach { yIndex ->
             val subgridNodes = getNodesBySubgrid(
-                puzzle.graph,
+                puzzle.currentGraph,
                 xIndex * interval + 1,
                 yIndex * interval + 1,
                 boundary
@@ -71,7 +71,7 @@ internal fun subgridsAreInvalid(puzzle: SudokuPuzzle): Boolean {
 }
 
 internal fun allSquaresAreFilled(puzzle: SudokuPuzzle): Boolean {
-    return puzzle.graph.values.all { it.first.color != 0 }
+    return puzzle.currentGraph.values.all { it.first.color != 0 }
 }
 
 internal fun getNodesByColumn(
@@ -115,10 +115,10 @@ internal fun getIntervalMax(boundary: Int, target: Int): Int {
 }
 
 internal fun SudokuPuzzle.print() {
-    val boundary = graph.size.sqrt
+    val boundary = currentGraph.size.sqrt
     (1..boundary).forEach { y ->
         val row = (1..boundary).map { x ->
-            graph[getHash(x, y)]?.first?.color?.toString() ?: "."
+            currentGraph[getHash(x, y)]?.first?.color?.toString() ?: "."
         }.joinToString(" ")
         println(row)
     }

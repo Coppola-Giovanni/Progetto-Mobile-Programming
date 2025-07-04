@@ -35,9 +35,9 @@ public class AppDatabase_Impl : AppDatabase() {
 
   protected override fun createOpenDelegate(): RoomOpenDelegate {
     val _openDelegate: RoomOpenDelegate = object : RoomOpenDelegate(1,
-        "ae2cc2b745b425f1662e64f19d6044cd", "677182bba2595edd95e467ef6d169e08") {
+        "ae2cc2b745b425f1662e64f19d6044cd", "c00702bd0f4e8d04c1b8235303f7c7c3") {
       public override fun createAllTables(connection: SQLiteConnection) {
-        connection.execSQL("CREATE TABLE IF NOT EXISTS `game_sessions` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `difficulty` TEXT NOT NULL, `start_time_millis` INTEGER NOT NULL, `end_time_millis` INTEGER, `duration_seconds` INTEGER, `points_scored` INTEGER NOT NULL, `is_solved` INTEGER NOT NULL, `initial_grid` TEXT NOT NULL, `current_grid` TEXT NOT NULL, `date_played_millis` INTEGER NOT NULL)")
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `game_sessions` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `difficulty` TEXT NOT NULL, `initial_grid` TEXT NOT NULL, `current_grid` TEXT NOT NULL, `start_time_millis` INTEGER NOT NULL, `end_time_millis` INTEGER, `duration_seconds` INTEGER, `points_scored` INTEGER NOT NULL, `is_solved` INTEGER NOT NULL, `date_played_millis` INTEGER NOT NULL)")
         connection.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)")
         connection.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ae2cc2b745b425f1662e64f19d6044cd')")
       }
@@ -67,6 +67,10 @@ public class AppDatabase_Impl : AppDatabase() {
             TableInfo.CREATED_FROM_ENTITY))
         _columnsGameSessions.put("difficulty", TableInfo.Column("difficulty", "TEXT", true, 0, null,
             TableInfo.CREATED_FROM_ENTITY))
+        _columnsGameSessions.put("initial_grid", TableInfo.Column("initial_grid", "TEXT", true, 0,
+            null, TableInfo.CREATED_FROM_ENTITY))
+        _columnsGameSessions.put("current_grid", TableInfo.Column("current_grid", "TEXT", true, 0,
+            null, TableInfo.CREATED_FROM_ENTITY))
         _columnsGameSessions.put("start_time_millis", TableInfo.Column("start_time_millis",
             "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY))
         _columnsGameSessions.put("end_time_millis", TableInfo.Column("end_time_millis", "INTEGER",
@@ -76,10 +80,6 @@ public class AppDatabase_Impl : AppDatabase() {
         _columnsGameSessions.put("points_scored", TableInfo.Column("points_scored", "INTEGER", true,
             0, null, TableInfo.CREATED_FROM_ENTITY))
         _columnsGameSessions.put("is_solved", TableInfo.Column("is_solved", "INTEGER", true, 0,
-            null, TableInfo.CREATED_FROM_ENTITY))
-        _columnsGameSessions.put("initial_grid", TableInfo.Column("initial_grid", "TEXT", true, 0,
-            null, TableInfo.CREATED_FROM_ENTITY))
-        _columnsGameSessions.put("current_grid", TableInfo.Column("current_grid", "TEXT", true, 0,
             null, TableInfo.CREATED_FROM_ENTITY))
         _columnsGameSessions.put("date_played_millis", TableInfo.Column("date_played_millis",
             "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY))

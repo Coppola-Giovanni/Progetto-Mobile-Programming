@@ -3,4 +3,8 @@
     <string name="easy">easy</string>
     <string name="medium">medium</string>
     <string name="hard">hard</string>
+    <string name="loading" >loading</string>
+    <string name="difficulty" />
+    <string name="game_complete" />
+    <string name="logo_description" />
 </resources>

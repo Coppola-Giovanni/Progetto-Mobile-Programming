@@ -4,4 +4,5 @@
     <string name="easy">facile</string>
     <string name="medium">media</string>
     <string name="hard">difficile</string>
+    <string name="loading">caricamento</string>
 </resources>
