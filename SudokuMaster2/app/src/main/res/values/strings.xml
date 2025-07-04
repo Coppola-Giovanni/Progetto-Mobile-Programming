@@ -1,10 +1,11 @@
 <resources>
     <string name="app_name">SudokuMaster</string>
-    <string name="easy">easy</string>
-    <string name="medium">medium</string>
-    <string name="hard">hard</string>
-    <string name="loading" >loading</string>
-    <string name="difficulty" />
-    <string name="game_complete" />
-    <string name="logo_description" />
+    <string name="easy">Easy</string>
+    <string name="medium">Medium</string>
+    <string name="hard">Hard</string>
+    <string name="loading" >Loading</string>
+    <string name="difficulty" >Difficulty</string>
+    <string name="game_complete" >Game Complete</string>
+    <string name="logo_description" >Logo Description</string>
+    <string name="generic_error" >Generic Error</string>
 </resources>

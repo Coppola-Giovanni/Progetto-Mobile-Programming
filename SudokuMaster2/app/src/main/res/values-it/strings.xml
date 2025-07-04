@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">SudokuMaster</string>
-    <string name="easy">facile</string>
-    <string name="medium">media</string>
-    <string name="hard">difficile</string>
-    <string name="loading">caricamento</string>
+    <string name="easy">Facile</string>
+    <string name="medium">Medio</string>
+    <string name="hard">Difficile</string>
+    <string name="loading">Caricamento</string>
+    <string name="difficulty">Difficoltà</string>
+    <string name="game_complete">Partita Completata</string>
+    <string name="logo_description">Descrizione Del Logo</string>
+    <string name="generic_error">Errore Generico</string>
 </resources>
