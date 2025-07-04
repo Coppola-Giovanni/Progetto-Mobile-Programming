@@ -3,5 +3,6 @@
     <string name="app_name">SudokuMaster</string>
     <string name="easy">facile</string>
     <string name="hard">difficile</string>
+    <string name="loading">caricamento</string>
     <string name="medium">media</string>
 </resources>

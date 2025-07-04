@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.SudokuMaster.app-mergeDebugResources-66:/values-h550dp-port-v13/values-h550dp-port-v13.xml",
+            "outputFile": "com.SudokuMaster.app-mergeDebugResources-72:/values-h550dp-port-v13/values-h550dp-port-v13.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\Valerio\\.gradle\\caches\\8.11.1\\transforms\\3d7a0240ff62ed676b8cb6205bb8fabb\\transformed\\material-1.10.0\\res\\values-h550dp-port-v13\\values-h550dp-port-v13.xml",
+                    "source": "C:\\Users\\Valerio\\.gradle\\caches\\8.11.1\\transforms\\6dccd998211862136fe40a162b6c5843\\transformed\\material-1.10.0\\res\\values-h550dp-port-v13\\values-h550dp-port-v13.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

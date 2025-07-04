@@ -5,6 +5,7 @@ import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
 import androidx.datastore.core.Serializer
+import com.sudokuMaster.data.UserPreferences
 import com.google.protobuf.InvalidProtocolBufferException
 import java.io.InputStream
 import java.io.OutputStream
@@ -15,7 +16,7 @@ internal val Context.userPreferencesDataStore : DataStore<UserPreferences>  by d
     serializer = UserPreferencesSerializer
 )
 
-private object UserPreferencesSerializer : Serializer<UserPreferences>{
+object UserPreferencesSerializer : Serializer<UserPreferences>{
 
     override val defaultValue: UserPreferences
         get() = UserPreferences.getDefaultInstance()

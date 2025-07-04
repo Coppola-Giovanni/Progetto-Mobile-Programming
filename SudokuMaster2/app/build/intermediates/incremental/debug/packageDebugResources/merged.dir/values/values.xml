@@ -8,8 +8,12 @@
     <color name="teal_700">#FF018786</color>
     <color name="white">#FFFFFFFF</color>
     <string name="app_name">SudokuMaster</string>
+    <string name="difficulty"/>
     <string name="easy">easy</string>
+    <string name="game_complete"/>
     <string name="hard">hard</string>
+    <string name="loading">loading</string>
+    <string name="logo_description"/>
     <string name="medium">medium</string>
     <style name="Theme.SudokuMaster" parent="android:Theme.Material.Light.NoActionBar"/>
 </resources>
