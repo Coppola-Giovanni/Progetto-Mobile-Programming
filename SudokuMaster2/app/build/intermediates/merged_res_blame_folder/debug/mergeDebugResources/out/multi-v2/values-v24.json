@@ -4,7 +4,7 @@
             "outputFile": "com.SudokuMaster.app-mergeDebugResources-65:/values-v24/values-v24.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\Valerio\\.gradle\\caches\\8.11.1\\transforms\\def61561db15b049eddccdd7b2cfb8af\\transformed\\appcompat-1.6.1\\res\\values-v24\\values-v24.xml",
+                    "source": "C:\\Users\\Valerio\\.gradle\\caches\\8.11.1\\transforms\\54799d0c1fa4b367764e7dc25beb6d21\\transformed\\appcompat-1.6.1\\res\\values-v24\\values-v24.xml",
                     "from": {
                         "startLines": "2,3",
                         "startColumns": "4,4",
@@ -14,7 +14,7 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\Valerio\\.gradle\\caches\\8.11.1\\transforms\\bfd7b7ae81f1a8beae86c75d109a5797\\transformed\\material-1.10.0\\res\\values-v24\\values-v24.xml",
+                    "source": "C:\\Users\\Valerio\\.gradle\\caches\\8.11.1\\transforms\\478e29bae0c955c58d42fa9b59c8a8f1\\transformed\\material-1.10.0\\res\\values-v24\\values-v24.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,9,12,15",
                         "startColumns": "4,4,4,4,4,4,4,4",

@@ -4,7 +4,7 @@
             "outputFile": "com.SudokuMaster.app-mergeDebugResources-65:/values-w600dp-land-v13/values-w600dp-land-v13.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\Valerio\\.gradle\\caches\\8.11.1\\transforms\\bfd7b7ae81f1a8beae86c75d109a5797\\transformed\\material-1.10.0\\res\\values-w600dp-land-v13\\values-w600dp-land-v13.xml",
+                    "source": "C:\\Users\\Valerio\\.gradle\\caches\\8.11.1\\transforms\\478e29bae0c955c58d42fa9b59c8a8f1\\transformed\\material-1.10.0\\res\\values-w600dp-land-v13\\values-w600dp-land-v13.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

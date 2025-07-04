@@ -88,6 +88,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.androidx.datastore)
 
+    //PROTOCOL BUFFER
     implementation(libs.protobuf.javalite)
     implementation(libs.protobuf.kotlin.lite)
     protobuf(libs.protoc)
@@ -96,6 +97,9 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+
+    //for conversion
+    implementation(libs.gson)
 
 }
 

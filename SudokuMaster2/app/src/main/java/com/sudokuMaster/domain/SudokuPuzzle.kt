@@ -1,17 +1,16 @@
 package com.sudokuMaster.domain
 
+import com.sudokuMaster.data.DifficultyLevel
 import com.sudokuMaster.logic.buildNewSudoku
-import java.io.Serializable
 import java.util.*
 import kotlin.collections.LinkedHashMap
 
 data class SudokuPuzzle(
-
     val boundary: Int,
-    val difficulty: Difficulty,
+    val difficulty: DifficultyLevel,
     val graph: LinkedHashMap<Int, LinkedList<SudokuNode>>
-    = buildNewSudoku(boundary, difficulty).graph,
+    = buildNewSudoku(difficulty).graph,
     var elapsedTime: Long = 0L
-): Serializable {
+){
     fun getValue(): LinkedHashMap<Int, LinkedList<SudokuNode>> = graph
 }

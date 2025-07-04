@@ -1,61 +1,76 @@
 
 package com.sudokuMaster.logic
 
-import android.content.Context
-import com.android.volley.Request
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.Volley
-import com.sudokuMaster.domain.Difficulty
+import com.sudokuMaster.data.DifficultyLevel
+import java.util.LinkedHashMap
+import java.util.LinkedList
 import com.sudokuMaster.domain.SudokuNode
 import com.sudokuMaster.domain.SudokuPuzzle
-import java.util.*
+
+fun buildNewSudoku(difficulty: DifficultyLevel): SudokuPuzzle {
+    val graph = LinkedHashMap<Int, LinkedList<SudokuNode>>()
 
 
-fun buildNewSudoku(
-    context: Context,
-    onSuccess: (SudokuPuzzle) -> Unit,
-    onError: (Exception) -> Unit
-) {
-    val queue = Volley.newRequestQueue(context)
-    val url = "https://sudoku-api.vercel.app/api/dosuku" // senza difficulty, la prende API
+    for (row in 0 until 9) {
+        val rowList = LinkedList<SudokuNode>()
+        for (col in 0 until 9) {
+            rowList.add(SudokuNode(row, col, 0, true))
+        }
+        graph[row] = rowList
+    }
 
-    val request = JsonObjectRequest(Request.Method.GET, url, null,
-        { response ->
-            try {
-                // Leggi la difficoltà dall'API
-                val difficultyStr = response.getString("difficulty").uppercase()
-                val difficulty = Difficulty.valueOf(difficultyStr)
+    val solvedGrid = generateFullSudokuGrid()
 
-                val puzzleArray = response
-                    .getJSONObject("newboard")
-                    .getJSONArray("grids")
-                    .getJSONObject(0)
-                    .getJSONArray("value")
 
-                val graph = LinkedHashMap<Int, LinkedList<SudokuNode>>()
+    val puzzleGrid = removeCellsBasedOnDifficulty(solvedGrid, difficulty)
 
-                for (row in 0 until puzzleArray.length()) {
-                    val rowArray = puzzleArray.getJSONArray(row)
-                    val rowList = LinkedList<SudokuNode>()
 
-                    for (col in 0 until rowArray.length()) {
-                        val value = rowArray.getInt(col)
-                        rowList.add(SudokuNode(row, col, value, value != 0))
-                    }
+    for (row in 0 until 9) {
+        for (col in 0 until 9) {
+            val value = puzzleGrid[row][col]
+            graph[row]?.set(col, SudokuNode(row, col,0, true))
+        }
+    }
 
-                    graph[row] = rowList
-                }
+    return SudokuPuzzle(9, difficulty, graph)
+}
 
-                val puzzle = SudokuPuzzle(1, difficulty, graph)
-                onSuccess(puzzle)
 
-            } catch (e: Exception) {
-                onError(e)
-            }
-        },
-        { error ->
-            onError(error)
-        })
+fun generateFullSudokuGrid(): Array<IntArray> {
+    return arrayOf(
+        intArrayOf(5, 3, 4, 6, 7, 8, 9, 1, 2),
+        intArrayOf(6, 7, 2, 1, 9, 5, 3, 4, 8),
+        intArrayOf(1, 9, 8, 3, 4, 2, 5, 6, 7),
+        intArrayOf(8, 5, 9, 7, 6, 1, 4, 2, 3),
+        intArrayOf(4, 2, 6, 8, 5, 3, 7, 9, 1),
+        intArrayOf(7, 1, 3, 9, 2, 4, 8, 5, 6),
+        intArrayOf(9, 6, 1, 5, 3, 7, 2, 8, 4),
+        intArrayOf(2, 8, 7, 4, 1, 9, 6, 3, 5),
+        intArrayOf(3, 4, 5, 2, 8, 6, 1, 7, 9)
+    )
+}
 
-    queue.add(request)
+
+fun removeCellsBasedOnDifficulty(grid: Array<IntArray>, difficulty: DifficultyLevel): Array<IntArray> {
+    val cellsToRemove = when (difficulty) {
+        DifficultyLevel.EASY -> 35
+        DifficultyLevel.MEDIUM -> 45
+        DifficultyLevel.HARD -> 55
+        else -> 55
+    }
+
+    val puzzle = grid.map { it.copyOf() }.toTypedArray()
+    val rand = java.util.Random()
+    var removed = 0
+
+    while (removed < cellsToRemove) {
+        val row = rand.nextInt(9)
+        val col = rand.nextInt(9)
+        if (puzzle[row][col] != 0) {
+            puzzle[row][col] = 0
+            removed++
+        }
+    }
+
+    return puzzle
 }
