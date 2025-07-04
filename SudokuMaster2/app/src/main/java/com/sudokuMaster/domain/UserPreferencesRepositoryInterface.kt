@@ -14,6 +14,6 @@ interface UserPreferencesRepositoryInterface {
     //suspend fun updateShowTutorial(show: Boolean): Result<Unit> not implemented yet!!
     suspend fun updateLastUnfinishedGameId(gameId: Long): Result<Unit>
 
-    suspend fun getUserPreferences(): Result<UserPreferences>
+    suspend fun getUserPreferences(): Flow<UserPreferences>
 
 }

@@ -1,60 +1,38 @@
 package com.sudokuMaster.domain
 
+import com.sudokuMaster.data.DifficultyLevel
 import com.sudokuMaster.data.model.GameSession
 import kotlinx.coroutines.flow.Flow
 
 interface GameRepositoryInterface {
-    /**
-     * Inserisce una nuova sessione di gioco nel database.
-     * @param gameSession L'oggetto GameSession da inserire.
-     * @return Result.success(Long) con l'ID della riga inserita, Result.failure(Exception) in caso di errore.
-     */
-    suspend fun insertGameSession(gameSession: GameSession): Result<Long>
 
-    /**
-     * Aggiorna una sessione di gioco esistente nel database.
-     * @param gameSession L'oggetto GameSession da aggiornare (deve avere un ID valido).
-     * @return Result.success(Unit) in caso di successo, Result.failure(Exception) in caso di errore.
-     */
-    suspend fun updateGameSession(gameSession: GameSession): Result<Unit>
+    suspend fun createNewGameAndSave(
+        difficulty: DifficultyLevel,
+        onSuccess: (GameSession) -> Unit,
+        onError: (Throwable) -> Unit
+    )
 
-    /**
-     * Elimina una sessione di gioco dal database.
-     * @param gameSession L'oggetto GameSession da eliminare.
-     * @return Result.success(Unit) in caso di successo, Result.failure(Exception) in caso di errore.
-     */
-    suspend fun deleteGameSession(gameSession: GameSession): Result<Unit>
+    suspend fun getLatestUnfinishedGameSession(
+        onSuccess: (GameSession) -> Unit,
+        onError: (Throwable) -> Unit
+    )
 
-    /**
-     * Ottiene una sessione di gioco specifica tramite il suo ID.
-     * @param sessionId L'ID della sessione di gioco.
-     * @return Flow che emette la GameSession corrispondente (o null se non trovata).
-     */
-    suspend fun getGameSessionById(sessionId: Long): Flow<GameSession?>
+    // Questo metodo ora riceve l'intero SudokuPuzzle aggiornato
+    // e restituisce la GameSession aggiornata con lo stato di risoluzione.
+    suspend fun updateGameNodeAndSave(
+        puzzle: SudokuPuzzle,
+        onSuccess: (GameSession) -> Unit, // Restituisce la GameSession aggiornata
+        onError: (Throwable) -> Unit
+    )
 
-    /**
-     * Ottiene tutte le sessioni di gioco.
-     * @return Flow che emette una lista di tutte le GameSession.
-     */
-    suspend fun getAllGameSessions(): Flow<List<GameSession>>
+    // Questo è un metodo più generico per aggiornare una GameSession esistente.
+    // Utile per il salvataggio dei progressi quando si esce, o altre logiche.
+    suspend fun updateGameSession(
+        gameSession: GameSession,
+        onSuccess: (GameSession) -> Unit,
+        onError: (Throwable) -> Unit
+    )
 
-    /**
-     * Ottiene l'ultima sessione di gioco non completata.
-     * Utile per la funzione "riprendi partita".
-     * @return Flow che emette l'ultima GameSession non completata (o null se nessuna).
-     */
-    suspend fun getLatestUnfinishedGameSession(): Flow<GameSession?>
-
-    suspend fun createNewGameAndSave(settings: Settings): Result<Long>
-
-    suspend fun updateGameNodeAndSave(gameId: Long, x: Int, y: Int, value: Int, newElapsedTime: Long): Result<Boolean>
-
-    // --- Operazioni e accesso alle statistiche aggregate ---
-
-    /**
-     * Fornisce un Flow reattivo delle statistiche utente aggregate.
-     * Le statistiche verranno ricalcolate e riemesse ogni volta che le sessioni di gioco cambiano.
-     * @return Flow che emette un oggetto UserStatistics.
-     */
-    fun getUserStatistics(): Flow<UserStatistics>
+    // Ora restituisce un Flow di UserStatistics, come da implementazione
+    suspend fun getUserStatistics(): Flow<UserStatistics>
 }

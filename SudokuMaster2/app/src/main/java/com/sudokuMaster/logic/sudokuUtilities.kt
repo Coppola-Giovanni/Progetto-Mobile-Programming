@@ -10,22 +10,24 @@ import kotlin.math.sqrt
 internal val Int.sqrt: Int
     get() = kotlin.math.sqrt(this.toDouble()).toInt()
 
-internal fun puzzleIsComplete(puzzle: SudokuPuzzle): Boolean {
+internal fun SudokuPuzzle.isComplete(): Boolean {
+    // puzzleIsValid ora è SudokuPuzzle.isValid()
     return when {
-        !puzzleIsValid(puzzle) -> false
-        !allSquaresAreFilled(puzzle) -> false
+        !this.isValid() -> false // Chiama la funzione di estensione
+        !allSquaresAreFilled(this) -> false
         else -> true
     }
 }
 
-internal fun puzzleIsValid(puzzle: SudokuPuzzle): Boolean {
+internal fun SudokuPuzzle.isValid(): Boolean {
     return when {
-        rowsAreInvalid(puzzle) -> false
-        columnsAreInvalid(puzzle) -> false
-        subgridsAreInvalid(puzzle) -> false
+        rowsAreInvalid(this) -> false
+        columnsAreInvalid(this) -> false
+        subgridsAreInvalid(this) -> false
         else -> true
     }
 }
+
 
 internal fun rowsAreInvalid(puzzle: SudokuPuzzle): Boolean {
     // Itera su ogni riga (0-based)
