@@ -182,8 +182,6 @@ fun SudokuGrid(
                                 color = MaterialTheme.colorScheme.inversePrimary
                             )
                             .run {
-                                val rightBorderWidth = if ((col + 1) % 3 == 0 && col != gridSize - 1) 2.dp else 1.dp
-                                val bottomBorderWidth = if ((row + 1) % 3 == 0 && row != gridSize - 1) 2.dp else 1.dp
                                 then(
                                     Modifier.border(
                                         width = 1.dp,
