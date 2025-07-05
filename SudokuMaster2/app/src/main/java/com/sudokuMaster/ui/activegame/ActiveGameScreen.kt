@@ -22,6 +22,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel // Importa questa funzione
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.res.stringResource
+import com.SudokuMaster.R
 import com.sudokuMaster.data.DifficultyLevel
 import com.sudokuMaster.domain.getHash
 import java.util.concurrent.TimeUnit
@@ -69,7 +71,7 @@ fun ActiveGameScreen(
         when (screenState) {
             ActiveGameScreenState.LOADING -> {
                 CircularProgressIndicator(modifier = Modifier.padding(32.dp))
-                Text(text = "Loading Sudoku...", style = MaterialTheme.typography.titleMedium)
+                Text(text = stringResource(R.string.loading_sudoku), style = MaterialTheme.typography.titleMedium)
             }
             ActiveGameScreenState.ACTIVE -> {
                 GameHeader(difficulty = difficulty, timerState = timerState)
@@ -82,7 +84,7 @@ fun ActiveGameScreen(
                 NumberPad(onInput = { input -> viewModel.onEvent(ActiveGameEvent.onInput(input)) })
                 Spacer(Modifier.height(16.dp))
                 Button(onClick = { viewModel.onEvent(ActiveGameEvent.OnStop) }) {
-                    Text("Save & Exit")
+                    Text(stringResource(R.string.save_exit))
                 }
             }
             ActiveGameScreenState.COMPLETE -> {
@@ -98,13 +100,27 @@ fun ActiveGameScreen(
 }
 
 @Composable
+fun getLocalizedDifficulty(difficulty: DifficultyLevel): String {
+    return when (difficulty) {
+        DifficultyLevel.EASY -> stringResource(R.string.difficulty_easy)
+        DifficultyLevel.MEDIUM -> stringResource(R.string.difficulty_medium)
+        DifficultyLevel.HARD -> stringResource(R.string.difficulty_hard)
+        DifficultyLevel.DIFFICULTY_UNSPECIFIED -> TODO()
+        DifficultyLevel.UNRECOGNIZED -> TODO()
+    }
+}
+
+
+
+
+@Composable
 fun GameHeader(difficulty: DifficultyLevel, timerState: Long) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = "Difficulty: ${difficulty.name}", style = MaterialTheme.typography.titleMedium)
+        Text(text = stringResource(R.string.Difficulty, getLocalizedDifficulty(difficulty)), style = MaterialTheme.typography.titleMedium)
         Text(text = formatTime(timerState), style = MaterialTheme.typography.titleLarge)
     }
 }
@@ -203,7 +219,7 @@ fun NumberPad(onInput: (Int) -> Unit) {
         Spacer(Modifier.height(8.dp))
         // Riga 4: Clear (0)
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            NumberButton(number = 0, onInput = onInput, text = "Clear")
+            NumberButton(number = 0, onInput = onInput, text = stringResource(R.string.clear))
         }
     }
 }
@@ -234,14 +250,14 @@ fun GameCompletionScreen(
     ) {
         Text(text = "Puzzle Solved!", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(16.dp))
-        Text(text = "Difficulty: ${difficulty.name}", style = MaterialTheme.typography.titleLarge)
-        Text(text = "Time: ${formatTime(timerState)}", style = MaterialTheme.typography.titleLarge)
+        Text(text = stringResource(R.string.Difficulty, getLocalizedDifficulty(difficulty)), style = MaterialTheme.typography.titleLarge)
+        Text(text = stringResource(R.string.time, formatTime(timerState)), style = MaterialTheme.typography.titleLarge)
         if (isNewRecord) {
-            Text(text = "NEW RECORD!", style = MaterialTheme.typography.headlineSmall, color = Color.Green)
+            Text(text = stringResource(R.string.new_record), style = MaterialTheme.typography.headlineSmall, color = Color.Green)
         }
         Spacer(Modifier.height(32.dp))
         Button(onClick = onNewGameClick) {
-            Text("Start New Game")
+            Text(stringResource(R.string.start_new_game))
         }
     }
 }
