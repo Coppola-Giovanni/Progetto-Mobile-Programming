@@ -27,6 +27,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -151,8 +152,6 @@ fun ActiveGameScreen(
     }
 }
 
-// ... (SudokuGrid, SudokuCell, NumberInput, InputButton, GameCompletionScreen, formatTime come forniti) ...
-
 @Composable
 fun SudokuGrid(
     tiles: List<SudokuTile>,
@@ -189,7 +188,6 @@ fun SudokuGrid(
                                 width = 1.dp, // Bordo sottile per le celle
                                 color = MaterialTheme.colorScheme.inversePrimary
                             )
-                        // Rimosso il secondo .then(Modifier.border(...)) duplicato
                     )
                 }
             }
@@ -207,18 +205,18 @@ fun SudokuCell(
 ) {
     val backgroundColor = when {
         isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-        else -> MaterialTheme.colorScheme.surface
+        else -> MaterialTheme.colorScheme.secondary
     }
 
     val textColor = when {
         isInitial -> MaterialTheme.colorScheme.onSurface
-        else -> MaterialTheme.colorScheme.secondary
+        else ->Color.Black
     }
 
     Box(
         modifier = modifier
             .background(backgroundColor)
-            .clickable(enabled = !isInitial, onClick = onClick), // Aggiunto enabled = !isInitial
+            .clickable(enabled = !isInitial, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         if (tile.value != 0) {
@@ -240,34 +238,62 @@ fun SudokuCell(
 fun NumberInput(
     onNumberClick: (Int) -> Unit
 ) {
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
-        horizontalArrangement = Arrangement.SpaceAround
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        for (i in 1..9) {
-            InputButton(number = i, onClick = { onNumberClick(i) })
+        // Row for numbers 1-5
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            for (i in 1..5) {
+                // Passa il numero come String
+                InputButton(displayValue = i.toString(), onClick = { onNumberClick(i) })
+            }
         }
-        InputButton(text = "X", onClick = { onNumberClick(0) }) // 0 per cancellare
+        Spacer(Modifier.height(8.dp)) // Add some vertical space between rows
+
+        // Row for numbers 6-9 and Clear (X)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            for (i in 6..9) {
+                // Passa il numero come String
+                InputButton(displayValue = i.toString(), onClick = { onNumberClick(i) })
+            }
+            // Per il pulsante "X", passa la stringa "X"
+            InputButton(displayValue = "X", onClick = { onNumberClick(0) }) // 0 for clear
+        }
     }
 }
 
 @Composable
 fun InputButton(
-    number: Int? = null,
-    text: String? = null,
+    displayValue: String,
     onClick: () -> Unit
 ) {
     Button(
         onClick = onClick,
         modifier = Modifier
-            .width(48.dp)
-            .height(48.dp)
+            .size(48.dp), // Dimensione compatta ma sufficiente
+        contentPadding = PaddingValues(0.dp), // Elimina padding interno
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.secondary, // Sfondo visibile
+            contentColor = Color.Black // Testo nero, ben leggibile
+        )
     ) {
-        Text(text ?: number.toString(), fontSize = 18.sp)
+        Text(
+            text = displayValue,
+            fontSize = 18.sp,
+            color = Color.Black // Assicura colore visibile
+        )
     }
 }
+
 
 @Composable
 fun GameCompletionScreen(

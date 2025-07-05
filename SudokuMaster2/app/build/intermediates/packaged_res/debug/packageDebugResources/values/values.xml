@@ -7,16 +7,38 @@
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
     <color name="white">#FFFFFFFF</color>
+    <string name="Difficulty">difficulty</string>
+    <string name="active_game" translatable="false"/>
+    <string name="active_game_title" translatable="false"/>
     <string name="app_name">SudokuMaster</string>
-    <string name="continua_partita">Continua Partita</string>
+    <string name="back" translatable="false"/>
+    <string name="back_button_desc" translatable="false"/>
+    <string name="back_to_home" translatable="false"/>
+    <string name="clear">C</string>
+    <string name="clear_button" translatable="false"/>
+    <string name="continua_partita" translatable="false">Continua Partita</string>
     <string name="difficulty"/>
+    <string name="difficulty_easy">easy</string>
+    <string name="difficulty_hard">hard</string>
+    <string name="difficulty_medium">"medium "</string>
     <string name="easy">easy</string>
+    <string name="error_generic_message" translatable="false"/>
+    <string name="error_loading_puzzle" translatable="false"/>
     <string name="game_complete"/>
+    <string name="generic_error">generic error</string>
     <string name="hard">hard</string>
     <string name="loading">loading</string>
+    <string name="loading_puzzle" translatable="false"/>
+    <string name="loading_sudoku">loading sudoku</string>
     <string name="logo_description"/>
     <string name="medium">medium</string>
-    <string name="nuova_partita">Nuova Partita</string>
-    <string name="statistiche_di_gioco">Statistiche di Gioco</string>
+    <string name="new_record">New Record!</string>
+    <string name="nuova_partita" translatable="false">Nuova Partita</string>
+    <string name="puzzle_solved" translatable="false"/>
+    <string name="save_exit">save and exit</string>
+    <string name="start_new_game">start a new game</string>
+    <string name="statistiche_di_gioco" translatable="false">Statistiche di Gioco</string>
+    <string name="time">time</string>
+    <string name="try_new_game" translatable="false"/>
     <style name="Theme.SudokuMaster" parent="android:Theme.Material.Light.NoActionBar"/>
 </resources>
