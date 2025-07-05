@@ -75,7 +75,7 @@ fun ActiveGameScreen(
             TopAppBar(
                 title = {
                     // Potresti mettere un titolo qui, ad esempio "Sudoku"
-                    Text(stringResource(R.string.loading_sudoku), color = MaterialTheme.colorScheme.onPrimaryContainer)
+                    Text(stringResource(R.string.app_name), color = MaterialTheme.colorScheme.onPrimaryContainer)
                 },
                 navigationIcon = {
                     IconButton(onClick = {
