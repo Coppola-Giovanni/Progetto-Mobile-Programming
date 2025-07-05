@@ -102,11 +102,21 @@ fun ActiveGameScreen(
 @Composable
 fun getLocalizedDifficulty(difficulty: DifficultyLevel): String {
     return when (difficulty) {
-        DifficultyLevel.EASY -> stringResource(R.string.difficulty_easy)
-        DifficultyLevel.MEDIUM -> stringResource(R.string.difficulty_medium)
-        DifficultyLevel.HARD -> stringResource(R.string.difficulty_hard)
-        DifficultyLevel.DIFFICULTY_UNSPECIFIED -> TODO()
-        DifficultyLevel.UNRECOGNIZED -> TODO()
+        DifficultyLevel.EASY -> {
+            stringResource(R.string.difficulty_easy)
+        }
+        DifficultyLevel.MEDIUM -> {
+            stringResource(R.string.difficulty_medium)
+        }
+        DifficultyLevel.HARD -> {
+            stringResource(R.string.difficulty_hard)
+        }
+        DifficultyLevel.DIFFICULTY_UNSPECIFIED -> {
+            TODO()
+        }
+        DifficultyLevel.UNRECOGNIZED -> {
+            TODO() //ciao
+        }
     }
 }
 

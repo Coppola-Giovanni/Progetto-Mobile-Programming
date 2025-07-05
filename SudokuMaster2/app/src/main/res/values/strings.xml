@@ -14,7 +14,7 @@
     <string name="difficulty_medium" >Medium</string>
     <string name="difficulty_easy" >Easy</string>
     <string name="Difficulty">Difficulty: %1$s</string>
-    <string name="clear">C</string>
+    <string name="clear">c</string>
     <string name="time">Time: %1$s</string>
     <string name="new_record">NEW RECORD!</string>
     <string name="start_new_game">Start New Game</string>
