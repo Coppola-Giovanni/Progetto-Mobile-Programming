@@ -9,4 +9,14 @@
     <string name="game_complete">Partita Completata</string>
     <string name="logo_description">Descrizione Del Logo</string>
     <string name="generic_error">Errore Generico</string>
+    <string name="difficulty_easy">Facile</string>
+    <string name="Difficulty">Difficoltà: %1$s</string>
+    <string name="clear">C</string>
+    <string name="time">Tempo: %1$s</string>
+    <string name="new_record">NUOVO RECORD!</string>
+    <string name="start_new_game">Inizia Una Nuova Partita</string>
+    <string name="loading_sudoku">Caricamento Sudoku</string>
+    <string name="save_exit">Salva Ed Esci</string>
+    <string name="difficulty_hard">Difficile</string>
+    <string name="difficulty_medium">Media</string>
 </resources>
