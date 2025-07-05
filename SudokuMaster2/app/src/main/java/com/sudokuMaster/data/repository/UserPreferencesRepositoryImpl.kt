@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 class UserPreferencesRepositoryImpl(
@@ -84,13 +85,13 @@ class UserPreferencesRepositoryImpl(
         }
     }
 
-    override suspend fun getUserPreferences(): Result<UserPreferences> = withContext(Dispatchers.IO) {
-        return@withContext try {
-            // .first() per ottenere il valore corrente e completare il flow
-            val preferences = userPreferencesDataStore.data.first()
-            Result.success(preferences)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    override suspend fun getUserPreferences(): Flow<UserPreferences> {
+        return userPreferencesDataStore.data
+            .map { preferences ->
+                // Qui potresti mappare le 'preferences' (dal DataStore) al tuo dominio UserPreferences
+                // Se il tuo DataStore è già DataStore<UserPreferences>, non serve una mappatura complessa.
+                // Assumiamo che UserPreferences sia la stessa classe che viene serializzata/deserializzata dal DataStore.
+                preferences // Restituisci direttamente l'oggetto UserPreferences
+            }
     }
 }

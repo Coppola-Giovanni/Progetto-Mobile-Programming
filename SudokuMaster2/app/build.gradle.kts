@@ -90,9 +90,8 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.material)
     implementation(libs.androidx.material.icons.extended)
-
+    implementation (libs.androidx.navigation.compose)
 
     //PROTOCOL BUFFER
     implementation(libs.protobuf.javalite)
