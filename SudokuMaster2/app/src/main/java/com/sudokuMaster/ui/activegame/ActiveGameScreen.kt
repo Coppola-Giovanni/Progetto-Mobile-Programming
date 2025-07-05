@@ -209,7 +209,7 @@ fun SudokuCell(
     }
 
     val textColor = when {
-        isInitial -> MaterialTheme.colorScheme.onSurface
+        isInitial -> MaterialTheme.colorScheme.primary
         else ->Color.Black
     }
 
@@ -282,14 +282,14 @@ fun InputButton(
             .size(48.dp), // Dimensione compatta ma sufficiente
         contentPadding = PaddingValues(0.dp), // Elimina padding interno
         colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.secondary, // Sfondo visibile
+            containerColor = MaterialTheme.colorScheme.primary, // Sfondo visibile
             contentColor = Color.Black // Testo nero, ben leggibile
         )
     ) {
         Text(
             text = displayValue,
             fontSize = 18.sp,
-            color = Color.Black // Assicura colore visibile
+            color = Color.White // Assicura colore visibile
         )
     }
 }
