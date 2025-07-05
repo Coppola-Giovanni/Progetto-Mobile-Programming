@@ -1,5 +1,6 @@
 package com.sudokuMaster.ui.activegame
 
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -32,12 +33,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.res.stringResource
+import com.SudokuMaster.R
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.min
+import androidx.compose.ui.unit.max
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActiveGameScreen(
     viewModelFactory: ActiveGameViewModelFactory,
-    navController: NavController, // NavController viene passato dalla MainActivity
+    navController: NavController,
     modifier: Modifier = Modifier,
 ) {
     val viewModel: ActiveGameViewModel = viewModel(
@@ -45,11 +51,11 @@ fun ActiveGameScreen(
     )
 
     val activeGameScreenState by viewModel.activeGameScreenState.collectAsState()
-    val sudokuTiles by viewModel.sudokuTiles.collectAsState() // Ora risolto dal ViewModel
+    val sudokuTiles by viewModel.sudokuTiles.collectAsState()
     val timerState by viewModel.timerState.collectAsState()
     val selectedTile by viewModel.selectedTile.collectAsState()
     val isSolved by viewModel.isSolved.collectAsState()
-    val currentDifficulty by viewModel.currentDifficulty.collectAsState() // Ora risolto dal ViewModel
+    val currentDifficulty by viewModel.currentDifficulty.collectAsState()
     val isNewRecord by viewModel.isNewRecord.collectAsState()
 
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -72,12 +78,10 @@ fun ActiveGameScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    // Potresti mettere un titolo qui, ad esempio "Sudoku"
                     Text("Sudoku Master", color = MaterialTheme.colorScheme.onPrimaryContainer)
                 },
                 navigationIcon = {
                     IconButton(onClick = {
-                        // Quando si clicca la freccia indietro, si torna alla schermata precedente
                         navController.popBackStack()
                     }) {
                         Icon(
@@ -96,6 +100,9 @@ fun ActiveGameScreen(
         }
     ) { paddingValues ->
 
+        val configuration = LocalConfiguration.current
+        val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+
         Column(
             modifier = modifier
                 .fillMaxSize()
@@ -109,23 +116,84 @@ fun ActiveGameScreen(
                     Text(text = "Caricamento Sudoku...", style = MaterialTheme.typography.titleMedium)
                 }
                 ActiveGameScreenState.ACTIVE -> {
-                    Text(
-                        text = "Tempo: ${formatTime(timerState)}",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(16.dp)
-                    )
+                    if (isLandscape) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(4.dp), // Ridotto il padding generale della riga
+                            horizontalArrangement = Arrangement.SpaceAround,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Sudoku Grid a sinistra (reso più piccolo)
+                            SudokuGrid(
+                                tiles = sudokuTiles,
+                                selectedTile = selectedTile,
+                                onTileClick = { x, y -> viewModel.onEvent(ActiveGameEvent.onTileFocused(x, y)) },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight(0.9f) // La griglia occupa solo il 90% dell'altezza disponibile
+                                    .aspectRatio(1f) // Mantiene la proporzione quadrata
+                                    .wrapContentSize(align = Alignment.Center) // Centra il contenuto se più piccolo
+                                    .padding(2.dp) // Ridotto il padding interno alla griglia
+                            )
 
-                    SudokuGrid(
-                        tiles = sudokuTiles,
-                        selectedTile = selectedTile,
-                        onTileClick = { x, y -> viewModel.onEvent(ActiveGameEvent.onTileFocused(x, y)) }
-                    )
+                            // Controlli e informazioni a destra
+                            Column(
+                                modifier = Modifier
+                                    .weight(0.5f)
+                                    .fillMaxHeight()
+                                    .padding(4.dp), // Ridotto il padding per la colonna dei controlli
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.SpaceAround
+                            ) {
+                                Text(
+                                    text = "Tempo: ${formatTime(timerState)}",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier.padding(bottom = 4.dp) // Ridotto il padding del tempo
+                                )
 
-                    Spacer(Modifier.height(16.dp))
+                                NumberInput(onNumberClick = { number ->
+                                    viewModel.onEvent(ActiveGameEvent.onInput(number))
+                                })
+                                Button(
+                                    onClick = { viewModel.onEvent(ActiveGameEvent.OnSuggestMoveClicked) },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 2.dp, vertical = 1.dp) // Ridotto padding del bottone
+                                        .heightIn(min = 36.dp) // Altezza minima leggermente ridotta per il bottone
+                                ) {
+                                    Text(stringResource(R.string.suggest_move), fontSize = 12.sp) // Testo ancora più piccolo
+                                }
+                            }
+                        }
+                    } else {
+                        // Layout per orientamento verticale (originale)
+                        Text(
+                            text = "Tempo: ${formatTime(timerState)}",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(16.dp)
+                        )
 
-                    NumberInput(onNumberClick = { number ->
-                        viewModel.onEvent(ActiveGameEvent.onInput(number))
-                    })
+                        SudokuGrid(
+                            tiles = sudokuTiles,
+                            selectedTile = selectedTile,
+                            onTileClick = { x, y -> viewModel.onEvent(ActiveGameEvent.onTileFocused(x, y)) }
+                        )
+
+                        Spacer(Modifier.height(16.dp))
+
+                        NumberInput(onNumberClick = { number ->
+                            viewModel.onEvent(ActiveGameEvent.onInput(number))
+                        })
+                        Button(
+                            onClick = { viewModel.onEvent(ActiveGameEvent.OnSuggestMoveClicked) },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(stringResource(R.string.suggest_move))
+                        }
+
+                        Spacer(Modifier.height(16.dp))
+                    }
                 }
                 ActiveGameScreenState.COMPLETE -> {
                     GameCompletionScreen(
@@ -136,14 +204,13 @@ fun ActiveGameScreen(
                     )
                 }
                 ActiveGameScreenState.ERROR -> {
-                    // Puoi aggiungere una UI di errore più sofisticata qui
                     Text(
                         text = "Si è verificato un errore durante il caricamento del gioco.",
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(16.dp)
                     )
-                    Button(onClick = { navController.popBackStack() }) { // Torna alla home
+                    Button(onClick = { navController.popBackStack() }) {
                         Text("Torna alla Home")
                     }
                 }
@@ -156,16 +223,16 @@ fun ActiveGameScreen(
 fun SudokuGrid(
     tiles: List<SudokuTile>,
     selectedTile: SudokuTile?,
-    onTileClick: (x: Int, y: Int) -> Unit
+    onTileClick: (x: Int, y: Int) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val gridSize = 9
-    // val cellSize = 40.dp // Non strettamente necessario se usi weight e aspectRatio
 
     Column(
-        modifier = Modifier
-            .aspectRatio(1f) // Rendi la griglia quadrata
+        modifier = modifier
+            .aspectRatio(1f)
             .padding(8.dp)
-            .border(2.dp, MaterialTheme.colorScheme.inversePrimary) // Bordo esterno
+            .border(2.dp, MaterialTheme.colorScheme.inversePrimary)
     ) {
         for (row in 0 until gridSize) {
             Row(
@@ -185,7 +252,7 @@ fun SudokuGrid(
                             .weight(1f)
                             .aspectRatio(1f)
                             .border(
-                                width = 1.dp, // Bordo sottile per le celle
+                                width = 1.dp,
                                 color = MaterialTheme.colorScheme.inversePrimary
                             )
                     )
@@ -223,7 +290,7 @@ fun SudokuCell(
             Text(
                 text = tile.value.toString(),
                 style = MaterialTheme.typography.bodyLarge.copy(
-                    fontSize = 24.sp,
+                    fontSize = 18.sp, // Ridotto ulteriormente a 18.sp
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
                 ),
@@ -244,29 +311,24 @@ fun NumberInput(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Row for numbers 1-5
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             for (i in 1..5) {
-                // Passa il numero come String
                 InputButton(displayValue = i.toString(), onClick = { onNumberClick(i) })
             }
         }
-        Spacer(Modifier.height(8.dp)) // Add some vertical space between rows
+        Spacer(Modifier.height(8.dp))
 
-        // Row for numbers 6-9 and Clear (X)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             for (i in 6..9) {
-                // Passa il numero come String
                 InputButton(displayValue = i.toString(), onClick = { onNumberClick(i) })
             }
-            // Per il pulsante "X", passa la stringa "X"
-            InputButton(displayValue = "X", onClick = { onNumberClick(0) }) // 0 for clear
+            InputButton(displayValue = "X", onClick = { onNumberClick(0) })
         }
     }
 }
@@ -279,17 +341,17 @@ fun InputButton(
     Button(
         onClick = onClick,
         modifier = Modifier
-            .size(48.dp), // Dimensione compatta ma sufficiente
-        contentPadding = PaddingValues(0.dp), // Elimina padding interno
+            .size(44.dp), // Ridotto leggermente la dimensione dei pulsanti
+        contentPadding = PaddingValues(0.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.secondary, // Sfondo visibile
-            contentColor = Color.Black // Testo nero, ben leggibile
+            containerColor = MaterialTheme.colorScheme.secondary,
+            contentColor = Color.Black
         )
     ) {
         Text(
             text = displayValue,
-            fontSize = 18.sp,
-            color = Color.Black // Assicura colore visibile
+            fontSize = 16.sp, // Ridotto la dimensione del testo nei pulsanti
+            color = Color.Black
         )
     }
 }

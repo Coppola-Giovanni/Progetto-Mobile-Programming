@@ -1,5 +1,6 @@
 package com.sudokuMaster.ui.activegame
 
+
 import com.sudokuMaster.logic.isComplete
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -21,10 +22,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.map // Import required for .map
 import kotlinx.coroutines.flow.SharingStarted // Import required for .stateIn
 import kotlinx.coroutines.flow.stateIn // Import required for .stateIn
+import kotlinx.coroutines.launch
 import java.util.LinkedList
 import java.util.concurrent.TimeUnit
 
@@ -139,6 +140,8 @@ class ActiveGameViewModel(
                     hasFocus = true // Questo ha senso per il ViewModel, ma la UI usa selectedTile per il render
                 )
             }
+
+            ActiveGameEvent.OnSuggestMoveClicked -> onSuggestMoveClicked()
         }
     }
 
@@ -315,6 +318,164 @@ class ActiveGameViewModel(
         gameJob?.cancel()
         Log.d("ActiveGameViewModel", "ViewModel onCleared.")
     }
+
+    private fun onSuggestMoveClicked() = viewModelScope.launch {
+        // Ensure _sudokuPuzzle.value is not null before proceeding
+        val currentPuzzle = _sudokuPuzzle.value ?: run {
+            Log.e("SudokuDebug", "onSuggestMoveClicked: _sudokuPuzzle is null. Cannot suggest move.")
+            return@launch
+        }
+
+        // Get a mutable map of the current graph for easier manipulation
+        val currentBoard = currentPuzzle.currentGraph.values.flatten().associateBy { getHash(it.x, it.y) }.toMutableMap()
+        val boundary = 9 // Assuming a 9x9 grid
+
+        Log.d("SudokuDebug", "--- SUGGEST MOVE CLICKED ---")
+        Log.d("SudokuDebug", "Current board state (values only) as seen by onSuggestMoveClicked:")
+        for (y in 0 until boundary) {
+            val rowValues = (0 until boundary).map { x ->
+                currentBoard[getHash(x, y)]?.color ?: 0 // Use .color for SudokuNode
+            }
+            Log.d("SudokuDebug", rowValues.joinToString(separator = ", "))
+        }
+
+        var suggestedX: Int? = null
+        var suggestedY: Int? = null
+        var suggestedValue: Int? = null
+
+        // Get the currently focused tile from _selectedTile
+        val focusedTile = _selectedTile.value
+
+        // Check if the focused tile is empty and mutable
+        if (focusedTile.value == 0 && !focusedTile.readOnly) {
+            Log.d("SudokuDebug", "Focused on empty mutable tile: (${focusedTile.x}, ${focusedTile.y})")
+            for (num in 1..boundary) {
+                // Create a temporary board for validity check. It's crucial to pass a copy.
+                val tempBoardForCheck = currentBoard.toMutableMap()
+                val tempNode = SudokuNode(focusedTile.x, focusedTile.y, num, focusedTile.readOnly)
+                tempBoardForCheck[getHash(focusedTile.x, focusedTile.y)] = tempNode
+
+                if (isValidMove(tempBoardForCheck, focusedTile.x, focusedTile.y, num, boundary)) {
+                    suggestedX = focusedTile.x
+                    suggestedY = focusedTile.y
+                    suggestedValue = num
+                    Log.d("SudokuDebug", "  Found valid suggestion $num for focused tile.")
+                    break // Found a suggestion for the focused tile
+                }
+            }
+        }
+
+        // If no move was found for the focused cell, or if there wasn't an empty/mutable focused cell,
+        // search for the first empty and mutable cell.
+        if (suggestedValue == null) {
+            Log.d("SudokuDebug", "No suggestion for focused tile, searching first empty mutable tile.")
+            outerLoop@ for (y in 0 until boundary) {
+                for (x in 0 until boundary) {
+                    val node = currentBoard[getHash(x, y)]
+                    if (node != null && node.color == 0 && !node.readOnly) { // Empty and mutable cell
+                        Log.d("SudokuDebug", "  Found empty mutable tile: ($x, $y)")
+                        for (num in 1..boundary) { // Try numbers from 1 to 9
+                            // Create a temporary board for validity check
+                            val tempBoardForCheck = currentBoard.toMutableMap()
+                            val tempNode = SudokuNode(x, y, num, node.readOnly)
+                            tempBoardForCheck[getHash(x, y)] = tempNode
+
+                            if (isValidMove(tempBoardForCheck, x, y, num, boundary)) {
+                                suggestedX = x
+                                suggestedY = y
+                                suggestedValue = num
+                                Log.d("SudokuDebug", "    Found valid suggestion $num for ($x, $y).")
+                                break@outerLoop // Found a suggestion, exit all loops
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (suggestedX != null && suggestedY != null && suggestedValue != null) {
+            Log.d("SudokuDebug", "Suggested move: Value $suggestedValue at ($suggestedX, $suggestedY)")
+
+            // Create a new SudokuPuzzle with the updated tile
+            val updatedNodesMap = LinkedHashMap<Int, LinkedList<SudokuNode>>()
+            currentPuzzle.currentGraph.forEach { (row, nodes) ->
+                updatedNodesMap[row] = LinkedList(nodes.map { node ->
+                    if (node.x == suggestedX && node.y == suggestedY) {
+                        node.copy(color = suggestedValue)
+                    } else {
+                        node.copy()
+                    }
+                })
+            }
+            _sudokuPuzzle.value = currentPuzzle.copy(currentGraph = updatedNodesMap)
+
+            // Update _selectedTile to reflect the newly focused tile
+            _selectedTile.value = SudokuTile(suggestedX, suggestedY, suggestedValue, true, false) // The suggested tile is never readOnly
+
+            // Check if the puzzle is complete after the suggestion
+            _sudokuPuzzle.value?.let { updatedPuzzle ->
+                if (updatedPuzzle.isComplete()) {
+                    _isSolved.value = true
+                    stopTimer()
+                    saveCurrentGameSession(isSolved = true)
+                    Log.d("ActiveGameViewModel", "Puzzle solved after suggestion! Transitioning to COMPLETE state.")
+                    _activeGameScreenState.value = ActiveGameScreenState.COMPLETE
+                } else {
+                    saveCurrentGameSession()
+                    Log.d("ActiveGameViewModel", "Puzzle updated with suggestion, not yet solved. Saving progress.")
+                }
+            }
+
+        } else {
+            Log.d("SudokuDebug", "No valid move found to suggest.")
+            // You might want to show a Toast or a message to the user here.
+            // This would typically be handled via a One-Shot event in a Compose app.
+        }
+    }
+
+
+    private fun isValidMove(
+        board: MutableMap<Int, SudokuNode>, // Changed to MutableMap<Int, SudokuNode> to match usage
+        row: Int,
+        col: Int,
+        num: Int,
+        boundary: Int
+    ): Boolean {
+        // 1. Check the row
+        for (c in 0 until boundary) {
+            val node = board[getHash(row, c)] // Use SudokuNode here
+            // Do not check the cell itself
+            if (c != col && node != null && node.color == num) { // Use .color for SudokuNode
+                return false
+            }
+        }
+
+        // 2. Check the column
+        for (r in 0 until boundary) {
+            val node = board[getHash(r, col)] // Use SudokuNode here
+            // Do not check the cell itself
+            if (r != row && node != null && node.color == num) { // Use .color for SudokuNode
+                return false
+            }
+        }
+
+        // 3. Check the 3x3 block
+        val subgridSize = Math.sqrt(boundary.toDouble()).toInt()
+        val startRow = (row / subgridSize) * subgridSize
+        val startCol = (col / subgridSize) * subgridSize
+
+        for (r in startRow until startRow + subgridSize) {
+            for (c in startCol until startCol + subgridSize) {
+                val node = board[getHash(r, c)] // Use SudokuNode here
+                // Do not check the cell itself
+                if ((r != row || c != col) && node != null && node.color == num) { // Use .color for SudokuNode
+                    return false
+                }
+            }
+        }
+        return true
+    }
+
 }
 
 class ActiveGameViewModelFactory(

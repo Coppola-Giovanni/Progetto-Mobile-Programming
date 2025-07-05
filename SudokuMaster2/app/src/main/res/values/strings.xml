@@ -1,35 +1,36 @@
 <resources>
     <string name="app_name">SudokuMaster</string>
-    <string name="easy">easy</string>
-    <string name="medium">medium</string>
-    <string name="hard">hard</string>
-    <string name="loading" >loading</string>
-    <string name="difficulty" />
-    <string name="game_complete" />
-    <string name="logo_description" />
-    <string name="nuova_partita" translatable="false">Nuova Partita</string>
-    <string name="continua_partita" translatable="false">Continua Partita</string>
-    <string name="statistiche_di_gioco" translatable="false">Statistiche di Gioco</string>
+    <string name="easy">Easy</string>
+    <string name="medium">Medium</string>
+    <string name="hard">Hard</string>
+    <string name="loading" >Loading</string>
+    <string name="difficulty" >Difficulty</string>
+    <string name="game_complete" >Game Complete</string>
+    <string name="logo_description" >Logo Description</string>
+    <string name="nuova_partita">New Game</string>
+    <string name="continua_partita">Continue Game</string>
+    <string name="statistiche_di_gioco">Game Statistics</string>
     <string name="back" translatable="false" />
     <string name="active_game" translatable="false" />
-    <string name="puzzle_solved" translatable="false" />
+    <string name="puzzle_solved" >Puzzle Solved</string>
     <string name="active_game_title" translatable="false" />
     <string name="back_button_desc" translatable="false" />
     <string name="loading_puzzle" translatable="false" />
-    <string name="error_loading_puzzle" translatable="false" />
-    <string name="error_generic_message" translatable="false" />
-    <string name="try_new_game" translatable="false" />
-    <string name="back_to_home" translatable="false" />
-    <string name="clear_button" translatable="false" />
+    <string name="error_loading_puzzle" >Error Loading Puzzle</string>
+    <string name="error_generic_message" >Generic Error</string>
+    <string name="try_new_game" >Try New Game</string>
+    <string name="back_to_home" >Back To Home</string>
+    <string name="clear_button">X</string>
     <string name="generic_error">generic error</string>
     <string name="difficulty_easy">easy</string>
     <string name="Difficulty">difficulty</string>
-    <string name="clear">C</string>
-    <string name="time">time</string>
+    <string name="clear">X</string>
+    <string name="time">Time: %1$s</string>
     <string name="new_record">New Record!</string>
-    <string name="start_new_game">start a new game</string>
-    <string name="loading_sudoku">loading sudoku</string>
-    <string name="save_exit">save and exit</string>
-    <string name="difficulty_hard">hard</string>
-    <string name="difficulty_medium">"medium "</string>
+    <string name="start_new_game">Start A New Game</string>
+    <string name="loading_sudoku">Loading Sudoku...</string>
+    <string name="save_exit">Save and Exit</string>
+    <string name="difficulty_hard">Hard</string>
+    <string name="difficulty_medium">"Medium "</string>
+    <string name="suggest_move" >Suggest Move</string>
 </resources>
