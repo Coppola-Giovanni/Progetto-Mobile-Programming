@@ -29,4 +29,5 @@
     <string name="error_generic_message">Errore Generico</string>
     <string name="try_new_game">Gioca Di Nuovo</string>
     <string name="error_loading_puzzle">Errore Di Caricamento Del Puzzle</string>
+    <string name="si_verificato_un_errore_durante_il_caricamento_del_gioco">Si è verificato un errore durante il caricamento del gioco.</string>
 </resources>

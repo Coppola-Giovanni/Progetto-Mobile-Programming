@@ -32,6 +32,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.res.stringResource
+import com.SudokuMaster.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,7 +75,7 @@ fun ActiveGameScreen(
             TopAppBar(
                 title = {
                     // Potresti mettere un titolo qui, ad esempio "Sudoku"
-                    Text("Sudoku Master", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                    Text(stringResource(R.string.loading_sudoku), color = MaterialTheme.colorScheme.onPrimaryContainer)
                 },
                 navigationIcon = {
                     IconButton(onClick = {
@@ -82,7 +84,7 @@ fun ActiveGameScreen(
                     }) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Torna indietro",
+                            contentDescription = stringResource(R.string.back_to_home),
                             tint = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
@@ -106,11 +108,11 @@ fun ActiveGameScreen(
             when (activeGameScreenState) {
                 ActiveGameScreenState.LOADING -> {
                     CircularProgressIndicator(modifier = Modifier.size(64.dp))
-                    Text(text = "Caricamento Sudoku...", style = MaterialTheme.typography.titleMedium)
+                    Text(text = stringResource(R.string.loading_sudoku), style = MaterialTheme.typography.titleMedium)
                 }
                 ActiveGameScreenState.ACTIVE -> {
                     Text(
-                        text = "Tempo: ${formatTime(timerState)}",
+                        text = stringResource(R.string.time,formatTime(timerState)),
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(16.dp)
                     )
@@ -120,6 +122,14 @@ fun ActiveGameScreen(
                         selectedTile = selectedTile,
                         onTileClick = { x, y -> viewModel.onEvent(ActiveGameEvent.onTileFocused(x, y)) }
                     )
+
+                    Spacer(Modifier.height(16.dp))
+                    Button(
+                        onClick = { viewModel.onEvent(ActiveGameEvent.OnSuggestMoveClicked) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(stringResource(R.string.suggest_move))
+                    }
 
                     Spacer(Modifier.height(16.dp))
 
@@ -138,13 +148,13 @@ fun ActiveGameScreen(
                 ActiveGameScreenState.ERROR -> {
                     // Puoi aggiungere una UI di errore più sofisticata qui
                     Text(
-                        text = "Si è verificato un errore durante il caricamento del gioco.",
+                        text = stringResource(R.string.si_verificato_un_errore_durante_il_caricamento_del_gioco),
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(16.dp)
                     )
                     Button(onClick = { navController.popBackStack() }) { // Torna alla home
-                        Text("Torna alla Home")
+                        Text(stringResource(R.string.back_to_home))
                     }
                 }
             }
@@ -307,16 +317,16 @@ fun GameCompletionScreen(
         verticalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxSize()
     ) {
-        Text(text = "Puzzle Solved!", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
+        Text(text = stringResource(R.string.puzzle_solved), style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(16.dp))
         Text(text = "Difficulty: ${difficulty.name}", style = MaterialTheme.typography.titleLarge)
-        Text(text = "Time: ${formatTime(timerState)}", style = MaterialTheme.typography.titleLarge)
+        Text(text = stringResource(R.string.time,formatTime(timerState)), style = MaterialTheme.typography.titleLarge)
         if (isNewRecord) {
-            Text(text = "NEW RECORD!", style = MaterialTheme.typography.headlineSmall, color = Color.Green)
+            Text(text = stringResource(R.string.new_record), style = MaterialTheme.typography.headlineSmall, color = Color.Green)
         }
         Spacer(Modifier.height(32.dp))
         Button(onClick = onNewGameClick) {
-            Text("Start New Game")
+            Text(stringResource(R.string.start_new_game))
         }
     }
 }
