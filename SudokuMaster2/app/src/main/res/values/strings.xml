@@ -10,20 +10,19 @@
     <string name="nuova_partita">New Game</string>
     <string name="continua_partita">Continue Game</string>
     <string name="statistiche_di_gioco">Game Statistics</string>
-    <string name="back" translatable="false" />
     <string name="active_game" translatable="false" />
     <string name="puzzle_solved" >Puzzle Solved</string>
     <string name="active_game_title" translatable="false" />
     <string name="back_button_desc" translatable="false" />
     <string name="loading_puzzle" translatable="false" />
-    <string name="error_loading_puzzle" >Error Loading Puzzle</string>
+    <string name="error_loading_puzzle">Error Loading Puzzle</string>
     <string name="error_generic_message" >Generic Error</string>
     <string name="try_new_game" >Try New Game</string>
     <string name="back_to_home" >Back To Home</string>
     <string name="clear_button">X</string>
     <string name="generic_error">generic error</string>
     <string name="difficulty_easy">easy</string>
-    <string name="Difficulty">difficulty</string>
+    <string name="Difficulty">Difficulty</string>
     <string name="clear">X</string>
     <string name="time">Time: %1$s</string>
     <string name="new_record">New Record!</string>
@@ -34,4 +33,11 @@
     <string name="difficulty_medium">"Medium "</string>
     <string name="suggest_move" >Suggest Move</string>
     <string name="si_verificato_un_errore_durante_il_caricamento_del_gioco">An error occurred while loading the game.</string>
+    <string name="caricamento_statistiche">Loading Statistics...</string>
+    <string name="errore_sconosciuto">Unknown Error</string>
+    <string name="nessuna_statistica_disponibile_gioca_la_tua_prima_partita">No statistics available. Play your first game!</string>
+    <string name="partite_giocate_totali">Total Matches Played:</string>
+    <string name="partite_risolte_totali">Total Resolved Matches:</string>
+    <string name="tempo_medio_risoluzione">Average Resolution Time:</string>
+    <string name="migliori_tempi_per_difficolt">Best Times for Difficulty:</string>
 </resources>
