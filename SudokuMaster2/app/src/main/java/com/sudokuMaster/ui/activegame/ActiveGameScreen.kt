@@ -4,8 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -23,7 +21,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.sudokuMaster.data.DifficultyLevel
-import com.sudokuMaster.domain.getHash
 import java.util.concurrent.TimeUnit
 import androidx.navigation.NavController
 import androidx.compose.material3.Scaffold
@@ -77,14 +74,14 @@ fun ActiveGameScreen(
             TopAppBar(
                 title = {
                 },
-                navigationIcon = { // Qui inseriamo l'IconButton per tornare indietro
+                navigationIcon = {
                     IconButton(onClick = {
-                        navController.popBackStack() // Logica per tornare indietro
+                        navController.popBackStack()
                     }) {
                         Icon(
-                            imageVector = Icons.Filled.ArrowBack, // L'icona della freccia indietro
+                            imageVector = Icons.Filled.ArrowBack,
                             contentDescription = "Torna indietro",
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer // Colore dell'icona
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
                 },
@@ -95,12 +92,12 @@ fun ActiveGameScreen(
                 )
             )
         }
-    ) { paddingValues -> // IMPORTANTISSIMO: Dobbiamo usare paddingValues
+    ) { paddingValues ->
 
         Column(
             modifier = modifier
                 .fillMaxSize()
-                .padding(paddingValues), // APPLICA QUI IL PADDING FORNITO DA SCAFFOLD
+                .padding(paddingValues),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -110,14 +107,12 @@ fun ActiveGameScreen(
                     Text(text = "Caricamento Sudoku...", style = MaterialTheme.typography.titleMedium)
                 }
                 ActiveGameScreenState.ACTIVE -> {
-                    // Contenuto per lo stato ACTIVE
                     Text(
                         text = "Tempo: ${formatTime(timerState)}",
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(16.dp)
                     )
 
-                    // Griglia del Sudoku
                     SudokuGrid(
                         tiles = sudokuTiles,
                         selectedTile = selectedTile,
@@ -126,13 +121,11 @@ fun ActiveGameScreen(
 
                     Spacer(Modifier.height(16.dp))
 
-                    // Input dei numeri
                     NumberInput(onNumberClick = { number ->
                         viewModel.onEvent(ActiveGameEvent.onInput(number))
                     })
                 }
                 ActiveGameScreenState.COMPLETE -> {
-                    // Contenuto per lo stato COMPLETE
                     GameCompletionScreen(
                         timerState = timerState,
                         difficulty = currentDifficulty,
@@ -142,7 +135,7 @@ fun ActiveGameScreen(
                 }
             }
         }
-    } // FINE SCAFFOLD
+    }
 }
 
 @Composable

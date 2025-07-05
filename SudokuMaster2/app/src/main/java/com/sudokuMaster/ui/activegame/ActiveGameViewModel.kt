@@ -110,7 +110,7 @@ class ActiveGameViewModel(
     private suspend fun startNewGame() {
         _showLoading.value = true
         _uiState.value = ActiveGameScreenState.LOADING
-        _error.value = null // Resetta eventuali errori precedenti
+        _error.value = null
 
         val userPreferences = userPreferencesRepository.getUserPreferencesFlow().first()
         val defaultDifficulty = userPreferences.defaultDifficulty
@@ -130,8 +130,7 @@ class ActiveGameViewModel(
             onError = { e ->
                 _error.value = "Errore durante la creazione del gioco: ${e.localizedMessage}"
                 _showLoading.value = false
-                _uiState.value = ActiveGameScreenState.ACTIVE // Torna a stato attivo ma con errore
-                // Potresti anche voler chiamare un callback per navigare indietro, come onGameLoadError
+                _uiState.value = ActiveGameScreenState.ACTIVE
             }
         )
     }
@@ -139,7 +138,7 @@ class ActiveGameViewModel(
     private suspend fun loadGame() {
         _showLoading.value = true
         _uiState.value = ActiveGameScreenState.LOADING
-        _error.value = null // Resetta eventuali errori precedenti
+        _error.value = null
 
         gameRepository.getLatestUnfinishedGameSession(
             onSuccess = { gameSession ->
@@ -157,7 +156,7 @@ class ActiveGameViewModel(
                 }
             },
             onError = { e ->
-                _error.value = "Nessuna partita da continuare o errore di caricamento: ${e.localizedMessage}. Avvio una nuova partita."
+                _error.value = "Nessuna partita da continuare o errore di caricamento: ${e.localizedMessage}."
             }
         )
     }
@@ -183,13 +182,13 @@ class ActiveGameViewModel(
     private fun onInput(input: Int) {
         _selectedTile.value?.let { tile ->
             if (!tile.readOnly) {
-                // Aggiorna il valore nella griglia dell'UI
+
                 val updatedGrid = _sudokuGrid.value.toMutableList()
                 val index = updatedGrid.indexOfFirst { it.x == tile.x && it.y == tile.y }
                 if (index != -1) {
                     updatedGrid[index] = tile.copy(value = input)
                     _sudokuGrid.value = updatedGrid
-                    _selectedTile.value = updatedGrid[index] // Aggiorna anche il selectedTile
+                    _selectedTile.value = updatedGrid[index]
                     saveGameProgress(updatedGrid[index])
                 }
             }
