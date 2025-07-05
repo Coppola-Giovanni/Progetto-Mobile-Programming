@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name">SudokuMaster</string>
-    <string name="easy">facile</string>
-    <string name="hard">difficile</string>
-    <string name="loading">caricamento</string>
-    <string name="medium">media</string>
-</resources>

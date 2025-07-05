@@ -3852,6 +3852,7 @@ string character_counter_pattern
 string clear_text_end_icon_content_description
 string close_drawer
 string close_sheet
+string continua_partita
 string default_error_message
 string default_popup_window_title
 string difficulty
@@ -4031,6 +4032,7 @@ string mtrl_timepicker_cancel
 string mtrl_timepicker_confirm
 string navigation_menu
 string not_selected
+string nuova_partita
 string password_toggle_content_description
 string path_password_eye
 string path_password_eye_mask_strike_through
@@ -4048,6 +4050,7 @@ string side_sheet_behavior
 string state_empty
 string state_off
 string state_on
+string statistiche_di_gioco
 string status_bar_notification_info_overflow
 string switch_role
 string tab

@@ -7,4 +7,7 @@
     <string name="difficulty" />
     <string name="game_complete" />
     <string name="logo_description" />
+    <string name="nuova_partita">Nuova Partita</string>
+    <string name="continua_partita">Continua Partita</string>
+    <string name="statistiche_di_gioco">Statistiche di Gioco</string>
 </resources>

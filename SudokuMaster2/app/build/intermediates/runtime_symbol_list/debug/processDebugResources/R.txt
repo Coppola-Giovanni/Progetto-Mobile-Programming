@@ -3851,6 +3851,7 @@ int string character_counter_pattern 0x7f0f002d
 int string clear_text_end_icon_content_description 0x7f0f002e
 int string close_drawer 0x7f0f002f
 int string close_sheet 0x7f0f0030
+int string continua_partita 0x7f0f00fb
 int string default_error_message 0x7f0f0031
 int string default_popup_window_title 0x7f0f0032
 int string difficulty 0x7f0f0033
@@ -4030,6 +4031,7 @@ int string mtrl_timepicker_cancel 0x7f0f00e0
 int string mtrl_timepicker_confirm 0x7f0f00e1
 int string navigation_menu 0x7f0f00e2
 int string not_selected 0x7f0f00e3
+int string nuova_partita 0x7f0f00fc
 int string password_toggle_content_description 0x7f0f00e4
 int string path_password_eye 0x7f0f00e5
 int string path_password_eye_mask_strike_through 0x7f0f00e6
@@ -4047,6 +4049,7 @@ int string side_sheet_behavior 0x7f0f00f1
 int string state_empty 0x7f0f00f2
 int string state_off 0x7f0f00f3
 int string state_on 0x7f0f00f4
+int string statistiche_di_gioco 0x7f0f00fd
 int string status_bar_notification_info_overflow 0x7f0f00f5
 int string switch_role 0x7f0f00f6
 int string tab 0x7f0f00f7

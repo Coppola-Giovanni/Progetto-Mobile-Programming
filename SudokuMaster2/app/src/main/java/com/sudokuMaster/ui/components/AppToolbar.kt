@@ -1,40 +1,39 @@
 package com.sudokuMaster.ui.components
 
 
-import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.foundation.isSystemInDarkTheme
-import com.sudokuMaster.ui.theme.textColorDark
-import com.sudokuMaster.ui.theme.textColorLight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppToolbar(
-    modifier: Modifier = Modifier,
     title: String,
-    icon: @Composable () -> Unit
+    modifier: Modifier = Modifier,
+    navigationIcon: @Composable (() -> Unit)? = null,
+    actions: @Composable (() -> Unit)? = null
 ) {
-    val isDarkTheme = isSystemInDarkTheme()
     TopAppBar(
+        title = { Text(title) },
         modifier = modifier,
-        title = {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge,
-                color = if (isDarkTheme) textColorDark else textColorLight,
-                textAlign = TextAlign.Start,
-                maxLines = 1,
-            )
-        },
-        navigationIcon = { icon() },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = if (isDarkTheme) textColorDark else textColorLight,
-            navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
-        )
-
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        ),
+        navigationIcon = {
+            navigationIcon?.invoke()
+        },
+        actions = {
+            actions?.invoke()
+        }
     )
 }

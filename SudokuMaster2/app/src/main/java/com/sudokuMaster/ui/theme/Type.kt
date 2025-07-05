@@ -37,7 +37,8 @@ val inputButton = TextStyle(
     fontFamily = FontFamily.Default,
     fontWeight = FontWeight.Black,
     fontSize = 28.sp,
-    textAlign = TextAlign.Center
+    textAlign = TextAlign.Center,
+    color = accentAmber
 )
 
 val mainTitle = TextStyle(

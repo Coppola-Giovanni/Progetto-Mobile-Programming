@@ -3,6 +3,7 @@ package com.sudokuMaster.ui.activegame
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.sudokuMaster.common.toDifficultyLevel
 import com.sudokuMaster.common.toGameSession
 import com.sudokuMaster.common.toSudokuPuzzle
 import com.sudokuMaster.data.DifficultyLevel
@@ -40,258 +41,281 @@ enum class ActiveGameScreenState {
 // ViewModel per la schermata di gioco attiva
 class ActiveGameViewModel(
     private val gameRepository: GameRepositoryInterface,
-    private val userPreferencesRepository: UserPreferencesRepositoryInterface
+    private val userPreferencesRepository: UserPreferencesRepositoryInterface,
+    private val initialGameType: String // AGGIUNTA: Parametro per il tipo di gioco
 ) : ViewModel() {
 
-    // --- STATO DELLA UI ---
-    // Utilizziamo StateFlow per esporre lo stato osservabile alla UI
-    private val _screenState = MutableStateFlow(ActiveGameScreenState.LOADING)
-    val screenState: StateFlow<ActiveGameScreenState> = _screenState.asStateFlow()
+    // --- StateFlow per l'UI ---
+    private val _uiState = MutableStateFlow(ActiveGameScreenState.LOADING)
+    val uiState: StateFlow<ActiveGameScreenState> = _uiState.asStateFlow()
 
-    private val _boardState = MutableStateFlow<HashMap<Int, SudokuTile>>(HashMap())
-    val boardState: StateFlow<HashMap<Int, SudokuTile>> = _boardState.asStateFlow()
+    private val _sudokuGrid = MutableStateFlow<List<SudokuTile>>(emptyList())
+    val sudokuGrid: StateFlow<List<SudokuTile>> = _sudokuGrid.asStateFlow()
+
+    private val _selectedTile = MutableStateFlow<SudokuTile?>(null)
+    val selectedTile: StateFlow<SudokuTile?> = _selectedTile.asStateFlow()
 
     private val _timerState = MutableStateFlow(0L)
     val timerState: StateFlow<Long> = _timerState.asStateFlow()
 
-    private val _difficulty = MutableStateFlow(DifficultyLevel.MEDIUM) // Default, sarà caricato dalle prefs
+    private val _difficulty = MutableStateFlow(DifficultyLevel.EASY)
     val difficulty: StateFlow<DifficultyLevel> = _difficulty.asStateFlow()
+
+    private val _showLoading = MutableStateFlow(true)
+    val showLoading: StateFlow<Boolean> = _showLoading.asStateFlow()
+
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error.asStateFlow()
 
     private val _isNewRecord = MutableStateFlow(false)
     val isNewRecord: StateFlow<Boolean> = _isNewRecord.asStateFlow()
 
-    // Variabili interne
+    // --- Variabili interne per la gestione del gioco ---
     private var timerJob: Job? = null
-    private var currentPuzzleId: Long = -1L // ID del puzzle corrente
+    private var currentPuzzleId: Long = 0L // ID della sessione di gioco corrente
+    private lateinit var currentSudokuPuzzle: SudokuPuzzle // Il puzzle di dominio
 
     init {
-        // Avvia la logica di caricamento all'inizializzazione del ViewModel
-        loadGame()
+        // Inizializza il gioco in base al tipo specificato dalla navigazione
+        viewModelScope.launch {
+            _showLoading.value = true
+            when (initialGameType) {
+                "new" -> startNewGame()
+                "continue" -> loadGame()
+                else -> {
+                    _error.value = "Tipo di gioco non valido."
+                    _showLoading.value = false
+                    // Potresti voler navigare indietro o mostrare un errore più persistente
+                }
+            }
+        }
     }
 
-    // --- EVENTI DALLA UI ---
+    // --- Gestione degli eventi dell'UI ---
     fun onEvent(event: ActiveGameEvent) {
         when (event) {
             is ActiveGameEvent.onInput -> onInput(event.input)
             is ActiveGameEvent.onTileFocused -> onTileFocused(event.x, event.y)
-            ActiveGameEvent.OnNewGameClicked -> onNewGameClicked()
-            ActiveGameEvent.OnStop -> onStop()
-            ActiveGameEvent.OnStart -> { /* Già gestito in init o tramite loadGame */ }
+            ActiveGameEvent.OnNewGameClicked -> viewModelScope.launch { startNewGame() }
+            ActiveGameEvent.OnStart -> startTimer() // Chiamato quando la schermata è attiva
+            ActiveGameEvent.OnStop -> stopTimer()   // Chiamato quando la schermata esce
         }
     }
 
-    private fun onTileFocused(x: Int, y: Int) = viewModelScope.launch {
-        val currentBoard = _boardState.value.toMutableMap()
-        currentBoard.values.forEach { tile ->
-            // Imposta a true solo la cella focalizzata, tutte le altre a false
-            tile.hasFocus = (tile.x == x && tile.y == y)
-        }
-        _boardState.value = HashMap(currentBoard) // Aggiorna lo StateFlow con la nuova HashMap
-    }
+    private suspend fun startNewGame() {
+        _showLoading.value = true
+        _uiState.value = ActiveGameScreenState.LOADING
+        _error.value = null // Resetta eventuali errori precedenti
 
+        val userPreferences = userPreferencesRepository.getUserPreferencesFlow().first()
+        val defaultDifficulty = userPreferences.defaultDifficulty
 
-    private fun onInput(input: Int) = viewModelScope.launch {
-        val focusedTile = _boardState.value.values.find { it.hasFocus }
-
-        focusedTile?.let { tile ->
-            // Non permettere di modificare celle readOnly
-            if (tile.readOnly) return@launch
-
-            val newBoardState = _boardState.value.toMutableMap()
-            val updatedTile = tile.copy(value = input, hasFocus = false) // Copia per immutabilità
-            newBoardState[getHash(tile.x, tile.y)] = updatedTile
-
-            _boardState.value = HashMap(newBoardState) // Aggiorna lo StateFlow
-
-            // Ora aggiorniamo il puzzle nel repository
-            val elapsedTime = _timerState.value
-            val puzzle = mapBoardStateToSudokuPuzzle(HashMap(newBoardState), _difficulty.value, elapsedTime)
-
-            gameRepository.updateGameNodeAndSave(
-                puzzle, // Passa l'intero puzzle aggiornato
-                onSuccess = { updatedGameSession ->
-                    // L'updateGameNodeAndSave ora restituisce la GameSession aggiornata
-                    // Possiamo estrarre isSolved da lì.
-                    if (updatedGameSession.isSolved) {
-                        timerJob?.cancel()
-                        val solveTimeMillis = updatedGameSession.durationSeconds?.let { it * 1000L }
-                            ?: (updatedGameSession.endTimeMillis?.minus(updatedGameSession.startTimeMillis)
-                                ?: 0L) // Fallback se duration_seconds è nullo
-                        checkIfNewRecord(solveTimeMillis)
-                    }
-                },
-                onError = {
-                    // Mostra errore (da gestire tramite ActiveGameContainer)
-                    // Per ora, non abbiamo un accesso diretto al container qui.
-                    // Questo sarà gestito dalla UI che osserva lo stato.
-                }
-            )
-        }
-    }
-
-    private fun onNewGameClicked() = viewModelScope.launch {
-        // Salva lo stato corrente se non è completo, poi naviga
-        if (_screenState.value != ActiveGameScreenState.COMPLETE) {
-            val currentBoard = _boardState.value
-            val currentDifficulty = _difficulty.value
-            val currentElapsedTime = _timerState.value
-
-            val puzzleToSave = mapBoardStateToSudokuPuzzle(currentBoard, currentDifficulty, currentElapsedTime)
-
-            gameRepository.updateGameSession(
-                gameSession = puzzleToSave.toGameSession(currentPuzzleId), // Converti in GameSession
-                onSuccess = { navigateToNewGame() },
-                onError = { navigateToNewGame() /* Errore nel salvataggio, naviga comunque */ }
-            )
-        } else {
-            navigateToNewGame()
-        }
-    }
-
-    private fun navigateToNewGame() {
-        // Questa logica di navigazione non può essere gestita direttamente dal ViewModel.
-        // Il ViewModel aggiorna uno stato e l'Activity/Composable osserva quello stato
-        // e innesca la navigazione.
-        // Per ora, non facciamo nulla qui, l'ActiveGameActivity gestirà la navigazione.
-        // _screenState.value = ActiveGameScreenState.LOADING // Potrebbe essere utile reset per la nuova partita
-        // Poi l'Activity reindirizzerà.
-        // Dobbiamo passare l'evento di "navigazione" alla UI
-    }
-
-    private fun onStop() {
-        if (_screenState.value != ActiveGameScreenState.COMPLETE) {
-            viewModelScope.launch {
-                val currentBoard = _boardState.value
-                val currentDifficulty = _difficulty.value
-                val currentElapsedTime = _timerState.value
-
-                val puzzleToSave = mapBoardStateToSudokuPuzzle(currentBoard, currentDifficulty, currentElapsedTime)
-
-                gameRepository.updateGameSession(
-                    gameSession = puzzleToSave.toGameSession(currentPuzzleId), // Converti in GameSession
-                    onSuccess = { timerJob?.cancel() }, // Annulla il timer
-                    onError = {
-                        // Mostra errore (da gestire dalla UI)
-                        timerJob?.cancel()
-                    }
-                )
-            }
-        } else {
-            timerJob?.cancel() // Se il gioco è completo, annulla solo il timer
-        }
-    }
-
-    private fun loadGame() = viewModelScope.launch {
-        _screenState.value = ActiveGameScreenState.LOADING
-        gameRepository.getLatestUnfinishedGameSession(
+        gameRepository.createNewGameAndSave(
+            difficulty = defaultDifficulty,
             onSuccess = { gameSession ->
-                // Aggiorna currentPuzzleId
                 currentPuzzleId = gameSession.id
-
-                val puzzle = gameSession.toSudokuPuzzle()
-                _difficulty.value = puzzle.difficulty
-                _timerState.value = puzzle.elapsedTime
-                _boardState.value = mapSudokuPuzzleToBoardState(puzzle)
-
-                // Se il puzzle è già risolto, mostra lo stato completo
-                if (gameSession.isSolved) {
-                    _screenState.value = ActiveGameScreenState.COMPLETE
-                    _isNewRecord.value = false // Non è un nuovo record se era già completo
-                } else {
-                    _screenState.value = ActiveGameScreenState.ACTIVE
-                    startTimer()
-                }
+                currentSudokuPuzzle = gameSession.toSudokuPuzzle() // Converte la GameSession in SudokuPuzzle
+                _difficulty.value = currentSudokuPuzzle.difficulty
+                initializeGrid(currentSudokuPuzzle)
+                _timerState.value = currentSudokuPuzzle.elapsedTime
+                _showLoading.value = false
+                _uiState.value = ActiveGameScreenState.ACTIVE
+                startTimer()
             },
-            onError = {
-                // Nessun gioco non finito, avvia una nuova partita con difficoltà predefinita
-                viewModelScope.launch {
-                    val settings = userPreferencesRepository.getUserPreferences().first()
-                    val defaultDifficulty = settings.defaultDifficulty
-
-                    gameRepository.createNewGameAndSave(
-                        difficulty = defaultDifficulty,
-                        onSuccess = { newGameSession ->
-                            currentPuzzleId = newGameSession.id
-                            val newPuzzle = newGameSession.toSudokuPuzzle()
-                            _difficulty.value = newPuzzle.difficulty
-                            _timerState.value = newPuzzle.elapsedTime
-                            _boardState.value = mapSudokuPuzzleToBoardState(newPuzzle)
-                            _screenState.value = ActiveGameScreenState.ACTIVE
-                            startTimer()
-                        },
-                        onError = {
-                            // Errore nella creazione di un nuovo gioco, mostra errore
-                            _screenState.value = ActiveGameScreenState.COMPLETE // Forse un fallback più adatto
-                            // E notificare ActiveGameActivity per mostrare un errore generico
-                        }
-                    )
-                }
+            onError = { e ->
+                _error.value = "Errore durante la creazione del gioco: ${e.localizedMessage}"
+                _showLoading.value = false
+                _uiState.value = ActiveGameScreenState.ACTIVE // Torna a stato attivo ma con errore
+                // Potresti anche voler chiamare un callback per navigare indietro, come onGameLoadError
             }
         )
     }
 
-    private fun startTimer() {
-        timerJob?.cancel() // Annulla qualsiasi timer precedente
-        timerJob = viewModelScope.launch {
-            while (_screenState.value == ActiveGameScreenState.ACTIVE) {
-                delay(1000) // Aspetta 1 secondo
-                _timerState.value = _timerState.value + 1
+    private suspend fun loadGame() {
+        _showLoading.value = true
+        _uiState.value = ActiveGameScreenState.LOADING
+        _error.value = null // Resetta eventuali errori precedenti
+
+        gameRepository.getLatestUnfinishedGameSession(
+            onSuccess = { gameSession ->
+                if (gameSession.isSolved) {
+                    //
+                } else {
+                    currentPuzzleId = gameSession.id
+                    currentSudokuPuzzle = gameSession.toSudokuPuzzle()
+                    _difficulty.value = currentSudokuPuzzle.difficulty
+                    initializeGrid(currentSudokuPuzzle)
+                    _timerState.value = currentSudokuPuzzle.elapsedTime
+                    _showLoading.value = false
+                    _uiState.value = ActiveGameScreenState.ACTIVE
+                    startTimer()
+                }
+            },
+            onError = { e ->
+                _error.value = "Nessuna partita da continuare o errore di caricamento: ${e.localizedMessage}. Avvio una nuova partita."
             }
-        }
+        )
     }
 
-    private fun checkIfNewRecord(finalTimeMillis: Long) = viewModelScope.launch {
-        val userStats = gameRepository.getUserStatistics().first()
-        val currentDifficulty = _difficulty.value
-
-        val isRecord = when (currentDifficulty) {
-            DifficultyLevel.EASY -> finalTimeMillis < userStats.bestSolveTimeEasyMillis!!
-            DifficultyLevel.MEDIUM -> finalTimeMillis < userStats.bestSolveTimeMediumMillis!!
-            DifficultyLevel.HARD -> finalTimeMillis < userStats.bestSolveTimeHardMillis!!
-            else -> false
-        }
-
-        _isNewRecord.value = isRecord
-        _screenState.value = ActiveGameScreenState.COMPLETE
-    }
-
-    // --- FUNZIONI DI MAPPATURA (Utilità interne) ---
-    // Mappa da SudokuPuzzle a HashMap<Int, SudokuTile> per la UI
-    private fun mapSudokuPuzzleToBoardState(puzzle: SudokuPuzzle): HashMap<Int, SudokuTile> {
-        val board = HashMap<Int, SudokuTile>()
-        puzzle.currentGraph.forEach { (row, nodeList) ->
-            nodeList.forEach { node ->
-                board[getHash(node.x, node.y)] = SudokuTile(
-                    x = node.x,
-                    y = node.y,
-                    value = node.color,
-                    hasFocus = false,
-                    readOnly = node.readOnly
+    private fun initializeGrid(puzzle: SudokuPuzzle) {
+        val newGrid = mutableListOf<SudokuTile>()
+        puzzle.currentGraph.forEach { (_, nodes) ->
+            nodes.forEach { node ->
+                newGrid.add(
+                    SudokuTile(
+                        x = node.x,
+                        y = node.y,
+                        value = node.color,
+                        hasFocus = false,
+                        readOnly = node.readOnly
+                    )
                 )
             }
         }
-        return board
+        _sudokuGrid.value = newGrid.sortedWith(compareBy({ it.y }, { it.x }))
     }
 
-    // Mappa da HashMap<Int, SudokuTile> a SudokuPuzzle per il Repository
-    private fun mapBoardStateToSudokuPuzzle(
-        boardState: HashMap<Int, SudokuTile>,
+    private fun onInput(input: Int) {
+        _selectedTile.value?.let { tile ->
+            if (!tile.readOnly) {
+                // Aggiorna il valore nella griglia dell'UI
+                val updatedGrid = _sudokuGrid.value.toMutableList()
+                val index = updatedGrid.indexOfFirst { it.x == tile.x && it.y == tile.y }
+                if (index != -1) {
+                    updatedGrid[index] = tile.copy(value = input)
+                    _sudokuGrid.value = updatedGrid
+                    _selectedTile.value = updatedGrid[index] // Aggiorna anche il selectedTile
+                    saveGameProgress(updatedGrid[index])
+                }
+            }
+        }
+    }
+
+    private fun onTileFocused(x: Int, y: Int) {
+        val updatedGrid = _sudokuGrid.value.map {
+            it.copy(hasFocus = (it.x == x && it.y == y))
+        }
+        _sudokuGrid.value = updatedGrid
+        _selectedTile.value = updatedGrid.firstOrNull { it.x == x && it.y == y }
+    }
+
+    private fun startTimer() {
+        timerJob?.cancel() // Cancella il timer precedente se esiste
+        timerJob = viewModelScope.launch {
+            while (true) {
+                delay(1000) // Aggiorna ogni secondo
+                _timerState.value++
+                // Ogni 10 secondi, salva il tempo
+                if (_timerState.value % 10 == 0L) {
+                    saveGameProgress(null, onlySaveTime = true)
+                }
+            }
+        }
+    }
+
+    private fun stopTimer() {
+        timerJob?.cancel()
+        timerJob = null
+    }
+
+    private fun saveGameProgress(
+        updatedTile: SudokuTile? = null,
+        onlySaveTime: Boolean = false
+    ) = viewModelScope.launch {
+        // Se non c'è un puzzle corrente, non c'è nulla da salvare
+        if (!::currentSudokuPuzzle.isInitialized || currentPuzzleId == 0L) {
+            return@launch
+        }
+
+        // Recupera la griglia corrente aggiornata (solo se c'è un updatedTile)
+        val currentTiles = _sudokuGrid.value
+
+        // Ricrea il SudokuPuzzle di dominio con lo stato attuale
+        val updatedPuzzle = recreateSudokuPuzzle(
+            tiles = currentTiles,
+            difficulty = _difficulty.value,
+            elapsedTime = _timerState.value
+        )
+
+        gameRepository.updateGameNodeAndSave(
+            puzzle = updatedPuzzle,
+            onSuccess = { gameSession ->
+                currentSudokuPuzzle = gameSession.toSudokuPuzzle() // Aggiorna il puzzle di dominio con l'ultima GameSession
+                if (gameSession.isSolved) {
+                    stopTimer()
+                    _uiState.value = ActiveGameScreenState.COMPLETE
+                }
+            },
+            onError = { e ->
+                _error.value = "Errore durante il salvataggio o la verifica del gioco: ${e.localizedMessage}"
+                // Non cambiamo lo stato della UI in COMPLETE qui se c'è un errore
+            }
+        )
+    }
+
+    private suspend fun checkNewRecord(solveTimeSeconds: Long, difficulty: DifficultyLevel) {
+        val stats = gameRepository.getUserStatistics().first()
+        val currentBestTime = when (difficulty) {
+            DifficultyLevel.EASY -> stats.bestSolveTimeEasyMillis
+            DifficultyLevel.MEDIUM -> stats.bestSolveTimeMediumMillis
+            DifficultyLevel.HARD -> stats.bestSolveTimeHardMillis
+            DifficultyLevel.DIFFICULTY_UNSPECIFIED -> null
+            DifficultyLevel.UNRECOGNIZED -> TODO()
+        }
+
+        if (currentBestTime == null || (solveTimeSeconds * 1000 < currentBestTime)) {
+            _isNewRecord.value = true
+        }
+    }
+
+
+    override fun onCleared() {
+        super.onCleared()
+        stopTimer()
+        // Salva lo stato finale del gioco quando il ViewModel viene distrutto
+        // (es. l'utente esce dalla schermata)
+        viewModelScope.launch {
+            if (::currentSudokuPuzzle.isInitialized && currentPuzzleId != 0L) {
+                val updatedPuzzle = recreateSudokuPuzzle(
+                    tiles = _sudokuGrid.value,
+                    difficulty = _difficulty.value,
+                    elapsedTime = _timerState.value
+                )
+                gameRepository.updateGameSession(
+                    gameSession = updatedPuzzle.toGameSession(
+                        existingId = currentPuzzleId,
+                        isSolved = false, // Assumiamo non risolta alla chiusura forzata
+                        score = 0 // Il punteggio sarà calcolato solo alla risoluzione
+                    ),
+                    onSuccess = { /* Log success, no UI update needed */ },
+                    onError = { e ->
+                        // Log errore, non fare Toast qui perché il ViewModel sta per essere distrutto
+                        println("Errore nel salvataggio alla chiusura: ${e.localizedMessage}")
+                    }
+                )
+            }
+        }
+    }
+
+    // Helper per ricreare SudokuPuzzle dallo stato corrente delle tiles
+    private fun recreateSudokuPuzzle(
+        tiles: List<SudokuTile>,
         difficulty: DifficultyLevel,
         elapsedTime: Long
     ): SudokuPuzzle {
         val initialGraph = LinkedHashMap<Int, LinkedList<SudokuNode>>()
         val currentGraph = LinkedHashMap<Int, LinkedList<SudokuNode>>()
 
-        // Ricostruisci il grafo iniziale (potrebbe non essere necessario se non lo modifichi mai)
-        // Per semplicità, in questo esempio, assumiamo che initialGraph non cambi mai
-        // e che il repository lo gestisca. In un'app reale, o lo carichi o lo persisteti.
-        // Per ora, lo ricostruiamo basandoci sulle proprietà readOnly
-        boardState.values.forEach { tile ->
-            if (tile.readOnly) {
-                initialGraph.getOrPut(tile.y) { LinkedList() }.add(
-                    SudokuNode(tile.x, tile.y, tile.value, true)
-                )
-            }
+        // Riempie initialGraph e currentGraph basandosi sulle tiles fornite
+        // Devi avere l'initialGraph originale da qualche parte (es. nel currentSudokuPuzzle)
+        // Oppure, se stai solo aggiornando, assicurati di usare i valori originali per readOnly
+        val originalInitialGraph = currentSudokuPuzzle.initialGraph
+
+        tiles.forEach { tile ->
+            val initialValue = originalInitialGraph[tile.y]?.firstOrNull { it.x == tile.x }?.color ?: 0
+            initialGraph.getOrPut(tile.y) { LinkedList() }.add(
+                SudokuNode(tile.x, tile.y, initialValue, initialValue != 0)
+            )
             currentGraph.getOrPut(tile.y) { LinkedList() }.add(
                 SudokuNode(tile.x, tile.y, tile.value, tile.readOnly)
             )
@@ -317,12 +341,14 @@ class ActiveGameViewModel(
 // Factory per instanziare ActiveGameViewModel con dipendenze
 class ActiveGameViewModelFactory(
     private val gameRepository: GameRepositoryInterface,
-    private val userPreferencesRepository: UserPreferencesRepositoryInterface
+    private val userPreferencesRepository: UserPreferencesRepositoryInterface,
+    private val initialGameType: String // AGGIUNTA: Parametro per il tipo di gioco
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ActiveGameViewModel::class.java)) {
-            return ActiveGameViewModel(gameRepository, userPreferencesRepository) as T
+            // Passa initialGameType al ViewModel
+            return ActiveGameViewModel(gameRepository, userPreferencesRepository, initialGameType) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

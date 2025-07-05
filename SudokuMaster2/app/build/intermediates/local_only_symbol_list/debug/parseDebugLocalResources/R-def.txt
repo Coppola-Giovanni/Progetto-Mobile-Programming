@@ -12,6 +12,7 @@ drawable ic_launcher_foreground
 mipmap ic_launcher
 mipmap ic_launcher_round
 string app_name
+string continua_partita
 string difficulty
 string easy
 string game_complete
@@ -19,6 +20,8 @@ string hard
 string loading
 string logo_description
 string medium
+string nuova_partita
+string statistiche_di_gioco
 style Theme.SudokuMaster
 xml backup_rules
 xml data_extraction_rules
