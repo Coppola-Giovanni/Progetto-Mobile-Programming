@@ -72,7 +72,6 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val navController = rememberNavController()
-
                     SudokuAppNavigation(
                         navController = navController,
                         gameRepository = gameRepository,

@@ -32,6 +32,7 @@ internal val DifficultyLevel.toLocalizedResource: Int
             else -> R.string.hard
         }
     }
+
 fun DifficultyLevel.getModifier(): Double {
     return when (this) {
         DifficultyLevel.EASY -> 0.50

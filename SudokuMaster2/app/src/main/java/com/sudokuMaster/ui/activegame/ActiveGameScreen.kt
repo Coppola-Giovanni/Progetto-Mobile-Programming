@@ -32,12 +32,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActiveGameScreen(
     viewModelFactory: ActiveGameViewModelFactory,
-    navController: NavController,
+    navController: NavController, // NavController viene passato dalla MainActivity
     modifier: Modifier = Modifier,
 ) {
     val viewModel: ActiveGameViewModel = viewModel(
@@ -45,14 +44,13 @@ fun ActiveGameScreen(
     )
 
     val activeGameScreenState by viewModel.activeGameScreenState.collectAsState()
-    val sudokuTiles by viewModel.sudokuTiles.collectAsState()
+    val sudokuTiles by viewModel.sudokuTiles.collectAsState() // Ora risolto dal ViewModel
     val timerState by viewModel.timerState.collectAsState()
     val selectedTile by viewModel.selectedTile.collectAsState()
     val isSolved by viewModel.isSolved.collectAsState()
-    val currentDifficulty by viewModel.difficulty.collectAsState()
+    val currentDifficulty by viewModel.currentDifficulty.collectAsState() // Ora risolto dal ViewModel
     val isNewRecord by viewModel.isNewRecord.collectAsState()
 
-    // Listener per il ciclo di vita per avviare e fermare il timer
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val lifecycle = lifecycleOwner.lifecycle
@@ -73,9 +71,12 @@ fun ActiveGameScreen(
         topBar = {
             TopAppBar(
                 title = {
+                    // Potresti mettere un titolo qui, ad esempio "Sudoku"
+                    Text("Sudoku Master", color = MaterialTheme.colorScheme.onPrimaryContainer)
                 },
                 navigationIcon = {
                     IconButton(onClick = {
+                        // Quando si clicca la freccia indietro, si torna alla schermata precedente
                         navController.popBackStack()
                     }) {
                         Icon(
@@ -85,7 +86,7 @@ fun ActiveGameScreen(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors( // Colori della TopAppBar
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -133,10 +134,24 @@ fun ActiveGameScreen(
                         onNewGameClick = { viewModel.onEvent(ActiveGameEvent.OnNewGameClicked) }
                     )
                 }
+                ActiveGameScreenState.ERROR -> {
+                    // Puoi aggiungere una UI di errore più sofisticata qui
+                    Text(
+                        text = "Si è verificato un errore durante il caricamento del gioco.",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                    Button(onClick = { navController.popBackStack() }) { // Torna alla home
+                        Text("Torna alla Home")
+                    }
+                }
             }
         }
     }
 }
+
+// ... (SudokuGrid, SudokuCell, NumberInput, InputButton, GameCompletionScreen, formatTime come forniti) ...
 
 @Composable
 fun SudokuGrid(
@@ -145,7 +160,7 @@ fun SudokuGrid(
     onTileClick: (x: Int, y: Int) -> Unit
 ) {
     val gridSize = 9
-    val cellSize = 40.dp // Dimensione approssimativa di una cella
+    // val cellSize = 40.dp // Non strettamente necessario se usi weight e aspectRatio
 
     Column(
         modifier = Modifier
@@ -174,14 +189,7 @@ fun SudokuGrid(
                                 width = 1.dp, // Bordo sottile per le celle
                                 color = MaterialTheme.colorScheme.inversePrimary
                             )
-                            .run {
-                                then(
-                                    Modifier.border(
-                                        width = 1.dp,
-                                        color = MaterialTheme.colorScheme.inversePrimary
-                                    )
-                                )
-                            }
+                        // Rimosso il secondo .then(Modifier.border(...)) duplicato
                     )
                 }
             }
@@ -198,19 +206,19 @@ fun SudokuCell(
     modifier: Modifier = Modifier
 ) {
     val backgroundColor = when {
-        isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) // Colore per la cella selezionata
-        else -> MaterialTheme.colorScheme.surface // Colore di default per le celle
+        isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+        else -> MaterialTheme.colorScheme.surface
     }
 
     val textColor = when {
-        isInitial -> MaterialTheme.colorScheme.onSurface // Colore per i numeri iniziali
-        else -> MaterialTheme.colorScheme.secondary // Colore per i numeri inseriti dall'utente
+        isInitial -> MaterialTheme.colorScheme.onSurface
+        else -> MaterialTheme.colorScheme.secondary
     }
 
     Box(
         modifier = modifier
             .background(backgroundColor)
-            .clickable(onClick = onClick),
+            .clickable(enabled = !isInitial, onClick = onClick), // Aggiunto enabled = !isInitial
         contentAlignment = Alignment.Center
     ) {
         if (tile.value != 0) {
@@ -238,12 +246,10 @@ fun NumberInput(
             .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceAround
     ) {
-        // Numeri da 1 a 9
         for (i in 1..9) {
             InputButton(number = i, onClick = { onNumberClick(i) })
         }
-        // Tasto per cancellare (0 o un'icona)
-        InputButton(text = "X", onClick = { onNumberClick(0) })
+        InputButton(text = "X", onClick = { onNumberClick(0) }) // 0 per cancellare
     }
 }
 
@@ -289,7 +295,6 @@ fun GameCompletionScreen(
     }
 }
 
-// Funzione helper per formattare il tempo (da secondi a HH:MM:SS)
 fun formatTime(seconds: Long): String {
     val hours = TimeUnit.SECONDS.toHours(seconds)
     val minutes = TimeUnit.SECONDS.toMinutes(seconds) % 60
