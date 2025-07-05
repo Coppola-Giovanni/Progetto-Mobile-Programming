@@ -4,6 +4,7 @@
     <item quantity="one">%d nuova notifica</item>
     <item quantity="other">%d nuove notifiche</item>
   </plurals>
+    <string name="Difficulty">Difficoltà: %1$s</string>
     <string msgid="5976598919945601918" name="abc_action_bar_home_description">"Portami a casa"</string>
     <string msgid="8388173803310557296" name="abc_action_bar_up_description">"Torna indietro"</string>
     <string msgid="3937310113216875497" name="abc_action_menu_overflow_description">"Altre opzioni"</string>
@@ -46,21 +47,30 @@
     <string msgid="59049573811482460" name="call_notification_screening_text">"Applicazione filtro a chiamata in arrivo"</string>
     <string name="character_counter_content_description">%1$d caratteri inserirti su %2$d</string>
     <string name="character_counter_overflowed_content_description">Sono presenti %2$d caratteri in più rispetto al limite di %1$d</string>
+    <string name="clear">C</string>
     <string name="clear_text_end_icon_content_description">Cancella testo</string>
     <string msgid="406453423630273620" name="close_drawer">"Chiudi il menu di navigazione"</string>
     <string msgid="7573152094250666567" name="close_sheet">"Chiudi il foglio"</string>
     <string msgid="8038256446254964252" name="default_error_message">"Valore non valido"</string>
     <string msgid="6312721426453364202" name="default_popup_window_title">"Finestra popup"</string>
+    <string name="difficulty">Difficoltà</string>
+    <string name="difficulty_easy">Facile</string>
+    <string name="difficulty_hard">Difficile</string>
+    <string name="difficulty_medium">Media</string>
     <string msgid="1890207353314751437" name="dropdown_menu">"Menu a discesa"</string>
-    <string name="easy">facile</string>
+    <string name="easy">Facile</string>
     <string name="error_icon_content_description">Errore</string>
     <string name="exposed_dropdown_menu_content_description">Mostra il menu a discesa</string>
-    <string name="hard">difficile</string>
+    <string name="game_complete">Partita Completata</string>
+    <string name="generic_error">Errore Generico</string>
+    <string name="hard">Difficile</string>
     <string name="icon_content_description">Icona della finestra di dialogo</string>
     <string msgid="6827826412747255547" name="in_progress">"In corso"</string>
     <string msgid="7933458017204019916" name="indeterminate">"Elemento parzialmente selezionato"</string>
     <string name="item_view_role_description">Scheda</string>
-    <string name="loading">caricamento</string>
+    <string name="loading">Caricamento</string>
+    <string name="loading_sudoku">Caricamento Sudoku</string>
+    <string name="logo_description">Descrizione Del Logo</string>
     <string msgid="2988463736136100848" name="m3c_bottom_sheet_collapse_description">"Comprimi il riquadro inferiore"</string>
     <string msgid="1555567894577437024" name="m3c_bottom_sheet_dismiss_description">"Chiudi il riquadro inferiore"</string>
     <string msgid="8403354765404029791" name="m3c_bottom_sheet_drag_handle_description">"Punto di trascinamento"</string>
@@ -131,7 +141,7 @@
     <string name="material_timepicker_pm">pm</string>
     <string name="material_timepicker_select_time">Seleziona l\'ora</string>
     <string name="material_timepicker_text_input_mode_description">Passa alla modalità di immissione testo per inserire l\'ora.</string>
-    <string name="medium">media</string>
+    <string name="medium">Medio</string>
     <string name="mtrl_badge_numberless_content_description">Nuova notifica</string>
     <string name="mtrl_chip_close_icon_content_description">Rimuovi %1$s</string>
     <string name="mtrl_exceed_max_badge_number_content_description" ns2:ignore="PluralsCandidate">Più di %1$d nuove notifiche</string>
@@ -175,12 +185,15 @@
     <string name="mtrl_timepicker_cancel">Annulla</string>
     <string name="mtrl_timepicker_confirm">OK</string>
     <string msgid="542007171693138492" name="navigation_menu">"Menu di navigazione"</string>
+    <string name="new_record">NUOVO RECORD!</string>
     <string msgid="6610465462668679431" name="not_selected">"Opzione non selezionata"</string>
     <string name="password_toggle_content_description">Mostra password</string>
     <string msgid="5941395253238309765" name="range_end">"Fine intervallo"</string>
     <string msgid="7097486360902471446" name="range_start">"Inizio intervallo"</string>
+    <string name="save_exit">Salva Ed Esci</string>
     <string msgid="6264217191555673260" name="search_menu_title">"Cerca"</string>
     <string msgid="6043586758067023" name="selected">"Elemento selezionato"</string>
+    <string name="start_new_game">Inizia Una Nuova Partita</string>
     <string msgid="4139871816613051306" name="state_empty">"Vuoto"</string>
     <string msgid="5834637030682409883" name="state_off">"Off"</string>
     <string msgid="1490883874751719580" name="state_on">"On"</string>
@@ -188,6 +201,7 @@
     <string msgid="2561197295334830845" name="switch_role">"Opzione"</string>
     <string msgid="1672349317127674378" name="tab">"Scheda"</string>
     <string msgid="5946805113151406391" name="template_percent">"<ns1:g id="PERCENTAGE">%1$d</ns1:g> percento."</string>
+    <string name="time">Tempo: %1$s</string>
     <string msgid="3765533235322692011" name="tooltip_description">"Descrizione comando"</string>
     <string msgid="3124740595719787496" name="tooltip_label">"Mostra descrizione comando"</string>
 </resources>

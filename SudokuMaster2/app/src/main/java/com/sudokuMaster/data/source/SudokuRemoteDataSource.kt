@@ -5,6 +5,8 @@ import com.sudokuMaster.data.DifficultyLevel
 import retrofit2.http.GET
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 // --- 1. Modelli di Risposta API (Data Transfer Objects - DTO) ---
 // Questi sono per il parsing JSON dall'API
@@ -28,6 +30,18 @@ interface SudokuApiService {
     // L'API vercel.app non supporta un parametro di query per la difficoltà in questo endpoint.
     // Se fosse supportato, sarebbe: @Query("query") difficulty: String
     suspend fun getNewSudoku(): ApiResponse
+
+    companion object {
+        private const val BASE_URL = "https://sudoku.vercel.app/" // Questo è l'URL della tua API
+
+        fun create(): SudokuApiService {
+            return Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+                .create(SudokuApiService::class.java)
+        }
+    }
 }
 
 // --- 3. Implementazione del Remote Data Source ---

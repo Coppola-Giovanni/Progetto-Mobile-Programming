@@ -18,8 +18,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.io.IOException
 import java.util.LinkedList
-import java.util.concurrent.TimeUnit
 
 data class SudokuTile(
     val x: Int,
@@ -34,7 +34,8 @@ data class SudokuTile(
 enum class ActiveGameScreenState {
     LOADING,
     ACTIVE,
-    COMPLETE
+    COMPLETE,
+    ERROR
 }
 
 // ViewModel per la schermata di gioco attiva
@@ -60,6 +61,10 @@ class ActiveGameViewModel(
     private val _isNewRecord = MutableStateFlow(false)
     val isNewRecord: StateFlow<Boolean> = _isNewRecord.asStateFlow()
 
+    private val _errorMessage = MutableStateFlow<String?>(null) // Messaggio di errore per la UI
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+
+
     // Variabili interne
     private var timerJob: Job? = null
     private var currentPuzzleId: Long = -1L // ID del puzzle corrente
@@ -72,8 +77,8 @@ class ActiveGameViewModel(
     // --- EVENTI DALLA UI ---
     fun onEvent(event: ActiveGameEvent) {
         when (event) {
-            is ActiveGameEvent.onInput -> onInput(event.input)
-            is ActiveGameEvent.onTileFocused -> onTileFocused(event.x, event.y)
+            is ActiveGameEvent.OnInput -> onInput(event.input)
+            is ActiveGameEvent.OnTileFocused -> onTileFocused(event.x, event.y)
             ActiveGameEvent.OnNewGameClicked -> onNewGameClicked()
             ActiveGameEvent.OnStop -> onStop()
             ActiveGameEvent.OnStart -> { /* Già gestito in init o tramite loadGame */ }
@@ -107,46 +112,66 @@ class ActiveGameViewModel(
             val elapsedTime = _timerState.value
             val puzzle = mapBoardStateToSudokuPuzzle(HashMap(newBoardState), _difficulty.value, elapsedTime)
 
-            gameRepository.updateGameNodeAndSave(
-                puzzle, // Passa l'intero puzzle aggiornato
-                onSuccess = { updatedGameSession ->
-                    // L'updateGameNodeAndSave ora restituisce la GameSession aggiornata
-                    // Possiamo estrarre isSolved da lì.
-                    if (updatedGameSession.isSolved) {
-                        timerJob?.cancel()
-                        val solveTimeMillis = updatedGameSession.durationSeconds?.let { it * 1000L }
-                            ?: (updatedGameSession.endTimeMillis?.minus(updatedGameSession.startTimeMillis)
-                                ?: 0L) // Fallback se duration_seconds è nullo
-                        checkIfNewRecord(solveTimeMillis)
-                    }
-                },
-                onError = {
-                    // Mostra errore (da gestire tramite ActiveGameContainer)
-                    // Per ora, non abbiamo un accesso diretto al container qui.
-                    // Questo sarà gestito dalla UI che osserva lo stato.
+            try {
+                // Chiamata aggiornata senza callbacks
+                val updatedGameSession = gameRepository.updateGameNodeAndSave(puzzle)
+
+                if (updatedGameSession.isSolved) {
+                    timerJob?.cancel()
+                    _screenState.value = ActiveGameScreenState.COMPLETE // Imposta lo stato di gioco completo
+                    val solveTimeMillis = updatedGameSession.durationSeconds?.let { it * 1000L }
+                        ?: (updatedGameSession.endTimeMillis?.minus(updatedGameSession.startTimeMillis)
+                            ?: 0L)
+                    checkIfNewRecord(solveTimeMillis)
                 }
-            )
+            } catch (e: Exception) {
+                _errorMessage.value = "Errore durante l'aggiornamento del gioco: ${e.localizedMessage}"
+                _screenState.value = ActiveGameScreenState.ERROR // Imposta lo stato di errore
+                e.printStackTrace() // Per debug
+            }
         }
     }
 
     private fun onNewGameClicked() = viewModelScope.launch {
         // Salva lo stato corrente se non è completo, poi naviga
         if (_screenState.value != ActiveGameScreenState.COMPLETE) {
-            val currentBoard = _boardState.value
-            val currentDifficulty = _difficulty.value
-            val currentElapsedTime = _timerState.value
+            try {
+                val currentBoard = _boardState.value
+                val currentDifficulty = _difficulty.value
+                val currentElapsedTime = _timerState.value
 
-            val puzzleToSave = mapBoardStateToSudokuPuzzle(currentBoard, currentDifficulty, currentElapsedTime)
+                val puzzleToSave = mapBoardStateToSudokuPuzzle(currentBoard, currentDifficulty, currentElapsedTime)
 
-            gameRepository.updateGameSession(
-                gameSession = puzzleToSave.toGameSession(currentPuzzleId), // Converti in GameSession
-                onSuccess = { navigateToNewGame() },
-                onError = { navigateToNewGame() /* Errore nel salvataggio, naviga comunque */ }
-            )
+                // Chiamata aggiornata senza callbacks
+                gameRepository.updateGameSession(puzzleToSave.toGameSession(currentPuzzleId))
+                // Se il salvataggio ha successo, si può navigare o resetta lo stato.
+                // La navigazione dovrebbe essere gestita dalla UI che osserva lo stato.
+                resetGameStateAndPrepareForNewGame() // Prepara la ViewModel per un nuovo gioco
+            } catch (e: Exception) {
+                _errorMessage.value = "Errore nel salvataggio della partita corrente: ${e.localizedMessage}"
+                _screenState.value = ActiveGameScreenState.ERROR
+                e.printStackTrace()
+                // Anche in caso di errore nel salvataggio, potresti voler permettere di iniziare una nuova partita
+                resetGameStateAndPrepareForNewGame()
+            }
         } else {
-            navigateToNewGame()
+            resetGameStateAndPrepareForNewGame()
         }
+
+}
+    private fun resetGameStateAndPrepareForNewGame() {
+        // Resetting the state to trigger UI re-render and potentially new game creation
+        _boardState.value = HashMap()
+        _timerState.value = 0L
+        _difficulty.value = DifficultyLevel.MEDIUM // O il valore predefinito
+        _isNewRecord.value = false
+        _errorMessage.value = null
+        currentPuzzleId = -1L
+        timerJob?.cancel()
+        _screenState.value = ActiveGameScreenState.LOADING // La UI dovrebbe reagire a questo per iniziare un nuovo caricamento
+        loadGame() // Rilancia il processo di caricamento per una nuova partita
     }
+
 
     private fun navigateToNewGame() {
         // Questa logica di navigazione non può essere gestita direttamente dal ViewModel.
@@ -161,31 +186,37 @@ class ActiveGameViewModel(
     private fun onStop() {
         if (_screenState.value != ActiveGameScreenState.COMPLETE) {
             viewModelScope.launch {
-                val currentBoard = _boardState.value
-                val currentDifficulty = _difficulty.value
-                val currentElapsedTime = _timerState.value
+                try {
+                    val currentBoard = _boardState.value
+                    val currentDifficulty = _difficulty.value
+                    val currentElapsedTime = _timerState.value
 
-                val puzzleToSave = mapBoardStateToSudokuPuzzle(currentBoard, currentDifficulty, currentElapsedTime)
+                    val puzzleToSave = mapBoardStateToSudokuPuzzle(currentBoard, currentDifficulty, currentElapsedTime)
 
-                gameRepository.updateGameSession(
-                    gameSession = puzzleToSave.toGameSession(currentPuzzleId), // Converti in GameSession
-                    onSuccess = { timerJob?.cancel() }, // Annulla il timer
-                    onError = {
-                        // Mostra errore (da gestire dalla UI)
-                        timerJob?.cancel()
-                    }
-                )
+                    // Chiamata aggiornata senza callbacks
+                    gameRepository.updateGameSession(puzzleToSave.toGameSession(currentPuzzleId))
+                    timerJob?.cancel()
+                } catch (e: Exception) {
+                    _errorMessage.value = "Errore nel salvataggio della partita in pausa: ${e.localizedMessage}"
+                    _screenState.value = ActiveGameScreenState.ERROR
+                    e.printStackTrace()
+                    timerJob?.cancel() // Annulla il timer anche in caso di errore
+                }
             }
         } else {
-            timerJob?.cancel() // Se il gioco è completo, annulla solo il timer
+            timerJob?.cancel()
         }
     }
 
     private fun loadGame() = viewModelScope.launch {
         _screenState.value = ActiveGameScreenState.LOADING
-        gameRepository.getLatestUnfinishedGameSession(
-            onSuccess = { gameSession ->
-                // Aggiorna currentPuzzleId
+        _errorMessage.value = null // Resetta eventuali messaggi di errore precedenti
+        try {
+            // Tenta di ottenere l'ultima sessione non finita
+            val gameSession = gameRepository.getLatestUnfinishedGameSession()
+
+            if (gameSession != null) {
+                // Ho trovato una sessione non finita
                 currentPuzzleId = gameSession.id
 
                 val puzzle = gameSession.toSudokuPuzzle()
@@ -193,41 +224,38 @@ class ActiveGameViewModel(
                 _timerState.value = puzzle.elapsedTime
                 _boardState.value = mapSudokuPuzzleToBoardState(puzzle)
 
-                // Se il puzzle è già risolto, mostra lo stato completo
                 if (gameSession.isSolved) {
                     _screenState.value = ActiveGameScreenState.COMPLETE
-                    _isNewRecord.value = false // Non è un nuovo record se era già completo
+                    _isNewRecord.value = false
                 } else {
                     _screenState.value = ActiveGameScreenState.ACTIVE
                     startTimer()
                 }
-            },
-            onError = {
-                // Nessun gioco non finito, avvia una nuova partita con difficoltà predefinita
-                viewModelScope.launch {
-                    val settings = userPreferencesRepository.getUserPreferences().first()
-                    val defaultDifficulty = settings.defaultDifficulty
+            } else {
+                // Nessun gioco non finito, crea una nuova partita
+                val settings = userPreferencesRepository.getUserPreferencesFlow().first() // Usa getUserPreferencesFlow() per ottenere le preferenze
+                val defaultDifficulty = settings.defaultDifficulty
 
-                    gameRepository.createNewGameAndSave(
-                        difficulty = defaultDifficulty,
-                        onSuccess = { newGameSession ->
-                            currentPuzzleId = newGameSession.id
-                            val newPuzzle = newGameSession.toSudokuPuzzle()
-                            _difficulty.value = newPuzzle.difficulty
-                            _timerState.value = newPuzzle.elapsedTime
-                            _boardState.value = mapSudokuPuzzleToBoardState(newPuzzle)
-                            _screenState.value = ActiveGameScreenState.ACTIVE
-                            startTimer()
-                        },
-                        onError = {
-                            // Errore nella creazione di un nuovo gioco, mostra errore
-                            _screenState.value = ActiveGameScreenState.COMPLETE // Forse un fallback più adatto
-                            // E notificare ActiveGameActivity per mostrare un errore generico
-                        }
-                    )
-                }
+                // Chiamata aggiornata senza callbacks
+                val newGameSession = gameRepository.createNewGameAndSave(defaultDifficulty)
+
+                currentPuzzleId = newGameSession.id
+                val newPuzzle = newGameSession.toSudokuPuzzle()
+                _difficulty.value = newPuzzle.difficulty
+                _timerState.value = newPuzzle.elapsedTime
+                _boardState.value = mapSudokuPuzzleToBoardState(newPuzzle)
+                _screenState.value = ActiveGameScreenState.ACTIVE
+                startTimer()
             }
-        )
+        } catch (e: IOException) {
+            _errorMessage.value = "Errore di rete o di I/O durante il caricamento del gioco: ${e.localizedMessage}"
+            _screenState.value = ActiveGameScreenState.ERROR
+            e.printStackTrace()
+        } catch (e: Exception) {
+            _errorMessage.value = "Errore generico durante il caricamento del gioco: ${e.localizedMessage}"
+            _screenState.value = ActiveGameScreenState.ERROR
+            e.printStackTrace()
+        }
     }
 
     private fun startTimer() {
@@ -235,24 +263,29 @@ class ActiveGameViewModel(
         timerJob = viewModelScope.launch {
             while (_screenState.value == ActiveGameScreenState.ACTIVE) {
                 delay(1000) // Aspetta 1 secondo
-                _timerState.value = _timerState.value + 1
+                _timerState.value += 1
             }
         }
     }
 
     private fun checkIfNewRecord(finalTimeMillis: Long) = viewModelScope.launch {
-        val userStats = gameRepository.getUserStatistics().first()
-        val currentDifficulty = _difficulty.value
+        try {
+            val userStats = gameRepository.getUserStatistics().first()
+            val currentDifficulty = _difficulty.value
 
-        val isRecord = when (currentDifficulty) {
-            DifficultyLevel.EASY -> finalTimeMillis < userStats.bestSolveTimeEasyMillis!!
-            DifficultyLevel.MEDIUM -> finalTimeMillis < userStats.bestSolveTimeMediumMillis!!
-            DifficultyLevel.HARD -> finalTimeMillis < userStats.bestSolveTimeHardMillis!!
-            else -> false
+            val isRecord = when (currentDifficulty) {
+                DifficultyLevel.EASY -> userStats.bestSolveTimeEasyMillis?.let { finalTimeMillis < it } ?: false
+                DifficultyLevel.MEDIUM -> userStats.bestSolveTimeMediumMillis?.let { finalTimeMillis < it } ?: false
+                DifficultyLevel.HARD -> userStats.bestSolveTimeHardMillis?.let { finalTimeMillis < it } ?: false
+                else -> false
+            }
+
+            _isNewRecord.value = isRecord
+            _screenState.value = ActiveGameScreenState.COMPLETE
+        } catch (e: Exception) {
+            _errorMessage.value = "Errore nel calcolo del nuovo record: ${e.localizedMessage}"
+            e.printStackTrace()
         }
-
-        _isNewRecord.value = isRecord
-        _screenState.value = ActiveGameScreenState.COMPLETE
     }
 
     // --- FUNZIONI DI MAPPATURA (Utilità interne) ---

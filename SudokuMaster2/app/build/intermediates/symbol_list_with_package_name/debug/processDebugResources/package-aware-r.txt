@@ -3803,6 +3803,7 @@ layout support_simple_spinner_dropdown_item
 mipmap ic_launcher
 mipmap ic_launcher_round
 plurals mtrl_badge_content_description
+string Difficulty
 string abc_action_bar_home_description
 string abc_action_bar_up_description
 string abc_action_menu_overflow_description
@@ -3849,12 +3850,16 @@ string call_notification_screening_text
 string character_counter_content_description
 string character_counter_overflowed_content_description
 string character_counter_pattern
+string clear
 string clear_text_end_icon_content_description
 string close_drawer
 string close_sheet
 string default_error_message
 string default_popup_window_title
 string difficulty
+string difficulty_easy
+string difficulty_hard
+string difficulty_medium
 string dropdown_menu
 string easy
 string error_a11y_label
@@ -3863,6 +3868,7 @@ string exposed_dropdown_menu_content_description
 string fab_transformation_scrim_behavior
 string fab_transformation_sheet_behavior
 string game_complete
+string generic_error
 string hard
 string hide_bottom_view_on_scroll_behavior
 string icon_content_description
@@ -3870,6 +3876,7 @@ string in_progress
 string indeterminate
 string item_view_role_description
 string loading
+string loading_sudoku
 string logo_description
 string m3_exceed_max_badge_text_suffix
 string m3_ref_typeface_brand_medium
@@ -4030,6 +4037,7 @@ string mtrl_switch_track_path
 string mtrl_timepicker_cancel
 string mtrl_timepicker_confirm
 string navigation_menu
+string new_record
 string not_selected
 string password_toggle_content_description
 string path_password_eye
@@ -4038,6 +4046,7 @@ string path_password_eye_mask_visible
 string path_password_strike_through
 string range_end
 string range_start
+string save_exit
 string search_menu_title
 string searchbar_scrolling_view_behavior
 string searchview_clear_text_content_description
@@ -4045,6 +4054,7 @@ string searchview_navigation_content_description
 string selected
 string side_sheet_accessibility_pane_title
 string side_sheet_behavior
+string start_new_game
 string state_empty
 string state_off
 string state_on
@@ -4052,6 +4062,7 @@ string status_bar_notification_info_overflow
 string switch_role
 string tab
 string template_percent
+string time
 string tooltip_description
 string tooltip_label
 style AlertDialog_AppCompat

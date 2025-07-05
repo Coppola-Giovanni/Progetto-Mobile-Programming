@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
+import java.io.IOException
 import java.util.Date // Import per Date
 import java.util.LinkedList
 
@@ -26,172 +27,132 @@ class GameRepositoryImpl(
     private val sudokuRemoteDataSource: SudokuRemoteDataSource
 ) : GameRepositoryInterface {
 
-    override suspend fun createNewGameAndSave(
-        difficulty: DifficultyLevel,
-        onSuccess: (GameSession) -> Unit,
-        onError: (Throwable) -> Unit
-    ) {
-        try {
-            // 1. Chiedi un nuovo puzzle al remote data source
-            // La difficoltà passata è quella richiesta, non è sempre HARD.
-            val apiResult = sudokuRemoteDataSource.getNewSudokuPuzzleData(difficulty)
+    override suspend fun createNewGameAndSave(difficulty: DifficultyLevel): GameSession {
+        // La logica try-catch per l'API è stata spostata internamente in SudokuRemoteDataSource
+        // o gestita dal chiamante (ViewModel) con un try-catch esterno.
+        // Qui ci aspettiamo che sudokuRemoteDataSource.getNewSudokuPuzzleData() gestisca i suoi errori
+        // o propaghi un'eccezione se fallisce.
+        val (initialGridData, actualDifficulty) = try {
+            sudokuRemoteDataSource.getNewSudokuPuzzleData(difficulty).getOrThrow()
+        } catch (e: Exception) {
+            // Rilancia un'eccezione più specifica se necessario, o lascia che si propaghi
+            throw IOException("Failed to fetch new Sudoku puzzle from API: ${e.message}", e)
+        }
 
-            apiResult.onSuccess { (initialGridData, actualDifficulty) ->
-                // initialGridData è List<List<Int>>, actualDifficulty è DifficultyLevel
-                // Non abbiamo la 'solution' dal SudokuRemoteDataSource, useremo initialGridData per costruire initialGraph e currentGraph.
-                // Le celle readOnly saranno quelle che non sono 0 in initialGridData.
+        val boundary = 9
 
-                val boundary = 9 // Assumiamo 9x9
+        val initialGraph = LinkedHashMap<Int, LinkedList<SudokuNode>>()
+        val currentGraph = LinkedHashMap<Int, LinkedList<SudokuNode>>()
 
-                // Costruisci initialGraph e currentGraph dal initialGridData ricevuto dall'API
-                val initialGraph = LinkedHashMap<Int, LinkedList<SudokuNode>>()
-                val currentGraph = LinkedHashMap<Int, LinkedList<SudokuNode>>()
+        for (row in 0 until boundary) {
+            val initialRowList = LinkedList<SudokuNode>()
+            val currentRowList = LinkedList<SudokuNode>()
+            for (col in 0 until boundary) {
+                val value = initialGridData[row][col]
+                val isReadOnly = value != 0
 
-                for (row in 0 until boundary) {
-                    val initialRowList = LinkedList<SudokuNode>()
-                    val currentRowList = LinkedList<SudokuNode>()
-                    for (col in 0 until boundary) {
-                        val value = initialGridData[row][col] // Valore iniziale dal board dell'API
-                        val isReadOnly = value != 0
-
-                        initialRowList.add(
-                            SudokuNode(
-                                x = col,
-                                y = row,
-                                color = value,
-                                readOnly = isReadOnly
-                            )
-                        )
-                        currentRowList.add(
-                            SudokuNode(
-                                x = col,
-                                y = row,
-                                color = value, // Inizialmente con i valori non vuoti, 0 altrimenti
-                                readOnly = isReadOnly
-                            )
-                        )
-                    }
-                    initialGraph[row] = initialRowList
-                    currentGraph[row] = currentRowList
-                }
-                initialGraph.forEach { (_, list) -> list.sortBy { it.x } } // Ordina per x
-                currentGraph.forEach { (_, list) -> list.sortBy { it.x } } // Ordina per x
-
-
-                val newSudokuPuzzle = SudokuPuzzle(
-                    id = 0L, // L'ID sarà generato da Room
-                    boundary = boundary,
-                    difficulty = actualDifficulty, // Usa la difficoltà effettiva restituita dall'API
-                    initialGraph = initialGraph,
-                    currentGraph = currentGraph,
-                    elapsedTime = 0L
+                initialRowList.add(
+                    SudokuNode(
+                        x = col,
+                        y = row,
+                        color = value,
+                        readOnly = isReadOnly
+                    )
                 )
-
-                // 3. Converti il SudokuPuzzle in GameSession per Room e salvalo
-                val newGameSession = newSudokuPuzzle.toGameSession(
-                    existingId = 0L, // Nuovo gioco
-                    isSolved = false, // Non risolto all'inizio
-                    score = 0
-                ).copy(startTimeMillis = System.currentTimeMillis()) // Imposta il tempo di inizio
-
-                val gameId = gameSessionDao.insertGameSession(newGameSession)
-
-                // 4. Aggiorna lastUnfinishedGameId nelle UserPreferences
-                userPreferencesRepository.updateLastUnfinishedGameId(gameId)
-
-                // 5. Richiama onSuccess con la GameSession aggiornata con l'ID
-                onSuccess(newGameSession.copy(id = gameId))
-
-            }.onFailure { throwable ->
-                onError(Exception("Failed to get new sudoku puzzle from API: ${throwable.message}", throwable))
+                currentRowList.add(
+                    SudokuNode(
+                        x = col,
+                        y = row,
+                        color = value,
+                        readOnly = isReadOnly
+                    )
+                )
             }
-
-        } catch (e: Exception) {
-            onError(e)
+            initialGraph[row] = initialRowList
+            currentGraph[row] = currentRowList
         }
+        initialGraph.forEach { (_, list) -> list.sortBy { it.x } }
+        currentGraph.forEach { (_, list) -> list.sortBy { it.x } }
+
+        val newSudokuPuzzle = SudokuPuzzle(
+            id = 0L,
+            boundary = boundary,
+            difficulty = actualDifficulty,
+            initialGraph = initialGraph,
+            currentGraph = currentGraph,
+            elapsedTime = 0L
+        )
+
+        val newGameSession = newSudokuPuzzle.toGameSession(
+            existingId = 0L,
+            isSolved = false,
+            score = 0
+        ).copy(startTimeMillis = System.currentTimeMillis())
+
+        val gameId = gameSessionDao.insertGameSession(newGameSession)
+
+        userPreferencesRepository.updateLastUnfinishedGameId(gameId) // updateLastUnfinishedGameId restituisce Result<Unit>
+
+        return newGameSession.copy(id = gameId) // Restituisci la sessione con l'ID reale
     }
 
-    override suspend fun getLatestUnfinishedGameSession(
-        onSuccess: (GameSession) -> Unit,
-        onError: (Throwable) -> Unit
-    ) {
-        try {
-            val userPrefs = userPreferencesRepository.getUserPreferences().first()
-            val lastGameId = userPrefs.lastUnfinishedGameId
 
-            if (lastGameId != -1L) { // -1L indica nessun gioco non finito
-                val gameSession = gameSessionDao.getGameSessionById(lastGameId).firstOrNull()
-                if (gameSession != null && !gameSession.isSolved) {
-                    onSuccess(gameSession)
-                } else {
-                    // Il gioco precedente è stato risolto o non trovato, rimuovi il riferimento
-                    userPreferencesRepository.updateLastUnfinishedGameId(-1L)
-                    onError(Exception("No unfinished game found or game was already solved."))
-                }
+    override suspend fun getLatestUnfinishedGameSession(): GameSession? { // Restituisce GameSession? o lancia
+        val userPrefs = userPreferencesRepository.getUserPreferences().first()
+        val lastGameId = userPrefs.lastUnfinishedGameId
+
+        return if (lastGameId != -1L) {
+            val gameSession = gameSessionDao.getGameSessionById(lastGameId).firstOrNull()
+            if (gameSession != null && !gameSession.isSolved) {
+                gameSession
             } else {
-                onError(Exception("No last unfinished game ID found."))
+                userPreferencesRepository.updateLastUnfinishedGameId(-1L) // Pulisci l'ID se il gioco è risolto o non trovato
+                null // Nessun gioco non finito valido trovato
             }
-        } catch (e: Exception) {
-            onError(e)
+        } else {
+            null // Nessun ID di gioco non finito salvato
         }
     }
 
-    override suspend fun updateGameNodeAndSave(
-        puzzle: SudokuPuzzle,
-        onSuccess: (GameSession) -> Unit,
-        onError: (Throwable) -> Unit
-    ) {
-        try {
-            // Aggiorna la GameSession con i dati del puzzle corrente
-            val updatedGameSession = puzzle.toGameSession(
-                existingId = puzzle.id, // Usa l'ID del puzzle per aggiornare la sessione esistente
-                isSolved = false, // Presupponiamo non risolto, verrà verificato
-                score = 0 // Il punteggio verrà calcolato alla risoluzione
+
+    override suspend fun updateGameNodeAndSave(puzzle: SudokuPuzzle): GameSession {
+        val updatedGameSession = puzzle.toGameSession(
+            existingId = puzzle.id,
+            isSolved = false,
+            score = 0
+        )
+
+        val isPuzzleSolved = allSquaresAreFilled(puzzle) && puzzle.isComplete()
+
+        val finalGameSession: GameSession
+        if (isPuzzleSolved) {
+            val endTime = System.currentTimeMillis()
+            val initialGameSession = gameSessionDao.getGameSessionById(puzzle.id).firstOrNull()
+                ?: throw IllegalStateException("Game session with ID ${puzzle.id} not found during update.")
+
+            val duration = (endTime - initialGameSession.startTimeMillis) / 1000L // Durata in secondi
+            val score = calculateScore(duration, puzzle.difficulty)
+
+            finalGameSession = updatedGameSession.copy(
+                endTimeMillis = endTime,
+                durationSeconds = duration,
+                score = score,
+                isSolved = true,
+                datePlayedMillis = endTime
             )
-
-            // Verifica se il puzzle è completo e valido
-            val isPuzzleSolved = allSquaresAreFilled(puzzle) && puzzle.isComplete()
-
-            val finalGameSession: GameSession
-            if (isPuzzleSolved) {
-                // Se risolto, calcola endTimeMillis, score, isSolved, datePlayedMillis
-                val endTime = System.currentTimeMillis()
-                val score = calculateScore(puzzle.elapsedTime, puzzle.difficulty) // Implementa questa funzione
-                val initialGameSession = gameSessionDao.getGameSessionById(puzzle.id) // Recupera per startTimeMillis
-
-                finalGameSession = updatedGameSession.copy(
-                    endTimeMillis = endTime,
-                    durationSeconds = puzzle.elapsedTime,
-                    score = score,
-                    isSolved = true,
-                    datePlayedMillis = endTime
-                )
-                // Rimuovi l'ID del gioco non finito dalle preferenze utente
-                userPreferencesRepository.updateLastUnfinishedGameId(-1L)
-            } else {
-                // Altrimenti, è un semplice aggiornamento dello stato di gioco
-                finalGameSession = updatedGameSession
-            }
-
-            gameSessionDao.updateGameSession(finalGameSession)
-            onSuccess(finalGameSession)
-        } catch (e: Exception) {
-            onError(e)
+            userPreferencesRepository.updateLastUnfinishedGameId(-1L)
+        } else {
+            finalGameSession = updatedGameSession
         }
+
+        gameSessionDao.updateGameSession(finalGameSession)
+        return finalGameSession
     }
 
-    override suspend fun updateGameSession(
-        gameSession: GameSession,
-        onSuccess: (GameSession) -> Unit,
-        onError: (Throwable) -> Unit
-    ) {
-        try {
-            gameSessionDao.updateGameSession(gameSession)
-            onSuccess(gameSession)
-        } catch (e: Exception) {
-            onError(e)
-        }
+    override suspend fun updateGameSession(gameSession: GameSession) {
+        gameSessionDao.updateGameSession(gameSession)
     }
+
 
 
     override suspend fun getUserStatistics(): Flow<UserStatistics> {

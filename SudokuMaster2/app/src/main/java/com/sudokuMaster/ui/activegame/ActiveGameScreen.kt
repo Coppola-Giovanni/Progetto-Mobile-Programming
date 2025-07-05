@@ -1,11 +1,10 @@
 package com.sudokuMaster.ui.activegame
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -18,7 +17,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel // Importa questa funzione
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -78,10 +76,10 @@ fun ActiveGameScreen(
                 Spacer(Modifier.height(16.dp))
                 SudokuBoard(
                     boardState = boardState,
-                    onTileFocused = { x, y -> viewModel.onEvent(ActiveGameEvent.onTileFocused(x, y)) }
+                    onTileFocused = { x, y -> viewModel.onEvent(ActiveGameEvent.OnTileFocused(x, y)) }
                 )
                 Spacer(Modifier.height(16.dp))
-                NumberPad(onInput = { input -> viewModel.onEvent(ActiveGameEvent.onInput(input)) })
+                NumberPad(onInput = { input -> viewModel.onEvent(ActiveGameEvent.OnInput(input)) })
                 Spacer(Modifier.height(16.dp))
                 Button(onClick = { viewModel.onEvent(ActiveGameEvent.OnStop) }) {
                     Text(stringResource(R.string.save_exit))
@@ -94,6 +92,9 @@ fun ActiveGameScreen(
                     isNewRecord = isNewRecord,
                     onNewGameClick = { viewModel.onEvent(ActiveGameEvent.OnNewGameClicked) }
                 )
+            }
+            ActiveGameScreenState.ERROR -> {
+                //
             }
         }
     }
@@ -111,12 +112,7 @@ fun getLocalizedDifficulty(difficulty: DifficultyLevel): String {
         DifficultyLevel.HARD -> {
             stringResource(R.string.difficulty_hard)
         }
-        DifficultyLevel.DIFFICULTY_UNSPECIFIED -> {
-            TODO()
-        }
-        DifficultyLevel.UNRECOGNIZED -> {
-            TODO() //ciao
-        }
+        else -> stringResource(R.string.difficulty_hard)
     }
 }
 
@@ -151,7 +147,10 @@ fun SudokuBoard(
         (0 until boardSize).forEach { y ->
             Row(modifier = Modifier.weight(1f)) {
                 (0 until boardSize).forEach { x ->
-                    val tile = boardState[getHash(x, y)] ?: SudokuTile(x, y, 0, false, false)
+                    val tile = boardState[getHash(x, y)] ?: SudokuTile(x, y, 0,
+                        hasFocus = false,
+                        readOnly = false
+                    )
                     val isBlockBorder = (x % blockSize == 0 && x != 0) || (y % blockSize == 0 && y != 0)
                     val borderModifier = if (isBlockBorder) Modifier.border(1.dp, Color.Black) else Modifier.border(0.5.dp, Color.Gray)
 
@@ -273,6 +272,7 @@ fun GameCompletionScreen(
 }
 
 // Funzione helper per formattare il tempo (da secondi a HH:MM:SS)
+@SuppressLint("DefaultLocale")
 fun formatTime(seconds: Long): String {
     val hours = TimeUnit.SECONDS.toHours(seconds)
     val minutes = TimeUnit.SECONDS.toMinutes(seconds) - TimeUnit.HOURS.toMinutes(hours)
