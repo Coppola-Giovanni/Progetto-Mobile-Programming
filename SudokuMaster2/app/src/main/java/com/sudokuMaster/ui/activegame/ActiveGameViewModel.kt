@@ -3,7 +3,6 @@ package com.sudokuMaster.ui.activegame
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.sudokuMaster.common.toDifficultyLevel
 import com.sudokuMaster.common.toGameSession
 import com.sudokuMaster.common.toSudokuPuzzle
 import com.sudokuMaster.data.DifficultyLevel
@@ -11,7 +10,6 @@ import com.sudokuMaster.domain.GameRepositoryInterface
 import com.sudokuMaster.domain.SudokuNode
 import com.sudokuMaster.domain.SudokuPuzzle
 import com.sudokuMaster.domain.UserPreferencesRepositoryInterface
-import com.sudokuMaster.domain.getHash
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +18,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.LinkedList
-import java.util.concurrent.TimeUnit
 
 data class SudokuTile(
     val x: Int,
@@ -31,7 +28,6 @@ data class SudokuTile(
 )
 
 
-// Stato generale della schermata (Loading, Active, Complete)
 enum class ActiveGameScreenState {
     LOADING,
     ACTIVE,
@@ -49,8 +45,17 @@ class ActiveGameViewModel(
     private val _uiState = MutableStateFlow(ActiveGameScreenState.LOADING)
     val uiState: StateFlow<ActiveGameScreenState> = _uiState.asStateFlow()
 
+    private val _activeGameScreenState = MutableStateFlow(ActiveGameScreenState.LOADING)
+    val activeGameScreenState: StateFlow<ActiveGameScreenState> = _activeGameScreenState.asStateFlow()
+
     private val _sudokuGrid = MutableStateFlow<List<SudokuTile>>(emptyList())
     val sudokuGrid: StateFlow<List<SudokuTile>> = _sudokuGrid.asStateFlow()
+
+    private val _sudokuTiles = MutableStateFlow(emptyList<SudokuTile>())
+    val sudokuTiles: StateFlow<List<SudokuTile>> = _sudokuTiles.asStateFlow()
+
+    private val _isSolved = MutableStateFlow(false)
+    val isSolved: StateFlow<Boolean> = _isSolved.asStateFlow()
 
     private val _selectedTile = MutableStateFlow<SudokuTile?>(null)
     val selectedTile: StateFlow<SudokuTile?> = _selectedTile.asStateFlow()
@@ -306,9 +311,6 @@ class ActiveGameViewModel(
         val initialGraph = LinkedHashMap<Int, LinkedList<SudokuNode>>()
         val currentGraph = LinkedHashMap<Int, LinkedList<SudokuNode>>()
 
-        // Riempie initialGraph e currentGraph basandosi sulle tiles fornite
-        // Devi avere l'initialGraph originale da qualche parte (es. nel currentSudokuPuzzle)
-        // Oppure, se stai solo aggiornando, assicurati di usare i valori originali per readOnly
         val originalInitialGraph = currentSudokuPuzzle.initialGraph
 
         tiles.forEach { tile ->

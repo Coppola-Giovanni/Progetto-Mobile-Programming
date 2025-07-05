@@ -19,127 +19,178 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.viewmodel.compose.viewModel // Importa questa funzione
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.navigation.NavController
 import com.sudokuMaster.data.DifficultyLevel
 import com.sudokuMaster.domain.getHash
 import java.util.concurrent.TimeUnit
+import androidx.navigation.NavController
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Icon
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TopAppBarDefaults
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActiveGameScreen(
     viewModelFactory: ActiveGameViewModelFactory,
-    onGameSolved: () -> Unit,  //Callback per gioco risolto
-    onGameLoadError: () -> Unit,  //Callback per errore di caricamento
     navController: NavController,
     modifier: Modifier = Modifier,
 ) {
     val viewModel: ActiveGameViewModel = viewModel(
-        factory = viewModelFactory)
+        factory = viewModelFactory
+    )
 
-    // Osserva gli StateFlow del ViewModel
-    val uiState by viewModel.uiState.collectAsState()
-    val sudokuGrid by viewModel.sudokuGrid.collectAsState()
-    val selectedTile by viewModel.selectedTile.collectAsState()
+    val activeGameScreenState by viewModel.activeGameScreenState.collectAsState()
+    val sudokuTiles by viewModel.sudokuTiles.collectAsState()
     val timerState by viewModel.timerState.collectAsState()
-    val difficulty by viewModel.difficulty.collectAsState()
-    val showLoading by viewModel.showLoading.collectAsState()
-    val error by viewModel.error.collectAsState()
+    val selectedTile by viewModel.selectedTile.collectAsState()
+    val isSolved by viewModel.isSolved.collectAsState()
+    val currentDifficulty by viewModel.difficulty.collectAsState()
     val isNewRecord by viewModel.isNewRecord.collectAsState()
 
-    // Gestione degli effetti collaterali
-    LaunchedEffect(LocalLifecycleOwner.current) {
-        viewModel.onEvent(ActiveGameEvent.OnStart) // Avvia il timer e la logica iniziale
-    }
-
-    // Gestione della navigazione al completamento del gioco
-    LaunchedEffect(uiState) {
-        if (uiState == ActiveGameScreenState.COMPLETE) {
-            onGameSolved() // Richiama il callback per tornare indietro o mostrare una schermata di vittoria
+    // Listener per il ciclo di vita per avviare e fermare il timer
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val lifecycle = lifecycleOwner.lifecycle
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            when (event) {
+                androidx.lifecycle.Lifecycle.Event.ON_START -> viewModel.onEvent(ActiveGameEvent.OnStart)
+                androidx.lifecycle.Lifecycle.Event.ON_STOP -> viewModel.onEvent(ActiveGameEvent.OnStop)
+                else -> {}
+            }
+        }
+        lifecycle.addObserver(observer)
+        onDispose {
+            lifecycle.removeObserver(observer)
         }
     }
 
-    // Gestione degli errori di caricamento/logica
-    LaunchedEffect(error) {
-        error?.let {
-            onGameLoadError()
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                },
+                navigationIcon = { // Qui inseriamo l'IconButton per tornare indietro
+                    IconButton(onClick = {
+                        navController.popBackStack() // Logica per tornare indietro
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack, // L'icona della freccia indietro
+                            contentDescription = "Torna indietro",
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer // Colore dell'icona
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors( // Colori della TopAppBar
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            )
         }
-    }
+    ) { paddingValues -> // IMPORTANTISSIMO: Dobbiamo usare paddingValues
 
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        if (showLoading) {
-            CircularProgressIndicator()
-        } else {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                Text(
-                    text = "Difficulty: ${difficulty.name}",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(top = 16.dp)
-                )
-                Text(
-                    text = "Time: ${formatTime(timerState)}",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Griglia del Sudoku
-                SudokuGrid(sudokuGrid) { x, y ->
-                    viewModel.onEvent(ActiveGameEvent.onTileFocused(x, y))
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(paddingValues), // APPLICA QUI IL PADDING FORNITO DA SCAFFOLD
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            when (activeGameScreenState) {
+                ActiveGameScreenState.LOADING -> {
+                    CircularProgressIndicator(modifier = Modifier.size(64.dp))
+                    Text(text = "Caricamento Sudoku...", style = MaterialTheme.typography.titleMedium)
                 }
+                ActiveGameScreenState.ACTIVE -> {
+                    // Contenuto per lo stato ACTIVE
+                    Text(
+                        text = "Tempo: ${formatTime(timerState)}",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(16.dp)
+                    )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                    // Griglia del Sudoku
+                    SudokuGrid(
+                        tiles = sudokuTiles,
+                        selectedTile = selectedTile,
+                        onTileClick = { x, y -> viewModel.onEvent(ActiveGameEvent.onTileFocused(x, y)) }
+                    )
 
-                // Controlli di input
-                InputControls(selectedTile) { input ->
-                    viewModel.onEvent(ActiveGameEvent.onInput(input))
+                    Spacer(Modifier.height(16.dp))
+
+                    // Input dei numeri
+                    NumberInput(onNumberClick = { number ->
+                        viewModel.onEvent(ActiveGameEvent.onInput(number))
+                    })
+                }
+                ActiveGameScreenState.COMPLETE -> {
+                    // Contenuto per lo stato COMPLETE
+                    GameCompletionScreen(
+                        timerState = timerState,
+                        difficulty = currentDifficulty,
+                        isNewRecord = isNewRecord,
+                        onNewGameClick = { viewModel.onEvent(ActiveGameEvent.OnNewGameClicked) }
+                    )
                 }
             }
         }
-
-        // Overlay della schermata di completamento se il gioco è risolto
-        if (uiState == ActiveGameScreenState.COMPLETE && !showLoading) {
-            GameCompletionScreen(
-                timerState = timerState,
-                difficulty = difficulty,
-                isNewRecord = isNewRecord,
-                onNewGameClick = {
-                    viewModel.onEvent(ActiveGameEvent.OnNewGameClicked)
-                    // Non richiamare onGameSolved qui, perché il ViewModel gestisce il passaggio a una nuova partita
-                    // e la UI si aggiornerà di conseguenza allo stato di Loading/Active
-                }
-            )
-        }
-    }
+    } // FINE SCAFFOLD
 }
 
 @Composable
 fun SudokuGrid(
-    grid: List<SudokuTile>,
+    tiles: List<SudokuTile>,
+    selectedTile: SudokuTile?,
     onTileClick: (x: Int, y: Int) -> Unit
 ) {
+    val gridSize = 9
+    val cellSize = 40.dp // Dimensione approssimativa di una cella
+
     Column(
         modifier = Modifier
-            .aspectRatio(1f) // Rende la griglia quadrata
+            .aspectRatio(1f) // Rendi la griglia quadrata
             .padding(8.dp)
-            .border(2.dp, Color.Black) // Bordo esterno della griglia
+            .border(2.dp, MaterialTheme.colorScheme.inversePrimary) // Bordo esterno
     ) {
-        (0..8).forEach { y -> // Righe
-            Row(modifier = Modifier.weight(1f)) {
-                (0..8).forEach { x -> // Colonne
-                    val tile = grid.firstOrNull { it.x == x && it.y == y }
-                    SudokuTileView(
+        for (row in 0 until gridSize) {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                for (col in 0 until gridSize) {
+                    val tile = tiles.firstOrNull { it.x == col && it.y == row } ?: SudokuTile(col, row, 0, false, false)
+                    val isSelected = selectedTile?.x == col && selectedTile?.y == row
+                    val isInitial = tile.readOnly
+
+                    SudokuCell(
                         tile = tile,
-                        onClick = onTileClick,
-                        isBoldBorder = (x % 3 == 2 && x != 8) || (y % 3 == 2 && y != 8)
+                        isSelected = isSelected,
+                        isInitial = isInitial,
+                        onClick = { onTileClick(col, row) },
+                        modifier = Modifier
+                            .weight(1f)
+                            .aspectRatio(1f)
+                            .border(
+                                width = 1.dp, // Bordo sottile per le celle
+                                color = MaterialTheme.colorScheme.inversePrimary
+                            )
+                            .run {
+                                val rightBorderWidth = if ((col + 1) % 3 == 0 && col != gridSize - 1) 2.dp else 1.dp
+                                val bottomBorderWidth = if ((row + 1) % 3 == 0 && row != gridSize - 1) 2.dp else 1.dp
+                                then(
+                                    Modifier.border(
+                                        width = 1.dp,
+                                        color = MaterialTheme.colorScheme.inversePrimary
+                                    )
+                                )
+                            }
                     )
                 }
             }
@@ -148,74 +199,71 @@ fun SudokuGrid(
 }
 
 @Composable
-fun RowScope.SudokuTileView(
-    tile: SudokuTile?,
-    onClick: (x: Int, y: Int) -> Unit,
-    isBoldBorder: Boolean
+fun SudokuCell(
+    tile: SudokuTile,
+    isSelected: Boolean,
+    isInitial: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val borderColor = if (isBoldBorder) Color.Black else Color.Gray
-    val borderWidth = if (isBoldBorder) 2.dp else 1.dp
-
     val backgroundColor = when {
-        tile?.hasFocus == true -> MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) // Colore per il focus
-        else -> MaterialTheme.colorScheme.surface // Colore di default
+        isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) // Colore per la cella selezionata
+        else -> MaterialTheme.colorScheme.surface // Colore di default per le celle
+    }
+
+    val textColor = when {
+        isInitial -> MaterialTheme.colorScheme.onSurface // Colore per i numeri iniziali
+        else -> MaterialTheme.colorScheme.secondary // Colore per i numeri inseriti dall'utente
     }
 
     Box(
-        modifier = Modifier
-            .weight(1f)
-            .fillMaxHeight()
-            .border(borderWidth, borderColor)
+        modifier = modifier
             .background(backgroundColor)
-            .clickable {
-                tile?.let { onClick(it.x, it.y) }
-            },
+            .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = if (tile?.value == 0) "" else tile?.value.toString(),
-            color = if (tile?.readOnly == true) Color.Black else MaterialTheme.colorScheme.primary, // Colore per numeri di partenza vs inseriti dall'utente
-            fontSize = 24.sp,
-            fontWeight = if (tile?.readOnly == true) FontWeight.Bold else FontWeight.Normal
-        )
+        if (tile.value != 0) {
+            Text(
+                text = tile.value.toString(),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                ),
+                color = textColor
+            )
+        }
     }
 }
+
 
 @Composable
-fun InputControls(
-    selectedTile: SudokuTile?,
-    onInput: (Int) -> Unit
+fun NumberInput(
+    onNumberClick: (Int) -> Unit
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceAround
+    ) {
         // Numeri da 1 a 9
-        val numbers = (1..9).chunked(3)
-        numbers.forEach { rowNumbers ->
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(vertical = 4.dp)
-            ) {
-                rowNumbers.forEach { number ->
-                    InputButton(number = number, onClick = onInput, enabled = selectedTile != null && !selectedTile.readOnly)
-                }
-            }
+        for (i in 1..9) {
+            InputButton(number = i, onClick = { onNumberClick(i) })
         }
-        // Pulsante "Clear"
-        Spacer(modifier = Modifier.height(8.dp))
-        InputButton(text = "Clear", onClick = { onInput(0) }, enabled = selectedTile != null && !selectedTile.readOnly)
+        // Tasto per cancellare (0 o un'icona)
+        InputButton(text = "X", onClick = { onNumberClick(0) })
     }
 }
-
 
 @Composable
 fun InputButton(
     number: Int? = null,
     text: String? = null,
-    onClick: (Int) -> Unit,
-    enabled: Boolean
+    onClick: () -> Unit
 ) {
     Button(
-        onClick = { number?.let { onClick(it) } ?: onClick(0) }, // 0 per "Clear"
-        enabled = enabled,
+        onClick = onClick,
         modifier = Modifier
             .width(48.dp)
             .height(48.dp)
@@ -223,7 +271,6 @@ fun InputButton(
         Text(text ?: number.toString(), fontSize = 18.sp)
     }
 }
-
 
 @Composable
 fun GameCompletionScreen(
@@ -254,7 +301,7 @@ fun GameCompletionScreen(
 // Funzione helper per formattare il tempo (da secondi a HH:MM:SS)
 fun formatTime(seconds: Long): String {
     val hours = TimeUnit.SECONDS.toHours(seconds)
-    val minutes = TimeUnit.SECONDS.toMinutes(seconds) - TimeUnit.HOURS.toMinutes(hours)
-    val secs = seconds - TimeUnit.MINUTES.toSeconds(minutes) - TimeUnit.HOURS.toSeconds(hours)
+    val minutes = TimeUnit.SECONDS.toMinutes(seconds) % 60
+    val secs = seconds % 60
     return String.format("%02d:%02d:%02d", hours, minutes, secs)
 }

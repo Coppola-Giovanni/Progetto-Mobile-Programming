@@ -103,6 +103,7 @@ fun SudokuAppNavigation(
         composable("active_game_screen/{gameType}") { backStackEntry ->
             val gameType = backStackEntry.arguments?.getString("gameType") ?: "new" // Default a "new"
 
+
             val activeGameViewModelFactory = ActiveGameViewModelFactory(
                 gameRepository = gameRepository,
                 userPreferencesRepository = userPreferencesRepository,
@@ -111,8 +112,7 @@ fun SudokuAppNavigation(
 
             ActiveGameScreen(
                 viewModelFactory = activeGameViewModelFactory,
-                onGameSolved = { navController.popBackStack() }, // Torna alla home o gestisci il popup di vittoria
-                onGameLoadError = { navController.popBackStack() } // Torna alla home in caso di errore di caricamento
+                navController = navController,
             )
         }
         composable("statistics_screen") {
