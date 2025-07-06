@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.SudokuMaster.app-mergeDebugResources-72:/values-v22/values-v22.xml",
+            "outputFile": "com.SudokuMaster.app-mergeDebugResources-74:/values-v22/values-v22.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\Valerio\\.gradle\\caches\\8.11.1\\transforms\\8ed60ff882b30210985477d1a7102ed5\\transformed\\appcompat-1.6.1\\res\\values-v22\\values-v22.xml",
+                    "source": "C:\\Users\\Valerio\\.gradle\\caches\\8.11.1\\transforms\\f5f1e413503e58af5a77b3315e009aab\\transformed\\appcompat-1.6.1\\res\\values-v22\\values-v22.xml",
                     "from": {
                         "startLines": "2,3,4,9",
                         "startColumns": "4,4,4,4",

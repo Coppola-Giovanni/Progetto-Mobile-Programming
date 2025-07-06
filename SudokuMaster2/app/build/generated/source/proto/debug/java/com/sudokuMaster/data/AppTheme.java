@@ -5,14 +5,6 @@
 package com.sudokuMaster.data;
 
 /**
- * <pre>
- *message Statistics {
- *int64 easy = 4;
- *int64 medium = 5;
- *int64 hard = 6;
- *}
- * </pre>
- *
  * Protobuf enum {@code AppTheme}
  */
 public enum AppTheme

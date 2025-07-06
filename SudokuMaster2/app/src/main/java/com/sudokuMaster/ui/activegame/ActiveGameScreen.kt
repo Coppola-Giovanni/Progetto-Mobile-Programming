@@ -36,6 +36,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import android.content.res.Configuration
+import androidx.compose.ui.platform.LocalConfiguration
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,6 +71,9 @@ fun ActiveGameScreen(
             lifecycle.removeObserver(observer)
         }
     }
+
+    val configuration = LocalConfiguration.current // Ottieni la configurazione corrente
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     Scaffold(
         topBar = {
@@ -121,29 +127,87 @@ fun ActiveGameScreen(
                     Text(text = "Caricamento Sudoku...", style = MaterialTheme.typography.titleMedium)
                 }
                 ActiveGameScreenState.ACTIVE -> {
-                    Text(
-                        text = "Tempo: ${formatTime(timerState)}",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(16.dp)
-                    )
+                    if (isLandscape) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            verticalAlignment = Alignment.CenterVertically // Centra verticalmente l'intera riga
+                        ) {
+                            // Left side: Timer, Difficulty, and Sudoku Grid
+                            Column(
+                                modifier = Modifier
+                                    .weight(0.35f)
+                                    .fillMaxHeight(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                SudokuGrid(
+                                    tiles = sudokuTiles,
+                                    selectedTile = selectedTile,
+                                    onTileClick = { x, y -> activeGameViewModel.onEvent(ActiveGameEvent.onTileFocused(x, y)) },
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                )
+                            }
 
-                    Text(
-                        text = "Difficoltà: ${currentDifficulty?.name ?: "N/A"}",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(bottom = 8.dp) // Add some padding if needed
-                    )
+                            // Right side: Number Input
+                            Column(
+                                modifier = Modifier
+                                    .weight(0.35f)
+                                    .fillMaxHeight(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center // Centra verticalmente i tasti di input
+                            ) {
+                                Text(
+                                    text = "Tempo: ${formatTime(timerState)}",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier.padding(bottom = 4.dp)
+                                )
 
-                    SudokuGrid(
-                        tiles = sudokuTiles,
-                        selectedTile = selectedTile,
-                        onTileClick = { x, y -> activeGameViewModel.onEvent(ActiveGameEvent.onTileFocused(x, y))  }
-                    )
+                                Text(
+                                    text = "Difficoltà: ${currentDifficulty?.name ?: "N/A"}",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                )
 
-                    Spacer(Modifier.height(16.dp))
+                                NumberInput(onNumberClick = { number ->
+                                    activeGameViewModel.onEvent(ActiveGameEvent.onInput(number))
+                                })
+                            }
+                        }
+                    } else {
+                        Column(
+                            modifier = modifier
+                                .fillMaxSize()
+                                .padding(paddingValues),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "Tempo: ${formatTime(timerState)}",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(16.dp)
+                            )
 
-                    NumberInput(onNumberClick = { number ->
-                        activeGameViewModel.onEvent(ActiveGameEvent.onInput(number))
-                    })
+                            Text(
+                                text = "Difficoltà: ${currentDifficulty?.name ?: "N/A"}",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+
+                            SudokuGrid(
+                                tiles = sudokuTiles,
+                                selectedTile = selectedTile,
+                                onTileClick = { x, y -> activeGameViewModel.onEvent(ActiveGameEvent.onTileFocused(x, y)) }
+                            )
+
+                            Spacer(Modifier.height(16.dp))
+
+                            NumberInput(onNumberClick = { number ->
+                                activeGameViewModel.onEvent(ActiveGameEvent.onInput(number))
+                            })
+                        }
+                    }
                 }
                 ActiveGameScreenState.COMPLETE -> {
                     GameCompletionScreen(
@@ -174,7 +238,8 @@ fun ActiveGameScreen(
 fun SudokuGrid(
     tiles: List<SudokuTile>,
     selectedTile: SudokuTile?,
-    onTileClick: (x: Int, y: Int) -> Unit
+    onTileClick: (x: Int, y: Int) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val gridSize = 9
     val thinLine = 1.dp

@@ -32,5 +32,6 @@ data class GameSession(
     val isSolved: Boolean = false,
 
     @ColumnInfo(name = "date_played_millis")
-    val datePlayedMillis: Long
+    val datePlayedMillis: Long,
+
 )

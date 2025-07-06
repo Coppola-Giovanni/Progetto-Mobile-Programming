@@ -79,6 +79,7 @@ dependencies {
     implementation(libs.volley)
     implementation(libs.androidx.tools.core)
     implementation(libs.androidx.datastore.core.android)
+    implementation(libs.play.services.phenotype)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
