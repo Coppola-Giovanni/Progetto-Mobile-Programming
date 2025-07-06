@@ -148,28 +148,11 @@ class ActiveGameViewModel(
         gameJob?.cancel()
         gameJob = viewModelScope.launch {
             try {
-                val userPrefs = userPreferencesRepository.getUserPreferences().firstOrNull()
-
-                val defaultDifficultyString = userPrefs?.defaultDifficulty
-                // NUOVA LOGICA: Trova DifficultyLevel confrontando ignorando il case
-                val defaultDifficulty = if (defaultDifficultyString != null) {
-                    var foundDifficulty: DifficultyLevel? = null
-                    for (level in DifficultyLevel.values()) {
-                        if (level.name.equals(defaultDifficultyString.toString(), ignoreCase = true)) {
-                            foundDifficulty = level
-                            break
-                        }
-                    }
-                    foundDifficulty ?: DifficultyLevel.MEDIUM // Se non trovato, usa MEDIUM
-                } else {
-                    DifficultyLevel.MEDIUM // Se la stringa è nulla, usa MEDIUM
-                }
-                // FINE NUOVA LOGICA
-
-                Log.d("ActiveGameViewModel", "loadNewGame: Fetched default difficulty: $defaultDifficulty")
+                val difficultyForApi = DifficultyLevel.UNRECOGNIZED
+                Log.d("ActiveGameViewModel", "loadNewGame: Fetched default difficulty: $difficultyForApi")
 
                 gameRepository.createNewGameAndSave(
-                    difficulty = defaultDifficulty,
+                    difficulty = difficultyForApi,
                     onSuccess = { gameSession ->
                         Log.d("ActiveGameViewModel", "loadNewGame: Game created successfully, ID: ${gameSession.id}")
                         _currentPuzzleId.value = gameSession.id
@@ -178,7 +161,7 @@ class ActiveGameViewModel(
                         _selectedTile.value = SudokuTile(0, 0, 0, true, true)
                         _timerState.value = gameSession.durationSeconds ?: 0L
                         _isSolved.value = gameSession.isSolved
-                        _currentDifficulty.value = defaultDifficulty
+                        _currentDifficulty.value = gameSession.difficulty.toDifficultyLevel()
                         _activeGameScreenState.value = ActiveGameScreenState.ACTIVE
                         startTimer()
                         Log.d("ActiveGameViewModel", "loadNewGame: State changed to ACTIVE.")
