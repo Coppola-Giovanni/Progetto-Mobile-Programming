@@ -49,4 +49,13 @@
     <string name="migliori_tempi_per_difficolt">Best Times for Difficulty:</string>
     <string name="continua_partita">Continue Game</string>
     <string name="suggest_move" >Suggest Move</string>
+    <string name="preferenze_utente">Preferenze Utente</string>
+    <string name="torna_indietro">Back</string>
+    <string name="tema_attuale">Current theme:: %1$s</string>
+    <string name="difficolt">Difficulty: %1$s</string>
+    <string name="suono_abilitato">Sound enabled:</string>
+    <string name="caricamento_preferenze">Loading preferences...</string>
+    <string name="salva_e_torna_indietro_cambiamenti_salvati_automaticamente">Save and Go Back (changes saved automatically)</string>
+    <string name="difficolt_predefinita">Default difficulty:</string>
+    <string name="tema_app">App Theme:</string>
 </resources>

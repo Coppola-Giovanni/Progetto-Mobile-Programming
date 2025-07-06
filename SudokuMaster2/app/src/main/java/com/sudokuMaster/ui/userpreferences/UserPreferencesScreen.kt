@@ -26,11 +26,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.sudokuMaster.data.AppTheme
 import com.sudokuMaster.data.DifficultyLevel
 import com.sudokuMaster.ui.Screen
+import com.SudokuMaster.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,13 +47,13 @@ fun UserPreferencesScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text("Preferenze Utente", color = MaterialTheme.colorScheme.onPrimaryContainer)
+                    Text(stringResource(R.string.preferenze_utente), color = MaterialTheme.colorScheme.onPrimaryContainer)
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Torna indietro",
+                            contentDescription = stringResource(R.string.torna_indietro),
                             tint = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
@@ -73,7 +75,7 @@ fun UserPreferencesScreen(
         ) {
             userPreferences?.let { prefs ->
                 // Esempio: Selezione del Tema
-                Text(text = "Tema App:", style = MaterialTheme.typography.titleMedium)
+                Text(text = stringResource(R.string.tema_app), style = MaterialTheme.typography.titleMedium)
                 // Puoi usare un DropdownMenu, RadioButtons o Slider per selezionare il tema
                 // Per semplicità, usiamo un bottone per cambiare ciclicamente il tema
                 Button(onClick = {
@@ -86,12 +88,12 @@ fun UserPreferencesScreen(
                     }
                     userPreferencesViewModel.updateAppTheme(nextTheme)
                 }) {
-                    Text("Tema attuale: ${prefs.appTheme.name}")
+                    Text(stringResource(R.string.tema_attuale, prefs.appTheme.name))
                 }
                 Spacer(Modifier.height(16.dp))
 
                 // Esempio: Selezione Difficoltà Default
-                Text(text = "Difficoltà predefinita:", style = MaterialTheme.typography.titleMedium)
+                Text(text = stringResource(R.string.difficolt_predefinita), style = MaterialTheme.typography.titleMedium)
                 Button(onClick = {
                     val nextDifficulty = when (prefs.defaultDifficulty) {
                         DifficultyLevel.EASY -> DifficultyLevel.MEDIUM
@@ -102,7 +104,7 @@ fun UserPreferencesScreen(
                     }
                     userPreferencesViewModel.updateDefaultDifficulty(nextDifficulty)
                 }) {
-                    Text("Difficoltà: ${prefs.defaultDifficulty.name}")
+                    Text(stringResource(R.string.difficolt, prefs.defaultDifficulty.name))
                 }
                 Spacer(Modifier.height(16.dp))
 
@@ -112,7 +114,7 @@ fun UserPreferencesScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(text = "Suono abilitato:", style = MaterialTheme.typography.titleMedium)
+                    Text(text = stringResource(R.string.suono_abilitato), style = MaterialTheme.typography.titleMedium)
                     Switch(
                         checked = prefs.soundEnabled,
                         onCheckedChange = { userPreferencesViewModel.updateSoundEnabled(it) }
@@ -120,13 +122,13 @@ fun UserPreferencesScreen(
                 }
             } ?: run {
                 // Caricamento o errore
-                Text("Caricamento preferenze...", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.caricamento_preferenze), style = MaterialTheme.typography.titleMedium)
             }
 
             Spacer(Modifier.weight(1f)) // Spinge il bottone sotto
 
             Button(onClick = { navController.popBackStack() }) {
-                Text("Salva e Torna Indietro (cambiamenti salvati automaticamente)")
+                Text(stringResource(R.string.salva_e_torna_indietro_cambiamenti_salvati_automaticamente))
             }
         }
     }

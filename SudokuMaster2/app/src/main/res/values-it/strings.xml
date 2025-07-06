@@ -48,4 +48,13 @@
     <string name="partite_risolte_totali">Partite Risolte Totali:</string>
     <string name="tempo_medio_risoluzione">Tempo Medio Risoluzione:</string>
     <string name="suggest_move">Suggerisci Mossa</string>
+    <string name="preferenze_utente">User Preferences</string>
+    <string name="torna_indietro">Torna Indietro</string>
+    <string name="tema_attuale">Tema attuale: %1$</string>
+    <string name="difficolt">Difficoltà: %1$s</string>
+    <string name="suono_abilitato">Suono abilitato:</string>
+    <string name="caricamento_preferenze">Caricamento Preferenze...</string>
+    <string name="salva_e_torna_indietro_cambiamenti_salvati_automaticamente">Salva e Torna Indietro (cambiamenti salvati automaticamente)</string>
+    <string name="difficolt_predefinita">Difficoltà predefinita:</string>
+    <string name="tema_app">Tema App:</string>
 </resources>

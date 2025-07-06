@@ -150,14 +150,6 @@ fun ActiveGameScreen(
                                     modifier = Modifier
                                         .fillMaxHeight()
                                 )
-                                Button(
-                                    onClick = { activeGameViewModel.onEvent(ActiveGameEvent.OnSuggestMoveClicked) },
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    Text(stringResource(R.string.suggest_move))
-                                }
-
-                                Spacer(Modifier.height(16.dp))
 
                             }
 
@@ -184,6 +176,17 @@ fun ActiveGameScreen(
                                 NumberInput(onNumberClick = { number ->
                                     activeGameViewModel.onEvent(ActiveGameEvent.onInput(number))
                                 })
+
+                                Button(
+                                    onClick = { activeGameViewModel.onEvent(ActiveGameEvent.OnSuggestMoveClicked) },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp)
+                                ) {
+                                    Text(stringResource(R.string.suggest_move))
+                                }
+
+                                Spacer(Modifier.height(16.dp))
                             }
                         }
                     } else {
@@ -192,12 +195,14 @@ fun ActiveGameScreen(
                                 .fillMaxSize()
                                 .padding(paddingValues),
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
+                            verticalArrangement = Arrangement.Top
                         ) {
+
+
                             Text(
                                 text = stringResource(R.string.time,formatTime(timerState)),
                                 style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.padding(16.dp)
+                                modifier = Modifier.padding(top = 4.dp)
                             )
 
                             Text(
@@ -214,9 +219,24 @@ fun ActiveGameScreen(
 
                             Spacer(Modifier.height(16.dp))
 
+                            Button(
+                                onClick = { activeGameViewModel.onEvent(ActiveGameEvent.OnSuggestMoveClicked) },
+                                modifier = Modifier
+                                           .fillMaxWidth()
+                                           .padding(horizontal = 16.dp)
+                            ) {
+                                Text(stringResource(R.string.suggest_move))
+                            }
+
+                            Spacer(Modifier.height(16.dp))
+
+
+
                             NumberInput(onNumberClick = { number ->
                                 activeGameViewModel.onEvent(ActiveGameEvent.onInput(number))
                             })
+
+                            Spacer((Modifier.height(16.dp)))
                         }
                     }
                 }
