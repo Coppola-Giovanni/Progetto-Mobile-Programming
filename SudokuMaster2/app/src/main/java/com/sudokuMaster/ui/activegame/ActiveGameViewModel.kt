@@ -44,7 +44,6 @@ enum class ActiveGameScreenState {
 
 class ActiveGameViewModel(
     private val gameRepository: GameRepositoryInterface,
-    private val userPreferencesRepository: UserPreferencesRepositoryInterface,
     private val initialGameType: String
 ) : ViewModel() {
 
@@ -302,7 +301,7 @@ class ActiveGameViewModelFactory(
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ActiveGameViewModel::class.java)) {
-            return ActiveGameViewModel(gameRepository, userPreferencesRepository, initialGameType) as T
+            return ActiveGameViewModel(gameRepository, initialGameType) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
