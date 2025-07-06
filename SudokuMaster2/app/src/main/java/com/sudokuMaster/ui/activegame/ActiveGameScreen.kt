@@ -28,6 +28,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.TopAppBar
@@ -81,6 +82,17 @@ fun ActiveGameScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Torna indietro",
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                },
+                actions = { // <<< AGGIUNGI IL BLOCCO ACTIONS QUI
+                    IconButton(onClick = {
+                        navController.navigate("user_preferences_screen") // Naviga alla nuova destinazione
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.Settings, // Icona per le impostazioni
+                            contentDescription = "Impostazioni utente",
                             tint = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }

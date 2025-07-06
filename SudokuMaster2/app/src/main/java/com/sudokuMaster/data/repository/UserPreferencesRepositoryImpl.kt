@@ -17,50 +17,28 @@ class UserPreferencesRepositoryImpl(
     private val userPreferencesDataStore: DataStore<UserPreferences>
 ) : UserPreferencesRepositoryInterface {
 
-    override fun getUserPreferencesFlow(): Flow<UserPreferences> {
-        return userPreferencesDataStore.data
-            .catch { exception ->
-                // DataStore throws an IOException when an error is encountered when reading data
-                if (exception is IOException) {
-                    emit(UserPreferences.getDefaultInstance()) // Emetti un'istanza di default in caso di errore di lettura
-                } else {
-                    throw exception // Rilancia altre eccezioni
-                }
-            }
-    }
+    override val userPreferencesFlow: Flow<UserPreferences> = userPreferencesDataStore.data
 
-    override suspend fun updateAppTheme(theme: AppTheme): Result<Unit> = withContext(Dispatchers.IO) {
-        return@withContext try {
-            userPreferencesDataStore.updateData { preferences ->
-                preferences.toBuilder().setAppTheme(theme).build()
-            }
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
+
+    override suspend fun updateAppTheme(theme: AppTheme) {
+        userPreferencesDataStore.updateData { currentPreferences ->
+            currentPreferences.toBuilder().setAppTheme(theme).build()
         }
     }
 
-    override suspend fun updateDefaultDifficulty(difficulty: DifficultyLevel): Result<Unit> = withContext(Dispatchers.IO) {
-        return@withContext try {
-            userPreferencesDataStore.updateData { preferences ->
-                preferences.toBuilder().setDefaultDifficulty(difficulty).build()
-            }
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
+
+    override suspend fun updateDefaultDifficulty(difficulty: DifficultyLevel) {
+        userPreferencesDataStore.updateData { currentPreferences ->
+            currentPreferences.toBuilder().setDefaultDifficulty(difficulty).build()
         }
     }
 
-    override suspend fun updateSoundEnabled(enabled: Boolean): Result<Unit> = withContext(Dispatchers.IO) {
-        return@withContext try {
-            userPreferencesDataStore.updateData { preferences ->
-                preferences.toBuilder().setSoundEnabled(enabled).build()
-            }
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
+    override suspend fun updateSoundEnabled(enabled: Boolean) {
+        userPreferencesDataStore.updateData { currentPreferences ->
+            currentPreferences.toBuilder().setSoundEnabled(enabled).build()
         }
     }
+
 
 
     /*override suspend fun updateShowTutorial(show: Boolean): Result<Unit> = withContext(Dispatchers.IO) {
@@ -74,24 +52,28 @@ class UserPreferencesRepositoryImpl(
         }
     }*/
 
-    override suspend fun updateLastUnfinishedGameId(gameId: Long): Result<Unit> = withContext(Dispatchers.IO) {
-        return@withContext try {
-            userPreferencesDataStore.updateData { preferences ->
-                preferences.toBuilder().setLastUnfinishedGameId(gameId).build()
-            }
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
+    override suspend fun updateLastUnfinishedGameId(id: Long) {
+        userPreferencesDataStore.updateData { currentPreferences ->
+            currentPreferences.toBuilder().setLastUnfinishedGameId(id).build()
+        }
+    }
+
+    override suspend fun updateLastAccessTimestamp(timestamp: Long) {
+        userPreferencesDataStore.updateData { currentPreferences ->
+            currentPreferences.toBuilder().setLastAccessTimestamp(timestamp).build()
         }
     }
 
     override suspend fun getUserPreferences(): Flow<UserPreferences> {
         return userPreferencesDataStore.data
-            .map { preferences ->
-                // Qui potresti mappare le 'preferences' (dal DataStore) al tuo dominio UserPreferences
-                // Se il tuo DataStore è già DataStore<UserPreferences>, non serve una mappatura complessa.
-                // Assumiamo che UserPreferences sia la stessa classe che viene serializzata/deserializzata dal DataStore.
-                preferences // Restituisci direttamente l'oggetto UserPreferences
+            .catch { exception ->
+                // DataStore throws an IOException when an error is encountered when reading data
+                if (exception is IOException) {
+                    emit(UserPreferences.getDefaultInstance()) // Emetti un'istanza di default in caso di errore di lettura
+                } else {
+                    throw exception // Rilancia altre eccezioni
+                }
             }
     }
+
 }

@@ -37,6 +37,8 @@ import com.sudokuMaster.ui.home.WinScreen
 import com.sudokuMaster.ui.stats.StatisticsScreen // Importa StatisticsScreen
 import com.sudokuMaster.ui.stats.StatisticsViewModel
 import com.sudokuMaster.ui.theme.GraphSudokuTheme
+import com.sudokuMaster.ui.userpreferences.UserPreferencesScreen
+import com.sudokuMaster.ui.userpreferences.UserPreferencesViewModel
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 // Non è necessario importare ProductionDispatcherProvider qui a meno che non lo usi direttamente
@@ -153,5 +155,17 @@ fun SudokuAppNavigation(
                 activeGameViewModel = activeGameViewModel
             )
         }
+        composable(Screen.UserPreferencesScreen.route){
+            val userPreferencesViewModel: UserPreferencesViewModel = viewModel(
+                factory = UserPreferencesViewModel.UserPreferencesViewModelFactory(
+                    userPreferencesRepository
+                )
+            )
+            UserPreferencesScreen(
+                navController = navController,
+                userPreferencesViewModel = userPreferencesViewModel
+            )
+        }
+
     }
 }
