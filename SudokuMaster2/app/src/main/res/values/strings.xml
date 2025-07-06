@@ -48,4 +48,5 @@
     <string name="tempo_medio_risoluzione">Average Resolution Time:</string>
     <string name="migliori_tempi_per_difficolt">Best Times for Difficulty:</string>
     <string name="continua_partita">Continue Game</string>
+    <string name="suggest_move" >Suggest Move</string>
 </resources>

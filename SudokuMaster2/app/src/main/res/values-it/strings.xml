@@ -47,4 +47,5 @@
     <string name="partite_giocate_totali">Partite Giocate Totali</string>
     <string name="partite_risolte_totali">Partite Risolte Totali:</string>
     <string name="tempo_medio_risoluzione">Tempo Medio Risoluzione:</string>
+    <string name="suggest_move">Suggerisci Mossa</string>
 </resources>

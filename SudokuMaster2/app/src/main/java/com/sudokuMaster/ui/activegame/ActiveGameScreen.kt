@@ -150,6 +150,15 @@ fun ActiveGameScreen(
                                     modifier = Modifier
                                         .fillMaxHeight()
                                 )
+                                Button(
+                                    onClick = { activeGameViewModel.onEvent(ActiveGameEvent.OnSuggestMoveClicked) },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(stringResource(R.string.suggest_move))
+                                }
+
+                                Spacer(Modifier.height(16.dp))
+
                             }
 
                             // Right side: Number Input

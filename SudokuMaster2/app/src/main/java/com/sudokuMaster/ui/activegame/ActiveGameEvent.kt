@@ -6,4 +6,5 @@ sealed class ActiveGameEvent {
     object OnNewGameClicked : ActiveGameEvent()
     object OnStart : ActiveGameEvent()
     object OnStop : ActiveGameEvent()
+    object OnSuggestMoveClicked : ActiveGameEvent()
 }
