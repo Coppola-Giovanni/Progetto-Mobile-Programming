@@ -7,8 +7,6 @@ import com.sudokuMaster.data.AppTheme
 import com.sudokuMaster.data.DifficultyLevel
 import com.sudokuMaster.domain.UserPreferencesRepositoryInterface
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -16,15 +14,13 @@ class UserPreferencesViewModel(
     private val userPreferencesRepository: UserPreferencesRepositoryInterface
 ) : ViewModel() {
 
-    // Espone le preferenze utente come StateFlow
     val userPreferencesFlow = userPreferencesRepository.userPreferencesFlow
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = null // UserPreferences().getDefaultInstance() se ne hai uno, altrimenti null
+            initialValue = null
         )
 
-    // Funzioni per aggiornare le preferenze
     fun updateAppTheme(theme: AppTheme) {
         viewModelScope.launch {
             userPreferencesRepository.updateAppTheme(theme)

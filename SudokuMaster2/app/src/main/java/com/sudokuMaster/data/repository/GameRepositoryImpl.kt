@@ -32,18 +32,13 @@ class GameRepositoryImpl(
         onError: (Throwable) -> Unit
     ) {
         try {
-            // 1. Chiedi un nuovo puzzle al remote data source
-            // La difficoltà passata è quella richiesta, non è sempre HARD.
             val apiResult = sudokuRemoteDataSource.getNewSudokuPuzzleData(difficulty)
 
             apiResult.onSuccess { (initialGridData, actualDifficulty) ->
-                // initialGridData è List<List<Int>>, actualDifficulty è DifficultyLevel
-                // Non abbiamo la 'solution' dal SudokuRemoteDataSource, useremo initialGridData per costruire initialGraph e currentGraph.
-                // Le celle readOnly saranno quelle che non sono 0 in initialGridData.
 
                 val boundary = 9 // Assumiamo 9x9
 
-                // Costruisci initialGraph e currentGraph dal initialGridData ricevuto dall'API
+                 // Costruisce initialGraph e currentGraph dal initialGridData ricevuto dall'API
                 val initialGraph = LinkedHashMap<Int, LinkedList<SudokuNode>>()
                 val currentGraph = LinkedHashMap<Int, LinkedList<SudokuNode>>()
 
@@ -66,7 +61,7 @@ class GameRepositoryImpl(
                             SudokuNode(
                                 x = col,
                                 y = row,
-                                color = value, // Inizialmente con i valori non vuoti, 0 altrimenti
+                                color = value,
                                 readOnly = isReadOnly
                             )
                         )
@@ -74,32 +69,30 @@ class GameRepositoryImpl(
                     initialGraph[row] = initialRowList
                     currentGraph[row] = currentRowList
                 }
-                initialGraph.forEach { (_, list) -> list.sortBy { it.x } } // Ordina per x
-                currentGraph.forEach { (_, list) -> list.sortBy { it.x } } // Ordina per x
+                initialGraph.forEach { (_, list) -> list.sortBy { it.x } }
+                currentGraph.forEach { (_, list) -> list.sortBy { it.x } }
 
 
                 val newSudokuPuzzle = SudokuPuzzle(
                     id = 0L, // L'ID sarà generato da Room
                     boundary = boundary,
-                    difficulty = actualDifficulty, // Usa la difficoltà effettiva restituita dall'API
+                    difficulty = actualDifficulty,
                     initialGraph = initialGraph,
                     currentGraph = currentGraph,
                     elapsedTime = 0L
                 )
 
-                // 3. Converti il SudokuPuzzle in GameSession per Room e salvalo
+                //Converte il SudokuPuzzle in GameSession per Room e lo salva
                 val newGameSession = newSudokuPuzzle.toGameSession(
-                    existingId = 0L, // Nuovo gioco
-                    isSolved = false, // Non risolto all'inizio
+                    existingId = 0L,
+                    isSolved = false,
                     score = 0
                 ).copy(startTimeMillis = System.currentTimeMillis()) // Imposta il tempo di inizio
 
                 val gameId = gameSessionDao.insertGameSession(newGameSession)
 
-                // 4. Aggiorna lastUnfinishedGameId nelle UserPreferences
                 userPreferencesRepository.updateLastUnfinishedGameId(gameId)
 
-                // 5. Richiama onSuccess con la GameSession aggiornata con l'ID
                 onSuccess(newGameSession.copy(id = gameId))
 
             }.onFailure { throwable ->
@@ -129,7 +122,6 @@ class GameRepositoryImpl(
                 if (gameSession != null && !gameSession.isSolved) {
                     onSuccess(gameSession)
                 } else {
-                    // Il gioco precedente è stato risolto o non trovato, rimuovi il riferimento
                     userPreferencesRepository.updateLastUnfinishedGameId(-1L)
                     onError(Exception("No unfinished game found or game was already solved."))
                 }
@@ -150,10 +142,7 @@ class GameRepositoryImpl(
         try {
             val existingGameSessionResult: GameSession? = gameSessionDao.getGameSessionById(gameSession.id).firstOrNull()
 
-            //val existingSession = gameSessionDao.getGameSessionById(gameSession.id)
             val wasJustSolved = (existingGameSessionResult?.isSolved == false) && gameSession.isSolved
-
-
 
             val finalGameSession: GameSession = if (wasJustSolved) {
                 val endTime = System.currentTimeMillis()
@@ -173,11 +162,10 @@ class GameRepositoryImpl(
             gameSessionDao.updateGameSession(finalGameSession)
 
             if (wasJustSolved) {
-                // Rimuovi l'ID del gioco non finito dalle preferenze utente
                 userPreferencesRepository.updateLastUnfinishedGameId(-1L)
 
                 // Aggiorna le statistiche generali e i tempi record
-                val currentStats = userStatisticsDao.getUserStatistics().first() // Questo non dovrebbe più dare errore
+                val currentStats = userStatisticsDao.getUserStatistics().first()
 
                 // Inizializza con valori di default se non esistono ancora statistiche (prima volta)
                 val currentGamesPlayed = currentStats?.totalGamesPlayed ?: 0
@@ -186,7 +174,6 @@ class GameRepositoryImpl(
                 val currentBestEasy = currentStats?.bestSolveTimeEasyMillis
                 val currentBestMedium = currentStats?.bestSolveTimeMediumMillis
                 val currentBestHard = currentStats?.bestSolveTimeHardMillis
-                // Mappa a dominio, o crea nuovo
 
                 val newTotalGamesPlayed = currentGamesPlayed + 1
                 val newTotalGamesSolved = currentGamesSolved + 1
@@ -225,7 +212,7 @@ class GameRepositoryImpl(
         return gameSessionDao.getAllGameSessions().map { gameSessions ->
             val solvedGames = gameSessions.filter { it.isSolved }
 
-            var totalGamesPlayed = gameSessions.size // Tutti i giochi (risolti o meno)
+            var totalGamesPlayed = gameSessions.size
             var totalGamesSolved = solvedGames.size
 
             var totalSolveTimeMillis = 0L
@@ -235,7 +222,7 @@ class GameRepositoryImpl(
 
             solvedGames.forEach { session ->
                 session.durationSeconds?.let { duration ->
-                    val durationMillis = duration * 1000L // Converti secondi in millisecondi
+                    val durationMillis = duration * 1000L // Converte secondi in millisecondi
                     totalSolveTimeMillis += durationMillis
 
                     when (session.difficulty.toDifficultyLevel()) {
@@ -254,14 +241,12 @@ class GameRepositoryImpl(
                 totalGamesPlayed = totalGamesPlayed,
                 totalGamesSolved = totalGamesSolved,
                 averageSolveTimeMillis = averageSolveTimeMillis,
-                bestSolveTimeEasyMillis = easySolveTimes.minOrNull(), // minOrNull restituisce null se lista vuota
+                bestSolveTimeEasyMillis = easySolveTimes.minOrNull(),
                 bestSolveTimeMediumMillis = mediumSolveTimes.minOrNull(),
                 bestSolveTimeHardMillis = hardSolveTimes.minOrNull()
             )
         }
     }
-
-
     // Funzione per calcolare il punteggio basata sul tempo e la difficoltà
     private fun calculateScore(elapsedTimeSeconds: Long, difficulty: DifficultyLevel): Int {
         val baseScore = 10000 // Punti base

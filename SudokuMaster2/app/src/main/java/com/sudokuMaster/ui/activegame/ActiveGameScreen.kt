@@ -1,8 +1,8 @@
 package com.sudokuMaster.ui.activegame
 
+import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -22,7 +22,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.SudokuMaster.R
 import com.sudokuMaster.data.DifficultyLevel
@@ -158,7 +157,10 @@ fun ActiveGameScreen(
                                     modifier = Modifier.padding(bottom = 4.dp)
                                 )
                                 Text(
-                                    text = "Difficoltà: ${currentDifficulty?.name ?: "N/A"}",
+                                    text = stringResource(
+                                        R.string.difficult,
+                                        currentDifficulty?.name ?: "N/A"
+                                    ),
                                     style = MaterialTheme.typography.titleMedium,
                                     modifier = Modifier.padding(bottom = 8.dp)
                                 )
@@ -192,15 +194,18 @@ fun ActiveGameScreen(
                         // Usiamo un Spacer con weight per spingere gli elementi verso l'alto
                         Spacer(modifier = Modifier.weight(0.5f)) // Spazio superiore
 
-                        // Timer and Difficulty (raggruppati)
+                        // Timer and Difficulty
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
                                 text = stringResource(R.string.time, formatTime(timerState)),
                                 style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.padding(top = 16.dp, bottom = 4.dp) // Spostato un po' più su
+                                modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
                             )
                             Text(
-                                text = "Difficoltà: ${currentDifficulty?.name ?: "N/A"}",
+                                text = stringResource(
+                                    R.string.difficult2,
+                                    currentDifficulty?.name ?: "N/A"
+                                ),
                                 style = MaterialTheme.typography.titleMedium,
                                 modifier = Modifier.padding(bottom = 8.dp)
                             )
@@ -279,11 +284,10 @@ fun SudokuGrid(
 
     val borderColor = MaterialTheme.colorScheme.inversePrimary
 
-    // Rimuoviamo il .border() esterno dalla Column, perché lo gestiamo cella per cella.
     Column(
         modifier = modifier
             .aspectRatio(1f)
-            .padding(8.dp) // Lascia questo padding per distanziare la griglia dal resto
+            .padding(8.dp)
     ) {
         for (row in 0 until gridSize) {
             Row(
@@ -294,15 +298,9 @@ fun SudokuGrid(
                     val isSelected = selectedTile?.x == col && selectedTile?.y == row
                     val isInitial = tile.readOnly
 
-                    // Determina lo spessore del bordo per ogni lato della cella
-                    // Bordo superiore: spesso se riga 0, 3, 6 (inizio di un blocco 3x3 o griglia)
                     val topBorder = if (row % 3 == 0) thickLine else thinLine
-                    // Bordo sinistro: spesso se colonna 0, 3, 6 (inizio di un blocco 3x3 o griglia)
                     val leftBorder = if (col % 3 == 0) thickLine else thinLine
-
-                    // Bordo destro: spesso se colonna 2, 5, 8 (fine di un blocco 3x3 o griglia)
                     val rightBorder = if ((col + 1) % 3 == 0) thickLine else thinLine
-                    // Bordo inferiore: spesso se riga 2, 5, 8 (fine di un blocco 3x3 o griglia)
                     val bottomBorder = if ((row + 1) % 3 == 0) thickLine else thinLine
 
 
@@ -364,22 +362,17 @@ fun SudokuCell(
     val backgroundColor = when {
         isSelected -> {
             if (isCurrentThemeDark) {
-                // Usa la costante definita in Colors.kt per coerenza
-                MaterialTheme.colorScheme.onSurfaceVariant // Un colore che contrasta con la superficie, ma è per gli elementi selezionati.
-                // Ho usato onSurfaceVariant come placeholder, ma potresti volerlo definire
-                // come un nuovo colore nel tuo ColorScheme, o semplicemente usare SelectedTileBackgroundDark
-                // Oppure, se vuoi usare la tua costante:
-                // SelectedTileBackgroundDark // Assicurati di importare SelectedTileBackgroundDark se non è già accessibile
+                MaterialTheme.colorScheme.onSurfaceVariant
             } else {
                 MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
             }
         }
-        else -> MaterialTheme.colorScheme.secondary // Sfondo normale della cella
+        else -> MaterialTheme.colorScheme.secondary
     }
 
     val textColor = when {
-        isInitial -> MaterialTheme.colorScheme.onPrimary // <-- CORRETTO: Ora userà il ciano in Dark Mode
-        else -> MaterialTheme.colorScheme.onSurface      // <-- CORRETTO: Ora userà il bianco in Dark Mode, nero in Light Mode
+        isInitial -> MaterialTheme.colorScheme.onPrimary
+        else -> MaterialTheme.colorScheme.onSurface
     }
 
     Box(
@@ -396,16 +389,14 @@ fun SudokuCell(
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
                 ),
-                color = textColor // Usa il colore del testo ottenuto dal tema
+                color = textColor
             )
         }
     }
 }
 
 fun ColorScheme.isDark(): Boolean {
-    // Un modo semplice per determinare se il tema è scuro è controllare la luminanza del colore di sfondo.
-    // Valori di luminanza bassi indicano colori scuri.
-    // 0.5 è una soglia comune, ma puoi aggiustarla.
+    // Determina se il tema è scuro e controlla la luminanza del colore di sfondo.
     return background.luminance() < 0.5f
 }
 
@@ -420,7 +411,6 @@ fun NumberInput(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Row for numbers 1-5
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
@@ -429,9 +419,8 @@ fun NumberInput(
                 InputButton(displayValue = i.toString(), onClick = { onNumberClick(i) })
             }
         }
-        Spacer(Modifier.height(8.dp)) // Add some vertical space between rows
+        Spacer(Modifier.height(8.dp))
 
-        // Row for numbers 6-9 and Clear (X)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
@@ -439,7 +428,7 @@ fun NumberInput(
             for (i in 6..9) {
                 InputButton(displayValue = i.toString(), onClick = { onNumberClick(i) })
             }
-            InputButton(displayValue = "X", onClick = { onNumberClick(0) }) // 0 for clear
+            InputButton(displayValue = "X", onClick = { onNumberClick(0) })
         }
     }
 }
@@ -494,6 +483,7 @@ fun GameCompletionScreen(
     }
 }
 
+@SuppressLint("DefaultLocale")
 fun formatTime(seconds: Long): String {
     val hours = TimeUnit.SECONDS.toHours(seconds)
     val minutes = TimeUnit.SECONDS.toMinutes(seconds) % 60

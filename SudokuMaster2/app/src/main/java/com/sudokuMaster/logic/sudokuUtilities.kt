@@ -2,16 +2,13 @@ package com.sudokuMaster.logic
 
 import com.sudokuMaster.domain.SudokuNode
 import com.sudokuMaster.domain.SudokuPuzzle
-import com.sudokuMaster.domain.getHash
 import java.util.LinkedList
-import kotlin.math.sqrt
 
 
 internal val Int.sqrt: Int
     get() = kotlin.math.sqrt(this.toDouble()).toInt()
 
 internal fun SudokuPuzzle.isComplete(): Boolean {
-    // puzzleIsValid ora è SudokuPuzzle.isValid()
     return when {
         !this.isValid() -> false // Chiama la funzione di estensione
         !allSquaresAreFilled(this) -> false
@@ -30,12 +27,10 @@ internal fun SudokuPuzzle.isValid(): Boolean {
 
 
 internal fun rowsAreInvalid(puzzle: SudokuPuzzle): Boolean {
-    // Itera su ogni riga (0-based)
+
     (0 until puzzle.boundary).forEach { row ->
         val nodeList = getNodesByRow(puzzle.currentGraph, row)
-        // Itera sui possibili valori (da 1 al boundary)
         (1..puzzle.boundary).forEach { value ->
-            // Conta le occorrenze di 'value' (non zero)
             val occurrences = nodeList.count { it.color == value && it.color != 0 }
             if (occurrences > 1) return true
         }
@@ -45,12 +40,9 @@ internal fun rowsAreInvalid(puzzle: SudokuPuzzle): Boolean {
 
 
 internal fun columnsAreInvalid(puzzle: SudokuPuzzle): Boolean {
-    // Itera su ogni colonna (0-based)
     (0 until puzzle.boundary).forEach { col ->
         val nodeList = getNodesByColumn(puzzle.currentGraph, col)
-        // Itera sui possibili valori (da 1 al boundary)
         (1..puzzle.boundary).forEach { value ->
-            // Conta le occorrenze di 'value' (non zero)
             val occurrences = nodeList.count { it.color == value && it.color != 0 }
             if (occurrences > 1) return true
         }
@@ -59,19 +51,13 @@ internal fun columnsAreInvalid(puzzle: SudokuPuzzle): Boolean {
 }
 
 internal fun subgridsAreInvalid(puzzle: SudokuPuzzle): Boolean {
-    val boundary = puzzle.boundary // Usa puzzle.boundary per chiarezza, è 9
-    val interval = boundary.sqrt // Sarà 3 per un 9x9
+    val boundary = puzzle.boundary
+    val interval = boundary.sqrt
 
-    // Itera attraverso l'inizio di ogni sottogriglia
-    // (xIndex, yIndex) rappresenta l'indice della sottogriglia, non del nodo
-    (0 until interval).forEach { subgridRowIndex -> // Indice della riga della sottogriglia (0, 1, 2)
-        (0 until interval).forEach { subgridColIndex -> // Indice della colonna della sottogriglia (0, 1, 2)
-            // Calcola le coordinate (0-based) del primo nodo di questa sottogriglia
+    (0 until interval).forEach { subgridRowIndex ->
+        (0 until interval).forEach { subgridColIndex ->
             val startNodeX = subgridColIndex * interval
             val startNodeY = subgridRowIndex * interval
-
-            // Ottieni tutti i nodi per la sottogriglia a cui appartiene il nodo (startNodeX, startNodeY)
-            // La funzione getNodesBySubgrid ora calcola l'intera sottogriglia a partire da un qualsiasi nodo al suo interno.
             val subgridNodes = getNodesBySubgrid(
                 puzzle.currentGraph,
                 startNodeX,
@@ -115,25 +101,15 @@ internal fun getNodesByColumn(
 internal fun getNodesByRow(
     graph: LinkedHashMap<Int, LinkedList<SudokuNode>>, y: Int
 ): List<SudokuNode> {
-    // La mappa è già indicizzata per riga (y). Assumiamo che y sia 0-based.
-    // Se usi 1-based nell'interfaccia, converti y-1.
-    // Dalla buildNewSudokuPuzzleFromGrid, le righe sono aggiunte con chiave 'row' da 0 a 8.
-    return graph[y]?.toList() ?: emptyList() // Converti in List immutabile e gestisci il caso nullo
+    return graph[y]?.toList() ?: emptyList()
 }
 
 internal fun getNodesBySubgrid(
     graph: LinkedHashMap<Int, LinkedList<SudokuNode>>,
-    // Questi x e y dovrebbero essere le coordinate (0-based) di un nodo all'interno della sottogriglia
-    // es. per il nodo (0,0), (0,1) ecc.
-    // Se in ingresso ricevi x e y dell'angolo superiore sinistro (1-based), devi adattare
-    // Ma è più robusto calcolare la subgrid a cui appartiene un dato nodo (x,y)
-    // Riscrivo questa funzione per prendere un x e y di QUALSIASI nodo e trovare la sua sottogriglia.
     nodeX: Int, nodeY: Int, boundary: Int
 ): List<SudokuNode> {
     val subgridNodes = mutableListOf<SudokuNode>()
-    val subgridSize = boundary.sqrt // Per Sudoku 9x9, sqrt è 3
-
-    // Calcola la riga e la colonna di inizio della sottogriglia a cui appartiene (nodeX, nodeY)
+    val subgridSize = boundary.sqrt
     val startRow = (nodeY / subgridSize) * subgridSize
     val endRow = startRow + subgridSize -1
 
@@ -143,7 +119,7 @@ internal fun getNodesBySubgrid(
     // Itera su tutte le righe che fanno parte di questa sottogriglia
     for (row in startRow..endRow) {
         graph[row]?.forEach { node ->
-            // Aggiungi solo i nodi che rientrano nelle colonne della sottogriglia
+            // Aggiunge solo i nodi che rientrano nelle colonne della sottogriglia
             if (node.x in startCol..endCol) {
                 subgridNodes.add(node)
             }
@@ -152,25 +128,4 @@ internal fun getNodesBySubgrid(
     return subgridNodes
 }
 
-
-internal fun getIntervalMax(boundary: Int, target: Int): Int {
-    val interval = boundary.sqrt
-    (1..interval).forEach { index ->
-        if (interval * index >= target && target > (interval * index - interval)) {
-            return index * interval
-        }
-    }
-    return boundary
-}
-
-internal fun SudokuPuzzle.print() {
-    val boundary = this.boundary // Usa puzzle.boundary, che è 9
-    (0 until boundary).forEach { y -> // Itera sulle righe da 0 a 8
-        val row = (0 until boundary).map { x -> // Itera sulle colonne da 0 a 8
-            // Accedi alla LinkedList della riga 'y' e trova il nodo con x 'x'
-            currentGraph[y]?.find { node -> node.x == x }?.color?.toString() ?: "."
-        }.joinToString(" ")
-        println(row)
-    }
-}
 

@@ -22,7 +22,9 @@
     <string name="continua_partita">Continue Game</string>
     <string name="difficolt">Difficulty: %1$s</string>
     <string name="difficolt_predefinita">Default difficulty:</string>
-    <string name="difficulty">Difficult</string>
+    <string name="difficult">difficulty</string>
+    <string name="difficult2">Difficulty: %1$s</string>
+    <string name="difficulty">Difficulty</string>
     <string name="difficulty2">Difficulty: %1$s</string>
     <string name="difficulty_easy">Easy</string>
     <string name="difficulty_hard">Hard</string>

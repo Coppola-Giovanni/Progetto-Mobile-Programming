@@ -24,6 +24,5 @@ interface GameRepositoryInterface {
         onError: (Throwable) -> Unit
     )
 
-    // Ora restituisce un Flow di UserStatistics, come da implementazione
     suspend fun getUserStatistics(): Flow<UserStatistics>
 }

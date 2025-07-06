@@ -26,6 +26,8 @@ string congratulazioni
 string continua_partita
 string difficolt
 string difficolt_predefinita
+string difficult
+string difficult2
 string difficulty
 string difficulty2
 string difficulty_easy

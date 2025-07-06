@@ -3931,6 +3931,8 @@ string default_error_message
 string default_popup_window_title
 string difficolt
 string difficolt_predefinita
+string difficult
+string difficult2
 string difficulty
 string difficulty2
 string difficulty_easy

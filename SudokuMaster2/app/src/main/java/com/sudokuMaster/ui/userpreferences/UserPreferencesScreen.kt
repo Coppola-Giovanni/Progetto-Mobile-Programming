@@ -16,7 +16,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -29,10 +28,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.SudokuMaster.R
 import com.sudokuMaster.data.AppTheme
 import com.sudokuMaster.data.DifficultyLevel
-import com.sudokuMaster.ui.Screen
-import com.SudokuMaster.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,16 +72,14 @@ fun UserPreferencesScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             userPreferences?.let { prefs ->
-                // Esempio: Selezione del Tema
                 Text(text = stringResource(R.string.tema_app), style = MaterialTheme.typography.titleMedium)
-                // Puoi usare un DropdownMenu, RadioButtons o Slider per selezionare il tema
-                // Per semplicità, usiamo un bottone per cambiare ciclicamente il tema
+
                 Button(onClick = {
                     val nextTheme = when (prefs.appTheme) {
                         AppTheme.LIGHT -> AppTheme.DARK
                         AppTheme.DARK -> AppTheme.SYSTEM_DEFAULT
                         AppTheme.SYSTEM_DEFAULT -> AppTheme.LIGHT
-                        AppTheme.THEME_UNSPECIFIED -> AppTheme.LIGHT // Default se non specificato
+                        AppTheme.THEME_UNSPECIFIED -> AppTheme.LIGHT
                         else -> AppTheme.LIGHT
                     }
                     userPreferencesViewModel.updateAppTheme(nextTheme)
@@ -92,7 +88,6 @@ fun UserPreferencesScreen(
                 }
                 Spacer(Modifier.height(16.dp))
 
-                // Esempio: Selezione Difficoltà Default
                 Text(text = stringResource(R.string.difficolt_predefinita), style = MaterialTheme.typography.titleMedium)
                 Button(onClick = {
                     val nextDifficulty = when (prefs.defaultDifficulty) {
@@ -108,7 +103,6 @@ fun UserPreferencesScreen(
                 }
                 Spacer(Modifier.height(16.dp))
 
-                // Esempio: Abilitare/Disabilitare Suono
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -121,7 +115,6 @@ fun UserPreferencesScreen(
                     )
                 }
             } ?: run {
-                // Caricamento o errore
                 Text(stringResource(R.string.caricamento_preferenze), style = MaterialTheme.typography.titleMedium)
             }
 

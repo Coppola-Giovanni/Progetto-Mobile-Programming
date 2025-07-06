@@ -17,5 +17,5 @@ interface UserStatisticsDAO {
     suspend fun updateUserStatistics(stats: UserStatistics)
 
     @Query("SELECT * FROM user_statistics WHERE id = 1")
-    fun getUserStatistics(): Flow<UserStatistics?> // Flow per reattività
+    fun getUserStatistics(): Flow<UserStatistics?>
 }

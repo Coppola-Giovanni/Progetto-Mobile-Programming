@@ -13,4 +13,3 @@ object ProductionDispatcherProvider : DispatcherProvider {
     }
 }
 
-//object == singleton, thread safe, can inherit from interface

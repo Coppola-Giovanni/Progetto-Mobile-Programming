@@ -10,7 +10,7 @@ import java.util.LinkedList
 fun SudokuPuzzle.toGameSession(existingId: Long = 0L, isSolved: Boolean = false, score: Int = 0): GameSession {
     val initialGridString = StringBuilder()
     this.initialGraph.forEach { (_, nodes) ->
-        nodes.sortBy { it.x } // Assicurati che i nodi siano ordinati per X per la stringa
+        nodes.sortBy { it.x }
         nodes.forEach { node ->
             initialGridString.append(node.color)
         }
@@ -18,37 +18,35 @@ fun SudokuPuzzle.toGameSession(existingId: Long = 0L, isSolved: Boolean = false,
 
     val currentGridString = StringBuilder()
     this.currentGraph.forEach { (_, nodes) ->
-        nodes.sortBy { it.x } // Assicurati che i nodi siano ordinati per X per la stringa
+        nodes.sortBy { it.x }
         nodes.forEach { node ->
             currentGridString.append(node.color)
         }
     }
 
-    // La logica di startTimeMillis/endTimeMillis/duration_seconds sarà gestita dal repository
-    // durante il salvataggio/aggiornamento. Qui passiamo solo elapsedTime
     val currentTimestamp = System.currentTimeMillis()
 
     return GameSession(
-        id = existingId, // L'ID esistente se stiamo aggiornando, 0 per un nuovo gioco
-        difficulty = this.difficulty.name, // Converti l'enum in String
+        id = existingId, // 0 per un nuovo gioco
+        difficulty = this.difficulty.name,
         initialGrid = initialGridString.toString(),
         currentGrid = currentGridString.toString(),
         startTimeMillis = currentTimestamp - (this.elapsedTime * 1000L), // Stima del tempo di inizio
-        endTimeMillis = if (isSolved) currentTimestamp else null, // Imposta solo se risolto
+        endTimeMillis = if (isSolved) currentTimestamp else null,
         durationSeconds = this.elapsedTime, // Tempo trascorso in secondi
-        score = score, // Punti, aggiornati dal repository alla risoluzione
-        isSolved = isSolved, // Stato di risoluzione
+        score = score,
+        isSolved = isSolved,
         datePlayedMillis = if (isSolved) currentTimestamp else 0L // Data di gioco solo se risolto
     )
 }
 
 fun GameSession.toSudokuPuzzle(): SudokuPuzzle {
-    val boundary = 9 // Assumiamo Sudoku 9x9
+    val boundary = 9
 
     val initialGraph = LinkedHashMap<Int, LinkedList<SudokuNode>>()
     val currentGraph = LinkedHashMap<Int, LinkedList<SudokuNode>>()
 
-    // Ricostruisci initialGraph e currentGraph dalle stringhe della griglia
+    // Ricostruisce initialGraph e currentGraph dalle stringhe della griglia
     for (row in 0 until boundary) {
         val initialRowList = LinkedList<SudokuNode>()
         val currentRowList = LinkedList<SudokuNode>()
@@ -61,7 +59,7 @@ fun GameSession.toSudokuPuzzle(): SudokuPuzzle {
                     x = col,
                     y = row,
                     color = initialValue,
-                    readOnly = initialValue != 0 // readOnly basato sull'initialValue
+                    readOnly = initialValue != 0
                 )
             )
             currentRowList.add(
@@ -69,7 +67,7 @@ fun GameSession.toSudokuPuzzle(): SudokuPuzzle {
                     x = col,
                     y = row,
                     color = currentValue,
-                    readOnly = initialValue != 0 // readOnly basato sull'initialValue
+                    readOnly = initialValue != 0
                 )
             )
         }
@@ -77,26 +75,34 @@ fun GameSession.toSudokuPuzzle(): SudokuPuzzle {
         currentGraph[row] = currentRowList
     }
 
-    // Ordina i nodi all'interno di ogni riga per x per garantire la coerenza
+
     initialGraph.forEach { (_, list) -> list.sortBy { it.x } }
     currentGraph.forEach { (_, list) -> list.sortBy { it.x } }
 
     return SudokuPuzzle(
         id = this.id,
         boundary = boundary,
-        difficulty = DifficultyLevel.valueOf(this.difficulty), // Converti String in Enum
+        difficulty = DifficultyLevel.valueOf(this.difficulty),
         initialGraph = initialGraph,
         currentGraph = currentGraph,
-        elapsedTime = this.durationSeconds ?: 0L // Utilizza durationSeconds per elapsedTime
+        elapsedTime = this.durationSeconds ?: 0L
     )
 }
 
-// Estensione per convertire String in DifficultyLevel (utile altrove, se necessario)
 fun String.toDifficultyLevel(): DifficultyLevel {
     return try {
         DifficultyLevel.valueOf(this.uppercase())
     } catch (e: IllegalArgumentException) {
         DifficultyLevel.MEDIUM // Fallback a MEDIUM o un altro default sensato
     }
+}
+
+internal fun Long.toTime(): String {
+    if( this >= 3600) return "+59:59"
+    var minutes = ((this % 3600) / 60).toString()
+    if(minutes.length == 1) minutes = "0$minutes"
+    var seconds = (this % 60).toString()
+    if (seconds.length == 1) seconds = "0$seconds"
+    return String.format("$minutes:$seconds")
 }
 

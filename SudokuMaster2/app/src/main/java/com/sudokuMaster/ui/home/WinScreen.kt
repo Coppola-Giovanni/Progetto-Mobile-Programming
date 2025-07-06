@@ -1,5 +1,6 @@
 package com.sudokuMaster.ui.home
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -25,10 +26,7 @@ fun WinScreen(
 ) {
     val isSolved by activeGameViewModel.isSolved.collectAsState()
     val timerState by activeGameViewModel.timerState.collectAsState()
-    val isNewRecord by activeGameViewModel.isNewRecord.collectAsState() // Se decidi di implementarlo
-
-    // Questo Composable viene mostrato solo quando il gioco è completo
-    // Ma è buona pratica verificare comunque lo stato
+    val isNewRecord by activeGameViewModel.isNewRecord.collectAsState()
     val activeGameScreenState by activeGameViewModel.activeGameScreenState.collectAsState()
 
     if (activeGameScreenState == ActiveGameScreenState.COMPLETE && isSolved) {
@@ -56,7 +54,7 @@ fun WinScreen(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
-            if (isNewRecord) { // Se vuoi mostrare se è un nuovo record
+            if (isNewRecord) {
                 Text(
                     text = stringResource(R.string.nuovo_record_personale),
                     style = MaterialTheme.typography.titleMedium,
@@ -70,7 +68,7 @@ fun WinScreen(
             Button(
                 onClick = {
                     navController.popBackStack(Screen.HomeScreen.route, inclusive = false)
-                    navController.navigate(Screen.HomeScreen.route) // Torna alla Home
+                    navController.navigate(Screen.HomeScreen.route)
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -81,10 +79,8 @@ fun WinScreen(
 
             Button(
                 onClick = {
-                    // Potresti voler avviare una nuova partita direttamente da qui
-                    // oppure navigare a una schermata di selezione difficoltà
-                    navController.popBackStack(Screen.ActiveGameScreen.route, inclusive = true) // Rimuove anche la WinScreen
-                    navController.navigate(Screen.ActiveGameScreen.createRoute("new")) // Avvia una nuova partita
+                    navController.popBackStack(Screen.ActiveGameScreen.route, inclusive = true)
+                    navController.navigate(Screen.ActiveGameScreen.createRoute("new"))
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -102,13 +98,10 @@ fun WinScreen(
                 Text(stringResource(R.string.vedi_statistiche))
             }
         }
-    } else {
-        // Se lo stato non è COMPLETE, non mostrare questa schermata o gestire un fallback
-        // Questo è importante se WinScreen può essere navigato per errore.
-        // In un'applicazione reale, potresti voler mostrare uno spinner o un messaggio di errore.
     }
 }
 
+@SuppressLint("DefaultLocale")
 fun formatTime(seconds: Long): String {
     val minutes = TimeUnit.SECONDS.toMinutes(seconds)
     val remainingSeconds = seconds - TimeUnit.MINUTES.toSeconds(minutes)

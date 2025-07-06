@@ -12,11 +12,11 @@ import com.sudokuMaster.data.model.GameSession
 import com.sudokuMaster.data.model.UserStatistics
 
 @Database(
-    entities = [GameSession::class, UserStatistics::class], // Tutte le entità del tuo database
-    version = 1,                     // La versione del database. Incrementala per le migrazioni.
-    exportSchema = false             // Imposta a true per esportare lo schema per le migrazioni in produzione.
+    entities = [GameSession::class, UserStatistics::class],
+    version = 1,
+    exportSchema = false
 )
-@TypeConverters(SudokuGraphConverter::class) // Registra qui i tuoi TypeConverters
+@TypeConverters(SudokuGraphConverter::class)
 abstract class AppDatabase : RoomDatabase() {
 
     // Metodi astratti per ottenere le istanze dei DAO
@@ -24,7 +24,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun userStatisticsDao(): UserStatisticsDAO
 
     companion object {
-        // La singola istanza del database per evitare problemi di concorrenza.
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
@@ -35,16 +34,12 @@ abstract class AppDatabase : RoomDatabase() {
          * @return L'istanza di AppDatabase.
          */
         fun getDatabase(context: Context): AppDatabase {
-            // Se l'istanza non è null, restituiscila. Altrimenti, crea un nuovo database.
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
-                    context.applicationContext, // Usa il contesto dell'applicazione per evitare memory leak
+                    context.applicationContext,
                     AppDatabase::class.java,
                     "sudoku_master_db" // Nome del file del database
                 )
-                    // Strategia di migrazione distruttiva per lo sviluppo.
-                    // In produzione, dovresti gestire le migrazioni in modo più controllato.
-                    // .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
                 instance

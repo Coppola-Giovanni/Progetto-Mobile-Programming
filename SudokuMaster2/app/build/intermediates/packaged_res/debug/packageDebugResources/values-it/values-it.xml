@@ -13,6 +13,8 @@
     <string name="continua_partita">Continua Partita</string>
     <string name="difficolt">Difficoltà: %1$s</string>
     <string name="difficolt_predefinita">Difficoltà predefinita:</string>
+    <string name="difficult">Difficoltà: %1$s</string>
+    <string name="difficult2">Difficoltà: %1$s</string>
     <string name="difficulty">Difficoltà</string>
     <string name="difficulty2">Difficolta: %1$s</string>
     <string name="difficulty_easy">Facile</string>

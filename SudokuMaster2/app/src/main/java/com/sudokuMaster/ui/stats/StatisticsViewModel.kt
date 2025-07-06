@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.sudokuMaster.domain.GameRepositoryInterface
 import com.sudokuMaster.data.model.UserStatistics
-import com.sudokuMaster.common.DispatcherProvider // Assicurati che questo import sia corretto
+import com.sudokuMaster.common.DispatcherProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 
 class StatisticsViewModel(
     private val gameRepository: GameRepositoryInterface,
-    private val dispatcherProvider: DispatcherProvider // Inietta DispatcherProvider
+    private val dispatcherProvider: DispatcherProvider
 ) : ViewModel() {
 
     private val _userStatistics = MutableStateFlow<UserStatistics?>(null)

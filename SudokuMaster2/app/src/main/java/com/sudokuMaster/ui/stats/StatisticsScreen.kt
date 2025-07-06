@@ -1,5 +1,6 @@
 package com.sudokuMaster.ui.stats
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,30 +25,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.sudokuMaster.common.ProductionDispatcherProvider
-import com.sudokuMaster.common.toTime
-import com.sudokuMaster.data.database.AppDatabase
-import com.sudokuMaster.data.repository.GameRepositoryImpl
-import com.sudokuMaster.data.repository.UserPreferencesRepositoryImpl
-import com.sudokuMaster.data.source.SudokuRemoteDataSource
-import com.sudokuMaster.data.source.SudokuApiService
-import com.sudokuMaster.data.source.ApiResponse
-import com.sudokuMaster.data.userPreferencesDataStore
-import com.sudokuMaster.ui.theme.GraphSudokuTheme
-import java.util.concurrent.TimeUnit
 import com.SudokuMaster.R
+import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatisticsScreen(
-    navController: NavController, // Now receiving NavController
-    statisticsViewModel: StatisticsViewModel, // Now receiving the ViewModel directly
+    navController: NavController,
+    statisticsViewModel: StatisticsViewModel,
     modifier: Modifier = Modifier,
 ) {
     val userStatistics by statisticsViewModel.userStatistics.collectAsState()
@@ -59,7 +47,7 @@ fun StatisticsScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.statistiche_di_gioco)) },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) { // Use navController.popBackStack()
+                    IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
@@ -96,7 +84,6 @@ fun StatisticsScreen(
                     modifier = Modifier.padding(16.dp)
                 )
             } else {
-                // Now directly access properties from UserStatisticsEntity
                 userStatistics?.let { stats ->
                     Text(stringResource(R.string.statistiche_utente), style = MaterialTheme.typography.headlineLarge)
                     Spacer(modifier = Modifier.height(16.dp))
@@ -134,6 +121,7 @@ fun StatsRow(label: String, value: String) {
 }
 
 // Helper function to format milliseconds to MM:SS
+@SuppressLint("DefaultLocale")
 fun formatMillis(millis: Long): String {
     val seconds = TimeUnit.MILLISECONDS.toSeconds(millis)
     val minutes = TimeUnit.SECONDS.toMinutes(seconds)
