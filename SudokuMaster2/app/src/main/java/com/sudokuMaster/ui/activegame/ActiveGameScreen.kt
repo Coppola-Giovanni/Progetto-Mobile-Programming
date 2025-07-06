@@ -1,62 +1,50 @@
 package com.sudokuMaster.ui.activegame
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.navigation.NavController
+import com.SudokuMaster.R
 import com.sudokuMaster.data.DifficultyLevel
 import java.util.concurrent.TimeUnit
-import androidx.navigation.NavController
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.IconButton
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import android.content.res.Configuration
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.stringResource
-import com.SudokuMaster.R
+import androidx.compose.ui.graphics.luminance
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActiveGameScreen(
     activeGameViewModel: ActiveGameViewModel,
-    navController: NavController, // NavController viene passato dalla MainActivity
+    navController: NavController,
     modifier: Modifier = Modifier,
 ) {
 
-    val activeGameScreenState by activeGameViewModel.activeGameScreenState.collectAsState() // Usa activeGameViewModel
-    val sudokuTiles by activeGameViewModel.sudokuTiles.collectAsState() // Usa activeGameViewModel
-    val timerState by activeGameViewModel.timerState.collectAsState() // Usa activeGameViewModel
-    val selectedTile by activeGameViewModel.selectedTile.collectAsState() // Usa activeGameViewModel
-    val isSolved by activeGameViewModel.isSolved.collectAsState() // Usa activeGameViewModel
-    val currentDifficulty by activeGameViewModel.currentDifficulty.collectAsState() // Usa activeGameViewModel
-    val isNewRecord by activeGameViewModel.isNewRecord.collectAsState() // Usa activeGameViewModel
+    val activeGameScreenState by activeGameViewModel.activeGameScreenState.collectAsState()
+    val sudokuTiles by activeGameViewModel.sudokuTiles.collectAsState()
+    val timerState by activeGameViewModel.timerState.collectAsState()
+    val selectedTile by activeGameViewModel.selectedTile.collectAsState()
+    val isSolved by activeGameViewModel.isSolved.collectAsState()
+    val currentDifficulty by activeGameViewModel.currentDifficulty.collectAsState()
+    val isNewRecord by activeGameViewModel.isNewRecord.collectAsState()
 
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
@@ -74,19 +62,17 @@ fun ActiveGameScreen(
         }
     }
 
-    val configuration = LocalConfiguration.current // Ottieni la configurazione corrente
+    val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    // Potresti mettere un titolo qui, ad esempio "Sudoku"
                     Text("Sudoku Master", color = MaterialTheme.colorScheme.onPrimaryContainer)
                 },
                 navigationIcon = {
                     IconButton(onClick = {
-                        // Quando si clicca la freccia indietro, si torna alla schermata precedente
                         navController.popBackStack()
                     }) {
                         Icon(
@@ -96,12 +82,12 @@ fun ActiveGameScreen(
                         )
                     }
                 },
-                actions = { // <<< AGGIUNGI IL BLOCCO ACTIONS QUI
+                actions = {
                     IconButton(onClick = {
-                        navController.navigate("user_preferences_screen") // Naviga alla nuova destinazione
+                        navController.navigate("user_preferences_screen")
                     }) {
                         Icon(
-                            imageVector = Icons.Filled.Settings, // Icona per le impostazioni
+                            imageVector = Icons.Filled.Settings,
                             contentDescription = stringResource(R.string.impostazioni_utente),
                             tint = MaterialTheme.colorScheme.onPrimaryContainer
                         )
@@ -115,148 +101,163 @@ fun ActiveGameScreen(
             )
         }
     ) { paddingValues ->
-
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            when (activeGameScreenState) {
-                ActiveGameScreenState.LOADING -> {
+        when (activeGameScreenState) {
+            ActiveGameScreenState.LOADING -> {
+                Column(
+                    modifier = modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
                     CircularProgressIndicator(modifier = Modifier.size(64.dp))
                     Text(text = stringResource(R.string.loading_sudoku), style = MaterialTheme.typography.titleMedium)
                 }
-                ActiveGameScreenState.ACTIVE -> {
-                    if (isLandscape) {
-                        Row(
+            }
+            ActiveGameScreenState.ACTIVE -> {
+                if (isLandscape) {
+                    // --- Layout per Landscape ---
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                            .padding(horizontal = 8.dp, vertical = 4.dp), // Padding generale per Landscape
+                        verticalAlignment = Alignment.CenterVertically // Centra verticalmente l'intera riga
+                    ) {
+                        // Sudoku Grid (Left side)
+                        Column(
                             modifier = Modifier
-                                .fillMaxSize(),
-                            verticalAlignment = Alignment.CenterVertically // Centra verticalmente l'intera riga
+                                .weight(0.6f) // Maggiore spazio per la griglia
+                                .fillMaxHeight(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
                         ) {
-                            // Left side: Timer, Difficulty, and Sudoku Grid
-                            Column(
+                            SudokuGrid(
+                                tiles = sudokuTiles,
+                                selectedTile = selectedTile,
+                                onTileClick = { x, y -> activeGameViewModel.onEvent(ActiveGameEvent.onTileFocused(x, y)) },
                                 modifier = Modifier
-                                    .weight(0.35f)
-                                    .fillMaxHeight(),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                SudokuGrid(
-                                    tiles = sudokuTiles,
-                                    selectedTile = selectedTile,
-                                    onTileClick = { x, y -> activeGameViewModel.onEvent(ActiveGameEvent.onTileFocused(x, y)) },
-                                    modifier = Modifier
-                                        .fillMaxHeight()
-                                )
+                                    .fillMaxHeight()
+                                    .padding(end = 8.dp) // Spazio tra griglia e controlli
+                            )
+                        }
 
-                            }
-
-                            // Right side: Number Input
-                            Column(
-                                modifier = Modifier
-                                    .weight(0.35f)
-                                    .fillMaxHeight(),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center // Centra verticalmente i tasti di input
-                            ) {
+                        // Controls (Right side)
+                        Column(
+                            modifier = Modifier
+                                .weight(0.4f) // Meno spazio per i controlli
+                                .fillMaxHeight(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.SpaceAround // Distribuisce lo spazio
+                        ) {
+                            // Timer and Difficulty
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
-                                    text = "Tempo: ${formatTime(timerState)}",
+                                    text = stringResource(R.string.time, formatTime(timerState)),
                                     style = MaterialTheme.typography.titleMedium,
                                     modifier = Modifier.padding(bottom = 4.dp)
                                 )
-
                                 Text(
                                     text = "Difficoltà: ${currentDifficulty?.name ?: "N/A"}",
                                     style = MaterialTheme.typography.titleMedium,
                                     modifier = Modifier.padding(bottom = 8.dp)
                                 )
-
-                                NumberInput(onNumberClick = { number ->
-                                    activeGameViewModel.onEvent(ActiveGameEvent.onInput(number))
-                                })
-
-                                Button(
-                                    onClick = { activeGameViewModel.onEvent(ActiveGameEvent.OnSuggestMoveClicked) },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp)
-                                ) {
-                                    Text(stringResource(R.string.suggest_move))
-                                }
-
-                                Spacer(Modifier.height(16.dp))
                             }
+
+                            // Suggestion Button
+                            Button(
+                                onClick = { activeGameViewModel.onEvent(ActiveGameEvent.OnSuggestMoveClicked) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 8.dp) // Padding adeguato
+                            ) {
+                                Text(stringResource(R.string.suggest_move))
+                            }
+
+                            // Number Input
+                            NumberInput(onNumberClick = { number ->
+                                activeGameViewModel.onEvent(ActiveGameEvent.onInput(number))
+                            })
                         }
-                    } else {
-                        Column(
-                            modifier = modifier
-                                .fillMaxSize()
-                                .padding(paddingValues),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Top
-                        ) {
+                    }
+                } else {
+                    // --- Layout per Portrait ---
+                    Column(
+                        modifier = modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.SpaceAround // Distribuisce lo spazio in verticale
+                    ) {
+                        // Usiamo un Spacer con weight per spingere gli elementi verso l'alto
+                        Spacer(modifier = Modifier.weight(0.5f)) // Spazio superiore
 
-
+                        // Timer and Difficulty (raggruppati)
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = stringResource(R.string.time,formatTime(timerState)),
+                                text = stringResource(R.string.time, formatTime(timerState)),
                                 style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.padding(top = 4.dp)
+                                modifier = Modifier.padding(top = 16.dp, bottom = 4.dp) // Spostato un po' più su
                             )
-
                             Text(
                                 text = "Difficoltà: ${currentDifficulty?.name ?: "N/A"}",
                                 style = MaterialTheme.typography.titleMedium,
                                 modifier = Modifier.padding(bottom = 8.dp)
                             )
-
-                            SudokuGrid(
-                                tiles = sudokuTiles,
-                                selectedTile = selectedTile,
-                                onTileClick = { x, y -> activeGameViewModel.onEvent(ActiveGameEvent.onTileFocused(x, y)) }
-                            )
-
-                            Spacer(Modifier.height(16.dp))
-
-                            Button(
-                                onClick = { activeGameViewModel.onEvent(ActiveGameEvent.OnSuggestMoveClicked) },
-                                modifier = Modifier
-                                           .fillMaxWidth()
-                                           .padding(horizontal = 16.dp)
-                            ) {
-                                Text(stringResource(R.string.suggest_move))
-                            }
-
-                            Spacer(Modifier.height(16.dp))
-
-
-
-                            NumberInput(onNumberClick = { number ->
-                                activeGameViewModel.onEvent(ActiveGameEvent.onInput(number))
-                            })
-
-                            Spacer((Modifier.height(16.dp)))
                         }
+
+                        SudokuGrid(
+                            tiles = sudokuTiles,
+                            selectedTile = selectedTile,
+                            onTileClick = { x, y -> activeGameViewModel.onEvent(ActiveGameEvent.onTileFocused(x, y)) }
+                        )
+
+                        Spacer(Modifier.height(16.dp)) // Spazio tra griglia e suggestion button
+
+                        Button(
+                            onClick = { activeGameViewModel.onEvent(ActiveGameEvent.OnSuggestMoveClicked) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                        ) {
+                            Text(stringResource(R.string.suggest_move))
+                        }
+
+                        // Usiamo un Spacer per dare respiro ai bottoni se necessario
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        NumberInput(onNumberClick = { number ->
+                            activeGameViewModel.onEvent(ActiveGameEvent.onInput(number))
+                        })
+
+                        // Usiamo un Spacer con weight per assicurare che i bottoni non siano schiacciati in basso
+                        Spacer(modifier = Modifier.weight(0.5f)) // Spazio inferiore
                     }
                 }
-                ActiveGameScreenState.COMPLETE -> {
-                    GameCompletionScreen(
-                        timerState = timerState,
-                        difficulty = currentDifficulty,
-                        isNewRecord = isNewRecord,
-                        onNewGameClick = { activeGameViewModel.onEvent(ActiveGameEvent.OnNewGameClicked) }
-                    )
-                }
-                ActiveGameScreenState.ERROR -> {
-                    // Puoi aggiungere una UI di errore più sofisticata qui
+            }
+            ActiveGameScreenState.COMPLETE -> {
+                GameCompletionScreen(
+                    timerState = timerState,
+                    difficulty = currentDifficulty,
+                    isNewRecord = isNewRecord,
+                    onNewGameClick = { activeGameViewModel.onEvent(ActiveGameEvent.OnNewGameClicked) }
+                )
+            }
+            ActiveGameScreenState.ERROR -> {
+                Column(
+                    modifier = modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
                     Text(
                         text = stringResource(R.string.si_verificato_un_errore_durante_il_caricamento_del_gioco),
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(16.dp)
                     )
-                    Button(onClick = { navController.popBackStack() }) { // Torna alla home
+                    Button(onClick = { navController.popBackStack() }) {
                         Text(stringResource(R.string.back_to_home))
                     }
                 }
@@ -278,11 +279,11 @@ fun SudokuGrid(
 
     val borderColor = MaterialTheme.colorScheme.inversePrimary
 
+    // Rimuoviamo il .border() esterno dalla Column, perché lo gestiamo cella per cella.
     Column(
-        modifier = Modifier
+        modifier = modifier
             .aspectRatio(1f)
-            .padding(8.dp)
-            .border(thickLine, borderColor) // Overall outer border of the Sudoku grid
+            .padding(8.dp) // Lascia questo padding per distanziare la griglia dal resto
     ) {
         for (row in 0 until gridSize) {
             Row(
@@ -293,18 +294,16 @@ fun SudokuGrid(
                     val isSelected = selectedTile?.x == col && selectedTile?.y == row
                     val isInitial = tile.readOnly
 
-                    // Determine border widths for this cell
-                    val currentThinLine = 1.dp
-                    val currentThickLine = 3.dp
+                    // Determina lo spessore del bordo per ogni lato della cella
+                    // Bordo superiore: spesso se riga 0, 3, 6 (inizio di un blocco 3x3 o griglia)
+                    val topBorder = if (row % 3 == 0) thickLine else thinLine
+                    // Bordo sinistro: spesso se colonna 0, 3, 6 (inizio di un blocco 3x3 o griglia)
+                    val leftBorder = if (col % 3 == 0) thickLine else thinLine
 
-                    // Left border is thick if it's the start of a 3x3 block (col 0, 3, 6)
-                    val leftBorder = if (col % 3 == 0) currentThickLine else currentThinLine
-                    // Top border is thick if it's the start of a 3x3 block (row 0, 3, 6)
-                    val topBorder = if (row % 3 == 0) currentThickLine else currentThinLine
-                    // Right border is thick if it's the end of a 3x3 block (col 2, 5) and not the very last column
-                    val rightBorder = if ((col + 1) % 3 == 0 && col != gridSize - 1) currentThickLine else currentThinLine
-                    // Bottom border is thick if it's the end of a 3x3 block (row 2, 5) and not the very last row
-                    val bottomBorder = if ((row + 1) % 3 == 0 && row != gridSize - 1) currentThickLine else currentThinLine
+                    // Bordo destro: spesso se colonna 2, 5, 8 (fine di un blocco 3x3 o griglia)
+                    val rightBorder = if ((col + 1) % 3 == 0) thickLine else thinLine
+                    // Bordo inferiore: spesso se riga 2, 5, 8 (fine di un blocco 3x3 o griglia)
+                    val bottomBorder = if ((row + 1) % 3 == 0) thickLine else thinLine
 
 
                     SudokuCell(
@@ -315,7 +314,7 @@ fun SudokuGrid(
                         modifier = Modifier
                             .weight(1f)
                             .aspectRatio(1f)
-                            .drawBehind { // Use drawBehind for precise border drawing
+                            .drawBehind {
                                 // Draw top border
                                 drawLine(
                                     color = borderColor,
@@ -330,24 +329,20 @@ fun SudokuGrid(
                                     end = Offset(0f, size.height),
                                     strokeWidth = leftBorder.toPx()
                                 )
-                                // Draw right border (only if not the very last column, as outer border handles it)
-                                if (col != gridSize - 1) {
-                                    drawLine(
-                                        color = borderColor,
-                                        start = Offset(size.width, 0f),
-                                        end = Offset(size.width, size.height),
-                                        strokeWidth = rightBorder.toPx()
-                                    )
-                                }
-                                // Draw bottom border (only if not the very last row, as outer border handles it)
-                                if (row != gridSize - 1) {
-                                    drawLine(
-                                        color = borderColor,
-                                        start = Offset(0f, size.height),
-                                        end = Offset(size.width, size.height),
-                                        strokeWidth = bottomBorder.toPx()
-                                    )
-                                }
+                                // Draw right border
+                                drawLine(
+                                    color = borderColor,
+                                    start = Offset(size.width, 0f),
+                                    end = Offset(size.width, size.height),
+                                    strokeWidth = rightBorder.toPx()
+                                )
+                                // Draw bottom border
+                                drawLine(
+                                    color = borderColor,
+                                    start = Offset(0f, size.height),
+                                    end = Offset(size.width, size.height),
+                                    strokeWidth = bottomBorder.toPx()
+                                )
                             }
                     )
                 }
@@ -364,14 +359,27 @@ fun SudokuCell(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val isCurrentThemeDark = MaterialTheme.colorScheme.isDark()
+
     val backgroundColor = when {
-        isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-        else -> MaterialTheme.colorScheme.secondary
+        isSelected -> {
+            if (isCurrentThemeDark) {
+                // Usa la costante definita in Colors.kt per coerenza
+                MaterialTheme.colorScheme.onSurfaceVariant // Un colore che contrasta con la superficie, ma è per gli elementi selezionati.
+                // Ho usato onSurfaceVariant come placeholder, ma potresti volerlo definire
+                // come un nuovo colore nel tuo ColorScheme, o semplicemente usare SelectedTileBackgroundDark
+                // Oppure, se vuoi usare la tua costante:
+                // SelectedTileBackgroundDark // Assicurati di importare SelectedTileBackgroundDark se non è già accessibile
+            } else {
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+            }
+        }
+        else -> MaterialTheme.colorScheme.secondary // Sfondo normale della cella
     }
 
     val textColor = when {
-        isInitial -> MaterialTheme.colorScheme.primary
-        else ->Color.Black
+        isInitial -> MaterialTheme.colorScheme.onPrimary // <-- CORRETTO: Ora userà il ciano in Dark Mode
+        else -> MaterialTheme.colorScheme.onSurface      // <-- CORRETTO: Ora userà il bianco in Dark Mode, nero in Light Mode
     }
 
     Box(
@@ -388,10 +396,17 @@ fun SudokuCell(
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
                 ),
-                color = textColor
+                color = textColor // Usa il colore del testo ottenuto dal tema
             )
         }
     }
+}
+
+fun ColorScheme.isDark(): Boolean {
+    // Un modo semplice per determinare se il tema è scuro è controllare la luminanza del colore di sfondo.
+    // Valori di luminanza bassi indicano colori scuri.
+    // 0.5 è una soglia comune, ma puoi aggiustarla.
+    return background.luminance() < 0.5f
 }
 
 
@@ -411,7 +426,6 @@ fun NumberInput(
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             for (i in 1..5) {
-                // Passa il numero come String
                 InputButton(displayValue = i.toString(), onClick = { onNumberClick(i) })
             }
         }
@@ -423,10 +437,8 @@ fun NumberInput(
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             for (i in 6..9) {
-                // Passa il numero come String
                 InputButton(displayValue = i.toString(), onClick = { onNumberClick(i) })
             }
-            // Per il pulsante "X", passa la stringa "X"
             InputButton(displayValue = "X", onClick = { onNumberClick(0) }) // 0 for clear
         }
     }
@@ -440,17 +452,17 @@ fun InputButton(
     Button(
         onClick = onClick,
         modifier = Modifier
-            .size(48.dp), // Dimensione compatta ma sufficiente
-        contentPadding = PaddingValues(0.dp), // Elimina padding interno
+            .size(48.dp),
+        contentPadding = PaddingValues(0.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.primary, // Sfondo visibile
-            contentColor = Color.Black // Testo nero, ben leggibile
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = Color.Black
         )
     ) {
         Text(
             text = displayValue,
             fontSize = 18.sp,
-            color = Color.White // Assicura colore visibile
+            color = Color.White
         )
     }
 }

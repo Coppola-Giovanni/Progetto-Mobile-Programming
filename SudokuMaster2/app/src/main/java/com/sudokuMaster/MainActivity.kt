@@ -58,7 +58,7 @@ class MainActivity : ComponentActivity() {
 
         val db = AppDatabase.getDatabase(applicationContext)
         val gameSessionDao = db.gameSessionDao()
-        val userStatisticsDao = db.userStatisticsDao() // <<< RECUPERA IL DAO DELLE STATISTICHE
+        val userStatisticsDao = db.userStatisticsDao()
 
         val retrofit = Retrofit.Builder()
             .baseUrl("https://sudoku-api.vercel.app/")
@@ -69,14 +69,15 @@ class MainActivity : ComponentActivity() {
 
         gameRepository = GameRepositoryImpl(
             gameSessionDao = gameSessionDao,
-            userStatisticsDao = userStatisticsDao, // <<< PASSA IL DAO DELLE STATISTICHE QUI
+            userStatisticsDao = userStatisticsDao,
             userPreferencesRepository = userPreferencesRepository,
             sudokuRemoteDataSource = sudokuRemoteDataSource
         )
         // --- FINE INIEZIONE DIPENDENZE ---
 
         setContent {
-            GraphSudokuTheme {
+            // Passa userPreferencesRepository alla tua funzione GraphSudokuTheme
+            GraphSudokuTheme(userPreferencesRepository = userPreferencesRepository) { // <-- MODIFICATO QUI
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -101,7 +102,7 @@ fun SudokuAppNavigation(
 ) {
     // NavHost è una funzione Composable, non un builder
     NavHost( navController = navController,
-            startDestination = Screen.HomeScreen.route as String) {
+        startDestination = Screen.HomeScreen.route as String) {
         composable(Screen.HomeScreen.route) { // Aggiungi la route qui
             HomeScreen(
                 onNewGameClick = { navController.navigate(Screen.ActiveGameScreen.createRoute("new")) },
@@ -124,7 +125,7 @@ fun SudokuAppNavigation(
             )
 
             ActiveGameScreen(
-                activeGameViewModel = activeGameViewModel, // <<< Corretto da activeGameViewModelFactory
+                activeGameViewModel = activeGameViewModel,
                 navController = navController
             )
         }
@@ -146,8 +147,6 @@ fun SudokuAppNavigation(
             }
             val activeGameViewModel: ActiveGameViewModel = viewModel(
                 viewModelStoreOwner = parentEntry,
-                // initialGameType non è rilevante qui, userà lo stato esistente,
-                // ma il Factory richiede comunque tutti i parametri.
                 factory = ActiveGameViewModelFactory(gameRepository, userPreferencesRepository, "continue")
             )
             WinScreen(

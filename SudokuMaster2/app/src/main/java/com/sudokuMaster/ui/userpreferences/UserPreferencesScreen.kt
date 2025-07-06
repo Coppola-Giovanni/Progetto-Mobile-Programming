@@ -128,7 +128,7 @@ fun UserPreferencesScreen(
             Spacer(Modifier.weight(1f)) // Spinge il bottone sotto
 
             Button(onClick = { navController.popBackStack() }) {
-                Text(stringResource(R.string.salva_e_torna_indietro_cambiamenti_salvati_automaticamente))
+                Text(stringResource(R.string.salva_e_torna_indietro))
             }
         }
     }

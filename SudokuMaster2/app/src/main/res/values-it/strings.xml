@@ -54,7 +54,7 @@
     <string name="difficolt">Difficoltà: %1$s</string>
     <string name="suono_abilitato">Suono abilitato:</string>
     <string name="caricamento_preferenze">Caricamento Preferenze...</string>
-    <string name="salva_e_torna_indietro_cambiamenti_salvati_automaticamente">Salva e Torna Indietro (cambiamenti salvati automaticamente)</string>
+    <string name="salva_e_torna_indietro">Salva e Torna Indietro</string>
     <string name="difficolt_predefinita">Difficoltà predefinita:</string>
     <string name="tema_app">Tema App:</string>
 </resources>

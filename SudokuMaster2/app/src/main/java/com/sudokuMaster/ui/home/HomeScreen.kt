@@ -18,6 +18,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.SudokuMaster.R
 import com.sudokuMaster.ui.theme.GraphSudokuTheme
+import com.sudokuMaster.data.AppTheme
+import com.sudokuMaster.data.DifficultyLevel
+import com.sudokuMaster.data.UserPreferences
+import com.sudokuMaster.domain.UserPreferencesRepositoryInterface
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf // Import this
 
 @Composable
 fun HomeScreen(
@@ -69,7 +76,26 @@ fun HomeScreen(
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
-    GraphSudokuTheme {
+    // Implementazione fittizia (mock) di UserPreferencesRepositoryInterface per la preview
+    val mockUserPreferencesRepository = object : UserPreferencesRepositoryInterface {
+        override val userPreferencesFlow: Flow<UserPreferences> = flowOf(
+            UserPreferences.newBuilder()
+                .setAppTheme(AppTheme.LIGHT) // Puoi impostare un tema di default per la preview
+                .setDefaultDifficulty(DifficultyLevel.MEDIUM)
+                .setSoundEnabled(true)
+                .build()
+        )
+
+        // Implementazioni vuote per le funzioni suspend, dato che non verranno usate in preview
+        override suspend fun updateAppTheme(theme: AppTheme) {}
+        override suspend fun updateDefaultDifficulty(difficulty: DifficultyLevel) {}
+        override suspend fun updateSoundEnabled(enabled: Boolean) {}
+        override suspend fun updateLastUnfinishedGameId(gameId: Long) {}
+        override suspend fun updateLastAccessTimestamp(timestamp: Long) {}
+        override suspend fun getUserPreferences(): Flow<UserPreferences> = userPreferencesFlow
+    }
+
+    GraphSudokuTheme(userPreferencesRepository = mockUserPreferencesRepository) {
         HomeScreen(
             onNewGameClick = {},
             onContinueGameClick = {},

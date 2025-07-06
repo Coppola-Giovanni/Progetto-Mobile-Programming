@@ -24,7 +24,7 @@
     <string name="difficulty_easy">Easy</string>
     <string name="Difficulty">Difficulty: %1$s</string>
     <string name="clear">C</string>
-    <string name="time">Time</string>
+    <string name="time">Time:%s</string>
     <string name="new_record">New Record!</string>
     <string name="start_new_game">Start a New Game</string>
     <string name="loading_sudoku">Loading Sudoku</string>
@@ -55,7 +55,7 @@
     <string name="difficolt">Difficulty: %1$s</string>
     <string name="suono_abilitato">Sound enabled:</string>
     <string name="caricamento_preferenze">Loading preferences...</string>
-    <string name="salva_e_torna_indietro_cambiamenti_salvati_automaticamente">Save and Go Back (changes saved automatically)</string>
+    <string name="salva_e_torna_indietro">Save and Go Back</string>
     <string name="difficolt_predefinita">Default difficulty:</string>
     <string name="tema_app">App Theme:</string>
 </resources>
