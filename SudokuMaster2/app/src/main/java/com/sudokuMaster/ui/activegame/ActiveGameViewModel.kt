@@ -26,9 +26,6 @@ import kotlinx.coroutines.flow.map // Import required for .map
 import kotlinx.coroutines.flow.SharingStarted // Import required for .stateIn
 import kotlinx.coroutines.flow.stateIn // Import required for .stateIn
 import java.util.LinkedList
-import java.util.concurrent.TimeUnit
-
-// ... (SudokuTile e ActiveGameScreenState come forniti) ...
 
 data class SudokuTile(
     val x: Int,
@@ -72,11 +69,9 @@ class ActiveGameViewModel(
     private var _currentPuzzleId = MutableStateFlow(0L)
     val currentPuzzleId: StateFlow<Long> = _currentPuzzleId.asStateFlow()
 
-    // ADDED: StateFlow per la difficoltà corrente
-    private val _currentDifficulty = MutableStateFlow(DifficultyLevel.MEDIUM) // Default iniziale
+    private val _currentDifficulty = MutableStateFlow(DifficultyLevel.MEDIUM)
     val currentDifficulty: StateFlow<DifficultyLevel> = _currentDifficulty.asStateFlow()
 
-    // ADDED: StateFlow per la lista di SudokuTile per la UI
     val sudokuTiles: StateFlow<List<SudokuTile>> = _sudokuPuzzle.map { puzzle ->
         puzzle?.let {
             it.currentGraph.values.flatten().map { node ->
@@ -91,7 +86,7 @@ class ActiveGameViewModel(
         } ?: emptyList()
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000), // Mantiene la flow attiva per 5 secondi dopo che nessun collector è attivo
+        started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
 
@@ -104,7 +99,7 @@ class ActiveGameViewModel(
         if (initialGameType == "new") {
             Log.d("ActiveGameViewModel", "init: Calling loadNewGame().")
             loadNewGame()
-        } else { // "continue" o qualsiasi altra stringa
+        } else {
             Log.d("ActiveGameViewModel", "init: Calling loadExistingGame().")
             loadExistingGame()
         }
@@ -148,28 +143,11 @@ class ActiveGameViewModel(
         gameJob?.cancel()
         gameJob = viewModelScope.launch {
             try {
-                val userPrefs = userPreferencesRepository.getUserPreferences().firstOrNull()
-
-                val defaultDifficultyString = userPrefs?.defaultDifficulty
-                // NUOVA LOGICA: Trova DifficultyLevel confrontando ignorando il case
-                val defaultDifficulty = if (defaultDifficultyString != null) {
-                    var foundDifficulty: DifficultyLevel? = null
-                    for (level in DifficultyLevel.values()) {
-                        if (level.name.equals(defaultDifficultyString.toString(), ignoreCase = true)) {
-                            foundDifficulty = level
-                            break
-                        }
-                    }
-                    foundDifficulty ?: DifficultyLevel.MEDIUM // Se non trovato, usa MEDIUM
-                } else {
-                    DifficultyLevel.MEDIUM // Se la stringa è nulla, usa MEDIUM
-                }
-                // FINE NUOVA LOGICA
-
-                Log.d("ActiveGameViewModel", "loadNewGame: Fetched default difficulty: $defaultDifficulty")
+                val difficultyForApi = DifficultyLevel.UNRECOGNIZED
+                Log.d("ActiveGameViewModel", "loadNewGame: Fetched default difficulty: $difficultyForApi")
 
                 gameRepository.createNewGameAndSave(
-                    difficulty = defaultDifficulty,
+                    difficulty = difficultyForApi,
                     onSuccess = { gameSession ->
                         Log.d("ActiveGameViewModel", "loadNewGame: Game created successfully, ID: ${gameSession.id}")
                         _currentPuzzleId.value = gameSession.id
@@ -178,7 +156,7 @@ class ActiveGameViewModel(
                         _selectedTile.value = SudokuTile(0, 0, 0, true, true)
                         _timerState.value = gameSession.durationSeconds ?: 0L
                         _isSolved.value = gameSession.isSolved
-                        _currentDifficulty.value = defaultDifficulty
+                        _currentDifficulty.value = gameSession.difficulty.toDifficultyLevel()
                         _activeGameScreenState.value = ActiveGameScreenState.ACTIVE
                         startTimer()
                         Log.d("ActiveGameViewModel", "loadNewGame: State changed to ACTIVE.")
@@ -211,8 +189,7 @@ class ActiveGameViewModel(
                         _selectedTile.value = SudokuTile(0, 0, 0, true, true)
                         _timerState.value = gameSession.durationSeconds ?: 0L
                         _isSolved.value = gameSession.isSolved
-                        // ASSUMPTION: gameSession ha una proprietà 'difficulty' che è una String o un DifficultyLevel
-                        _currentDifficulty.value = gameSession.difficulty.toDifficultyLevel() // AGGIUNTO: Aggiorna la difficoltà
+                        _currentDifficulty.value = gameSession.difficulty.toDifficultyLevel()
                         _activeGameScreenState.value = ActiveGameScreenState.ACTIVE
                         startTimer()
                         Log.d("ActiveGameViewModel", "loadExistingGame: State changed to ACTIVE.")

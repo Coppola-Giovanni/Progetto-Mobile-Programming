@@ -32,6 +32,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,11 +47,11 @@ fun ActiveGameScreen(
     )
 
     val activeGameScreenState by viewModel.activeGameScreenState.collectAsState()
-    val sudokuTiles by viewModel.sudokuTiles.collectAsState() // Ora risolto dal ViewModel
+    val sudokuTiles by viewModel.sudokuTiles.collectAsState()
     val timerState by viewModel.timerState.collectAsState()
     val selectedTile by viewModel.selectedTile.collectAsState()
     val isSolved by viewModel.isSolved.collectAsState()
-    val currentDifficulty by viewModel.currentDifficulty.collectAsState() // Ora risolto dal ViewModel
+    val currentDifficulty by viewModel.currentDifficulty.collectAsState()
     val isNewRecord by viewModel.isNewRecord.collectAsState()
 
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -72,12 +74,10 @@ fun ActiveGameScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    // Potresti mettere un titolo qui, ad esempio "Sudoku"
                     Text("Sudoku Master", color = MaterialTheme.colorScheme.onPrimaryContainer)
                 },
                 navigationIcon = {
                     IconButton(onClick = {
-                        // Quando si clicca la freccia indietro, si torna alla schermata precedente
                         navController.popBackStack()
                     }) {
                         Icon(
@@ -115,6 +115,12 @@ fun ActiveGameScreen(
                         modifier = Modifier.padding(16.dp)
                     )
 
+                    Text(
+                        text = "Difficoltà: ${currentDifficulty?.name ?: "N/A"}",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(bottom = 8.dp) // Add some padding if needed
+                    )
+
                     SudokuGrid(
                         tiles = sudokuTiles,
                         selectedTile = selectedTile,
@@ -136,14 +142,13 @@ fun ActiveGameScreen(
                     )
                 }
                 ActiveGameScreenState.ERROR -> {
-                    // Puoi aggiungere una UI di errore più sofisticata qui
                     Text(
                         text = "Si è verificato un errore durante il caricamento del gioco.",
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(16.dp)
                     )
-                    Button(onClick = { navController.popBackStack() }) { // Torna alla home
+                    Button(onClick = { navController.popBackStack() }) {
                         Text("Torna alla Home")
                     }
                 }
@@ -159,13 +164,16 @@ fun SudokuGrid(
     onTileClick: (x: Int, y: Int) -> Unit
 ) {
     val gridSize = 9
-    // val cellSize = 40.dp // Non strettamente necessario se usi weight e aspectRatio
+    val thinLine = 1.dp
+    val thickLine = 3.dp // Border for 3x3 blocks
+
+    val borderColor = MaterialTheme.colorScheme.inversePrimary
 
     Column(
         modifier = Modifier
-            .aspectRatio(1f) // Rendi la griglia quadrata
+            .aspectRatio(1f)
             .padding(8.dp)
-            .border(2.dp, MaterialTheme.colorScheme.inversePrimary) // Bordo esterno
+            .border(thickLine, borderColor) // Overall outer border of the Sudoku grid
     ) {
         for (row in 0 until gridSize) {
             Row(
@@ -176,6 +184,20 @@ fun SudokuGrid(
                     val isSelected = selectedTile?.x == col && selectedTile?.y == row
                     val isInitial = tile.readOnly
 
+                    // Determine border widths for this cell
+                    val currentThinLine = 1.dp
+                    val currentThickLine = 3.dp
+
+                    // Left border is thick if it's the start of a 3x3 block (col 0, 3, 6)
+                    val leftBorder = if (col % 3 == 0) currentThickLine else currentThinLine
+                    // Top border is thick if it's the start of a 3x3 block (row 0, 3, 6)
+                    val topBorder = if (row % 3 == 0) currentThickLine else currentThinLine
+                    // Right border is thick if it's the end of a 3x3 block (col 2, 5) and not the very last column
+                    val rightBorder = if ((col + 1) % 3 == 0 && col != gridSize - 1) currentThickLine else currentThinLine
+                    // Bottom border is thick if it's the end of a 3x3 block (row 2, 5) and not the very last row
+                    val bottomBorder = if ((row + 1) % 3 == 0 && row != gridSize - 1) currentThickLine else currentThinLine
+
+
                     SudokuCell(
                         tile = tile,
                         isSelected = isSelected,
@@ -184,10 +206,40 @@ fun SudokuGrid(
                         modifier = Modifier
                             .weight(1f)
                             .aspectRatio(1f)
-                            .border(
-                                width = 1.dp, // Bordo sottile per le celle
-                                color = MaterialTheme.colorScheme.inversePrimary
-                            )
+                            .drawBehind { // Use drawBehind for precise border drawing
+                                // Draw top border
+                                drawLine(
+                                    color = borderColor,
+                                    start = Offset(0f, 0f),
+                                    end = Offset(size.width, 0f),
+                                    strokeWidth = topBorder.toPx()
+                                )
+                                // Draw left border
+                                drawLine(
+                                    color = borderColor,
+                                    start = Offset(0f, 0f),
+                                    end = Offset(0f, size.height),
+                                    strokeWidth = leftBorder.toPx()
+                                )
+                                // Draw right border (only if not the very last column, as outer border handles it)
+                                if (col != gridSize - 1) {
+                                    drawLine(
+                                        color = borderColor,
+                                        start = Offset(size.width, 0f),
+                                        end = Offset(size.width, size.height),
+                                        strokeWidth = rightBorder.toPx()
+                                    )
+                                }
+                                // Draw bottom border (only if not the very last row, as outer border handles it)
+                                if (row != gridSize - 1) {
+                                    drawLine(
+                                        color = borderColor,
+                                        start = Offset(0f, size.height),
+                                        end = Offset(size.width, size.height),
+                                        strokeWidth = bottomBorder.toPx()
+                                    )
+                                }
+                            }
                     )
                 }
             }

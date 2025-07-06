@@ -20,11 +20,10 @@ class UserPreferencesRepositoryImpl(
     override fun getUserPreferencesFlow(): Flow<UserPreferences> {
         return userPreferencesDataStore.data
             .catch { exception ->
-                // DataStore throws an IOException when an error is encountered when reading data
                 if (exception is IOException) {
-                    emit(UserPreferences.getDefaultInstance()) // Emetti un'istanza di default in caso di errore di lettura
+                    emit(UserPreferences.getDefaultInstance())
                 } else {
-                    throw exception // Rilancia altre eccezioni
+                    throw exception
                 }
             }
     }
@@ -62,18 +61,6 @@ class UserPreferencesRepositoryImpl(
         }
     }
 
-
-    /*override suspend fun updateShowTutorial(show: Boolean): Result<Unit> = withContext(Dispatchers.IO) {
-        return@withContext try {
-            userPreferencesDataStore.updateData { preferences ->
-                preferences.toBuilder().setShowTutorial(show).build()
-            }
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }*/
-
     override suspend fun updateLastUnfinishedGameId(gameId: Long): Result<Unit> = withContext(Dispatchers.IO) {
         return@withContext try {
             userPreferencesDataStore.updateData { preferences ->
@@ -88,9 +75,6 @@ class UserPreferencesRepositoryImpl(
     override suspend fun getUserPreferences(): Flow<UserPreferences> {
         return userPreferencesDataStore.data
             .map { preferences ->
-                // Qui potresti mappare le 'preferences' (dal DataStore) al tuo dominio UserPreferences
-                // Se il tuo DataStore è già DataStore<UserPreferences>, non serve una mappatura complessa.
-                // Assumiamo che UserPreferences sia la stessa classe che viene serializzata/deserializzata dal DataStore.
                 preferences // Restituisci direttamente l'oggetto UserPreferences
             }
     }
