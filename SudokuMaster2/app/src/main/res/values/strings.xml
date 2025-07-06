@@ -58,4 +58,6 @@
     <string name="salva_e_torna_indietro">Save and Go Back</string>
     <string name="difficolt_predefinita">Default difficulty:</string>
     <string name="tema_app">App Theme:</string>
+    <string name="difficolt2">Difficult: %1$s</string>
+    <string name="difficolt3">Difficult: %1$s</string>
 </resources>

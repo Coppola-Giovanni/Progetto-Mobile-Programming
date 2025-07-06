@@ -158,7 +158,10 @@ fun ActiveGameScreen(
                                     modifier = Modifier.padding(bottom = 4.dp)
                                 )
                                 Text(
-                                    text = "Difficoltà: ${currentDifficulty?.name ?: "N/A"}",
+                                    text = stringResource(
+                                        R.string.difficolt3,
+                                        currentDifficulty?.name ?: "N/A"
+                                    ),
                                     style = MaterialTheme.typography.titleMedium,
                                     modifier = Modifier.padding(bottom = 8.dp)
                                 )
@@ -200,7 +203,10 @@ fun ActiveGameScreen(
                                 modifier = Modifier.padding(top = 16.dp, bottom = 4.dp) // Spostato un po' più su
                             )
                             Text(
-                                text = "Difficoltà: ${currentDifficulty?.name ?: "N/A"}",
+                                text = stringResource(
+                                    R.string.difficolt2,
+                                    currentDifficulty?.name ?: "N/A"
+                                ),
                                 style = MaterialTheme.typography.titleMedium,
                                 modifier = Modifier.padding(bottom = 8.dp)
                             )
