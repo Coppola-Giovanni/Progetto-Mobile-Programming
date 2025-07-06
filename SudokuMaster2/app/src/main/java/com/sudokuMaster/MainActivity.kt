@@ -7,11 +7,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.sudokuMaster.common.ProductionDispatcherProvider
 import com.sudokuMaster.data.UserPreferencesSerializer
 import com.sudokuMaster.data.database.AppDatabase
 import com.sudokuMaster.data.repository.GameRepositoryImpl
@@ -20,10 +26,16 @@ import com.sudokuMaster.data.source.SudokuApiService
 import com.sudokuMaster.data.source.SudokuRemoteDataSource
 import com.sudokuMaster.data.UserPreferences
 import com.sudokuMaster.data.userPreferencesDataStore
+import com.sudokuMaster.domain.GameRepositoryInterface
+import com.sudokuMaster.domain.UserPreferencesRepositoryInterface
+import com.sudokuMaster.ui.Screen
 import com.sudokuMaster.ui.activegame.ActiveGameScreen // Importa ActiveGameScreen
+import com.sudokuMaster.ui.activegame.ActiveGameViewModel
 import com.sudokuMaster.ui.activegame.ActiveGameViewModelFactory // Importa ActiveGameViewModelFactory
 import com.sudokuMaster.ui.home.HomeScreen // Importa HomeScreen
+import com.sudokuMaster.ui.home.WinScreen
 import com.sudokuMaster.ui.stats.StatisticsScreen // Importa StatisticsScreen
+import com.sudokuMaster.ui.stats.StatisticsViewModel
 import com.sudokuMaster.ui.theme.GraphSudokuTheme
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -32,24 +44,20 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class MainActivity : ComponentActivity() {
 
-    // Dichiarare le dipendenze come lateinit var a livello di classe
-    // per poterle inizializzare una volta e passarle ai Composable.
-    private lateinit var gameRepository: GameRepositoryImpl
-    private lateinit var userPreferencesRepository: UserPreferencesRepositoryImpl
+    private lateinit var gameRepository: GameRepositoryInterface
+    private lateinit var userPreferencesRepository: UserPreferencesRepositoryInterface
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // --- INIEZIONE DELLE DIPENDENZE ---
-        // 1. DataStore per UserPreferences
         val userPreferencesDataStore = applicationContext.userPreferencesDataStore
         userPreferencesRepository = UserPreferencesRepositoryImpl(userPreferencesDataStore)
 
-        // 2. Room Database
         val db = AppDatabase.getDatabase(applicationContext)
         val gameSessionDao = db.gameSessionDao()
+        val userStatisticsDao = db.userStatisticsDao() // <<< RECUPERA IL DAO DELLE STATISTICHE
 
-        // 3. Retrofit per API esterna
         val retrofit = Retrofit.Builder()
             .baseUrl("https://sudoku-api.vercel.app/")
             .addConverterFactory(GsonConverterFactory.create())
@@ -57,9 +65,9 @@ class MainActivity : ComponentActivity() {
         val sudokuApiService = retrofit.create(SudokuApiService::class.java)
         val sudokuRemoteDataSource = SudokuRemoteDataSource(sudokuApiService)
 
-        // 4. GameRepository
         gameRepository = GameRepositoryImpl(
             gameSessionDao = gameSessionDao,
+            userStatisticsDao = userStatisticsDao, // <<< PASSA IL DAO DELLE STATISTICHE QUI
             userPreferencesRepository = userPreferencesRepository,
             sudokuRemoteDataSource = sudokuRemoteDataSource
         )
@@ -85,37 +93,65 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun SudokuAppNavigation(
-    navController: NavController,
-    gameRepository: GameRepositoryImpl,
-    userPreferencesRepository: UserPreferencesRepositoryImpl
+    navController: NavHostController,
+    gameRepository: GameRepositoryInterface,
+    userPreferencesRepository: UserPreferencesRepositoryInterface
 ) {
-    val navController = rememberNavController()
-
-    NavHost(navController = navController, startDestination = "home_screen") {
-        composable("home_screen") {
+    // NavHost è una funzione Composable, non un builder
+    NavHost( navController = navController,
+            startDestination = Screen.HomeScreen.route as String) {
+        composable(Screen.HomeScreen.route) { // Aggiungi la route qui
             HomeScreen(
-                onNewGameClick = { navController.navigate("active_game_screen/new") },
-                onContinueGameClick = { navController.navigate("active_game_screen/continue") },
-                onViewStatisticsClick = { navController.navigate("statistics_screen") }
+                onNewGameClick = { navController.navigate(Screen.ActiveGameScreen.createRoute("new")) },
+                onContinueGameClick = { navController.navigate(Screen.ActiveGameScreen.createRoute("continue")) },
+                onViewStatisticsClick = { navController.navigate(Screen.StatisticsScreen.route) }
             )
         }
-        composable("active_game_screen/{gameType}") { backStackEntry ->
-            val gameType = backStackEntry.arguments?.getString("gameType") ?: "new" // Default a "new"
+        composable(
+            route = Screen.ActiveGameScreen.route,
+            arguments = listOf(navArgument("initialGameType") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val initialGameType = backStackEntry.arguments?.getString("initialGameType") ?: "new"
 
-
-            val activeGameViewModelFactory = ActiveGameViewModelFactory(
-                gameRepository = gameRepository,
-                userPreferencesRepository = userPreferencesRepository,
-                initialGameType = gameType // Passa il gameType dal navigazione
+            val activeGameViewModel: ActiveGameViewModel = viewModel(
+                factory = ActiveGameViewModelFactory(
+                    gameRepository = gameRepository,
+                    userPreferencesRepository = userPreferencesRepository,
+                    initialGameType = initialGameType
+                )
             )
 
             ActiveGameScreen(
-                viewModelFactory = activeGameViewModelFactory,
-                navController = navController,
+                activeGameViewModel = activeGameViewModel, // <<< Corretto da activeGameViewModelFactory
+                navController = navController
             )
         }
-        composable("statistics_screen") {
-            StatisticsScreen(onBackClick = { navController.popBackStack() })
+        composable(Screen.StatisticsScreen.route) {
+            val statisticsViewModel: StatisticsViewModel = viewModel(
+                factory = StatisticsViewModel.Factory(
+                    gameRepository = gameRepository,
+                    dispatcherProvider = ProductionDispatcherProvider
+                )
+            )
+            StatisticsScreen(
+                navController = navController,
+                statisticsViewModel = statisticsViewModel
+            )
+        }
+        composable(Screen.WinScreen.route) { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(Screen.ActiveGameScreen.route)
+            }
+            val activeGameViewModel: ActiveGameViewModel = viewModel(
+                viewModelStoreOwner = parentEntry,
+                // initialGameType non è rilevante qui, userà lo stato esistente,
+                // ma il Factory richiede comunque tutti i parametri.
+                factory = ActiveGameViewModelFactory(gameRepository, userPreferencesRepository, "continue")
+            )
+            WinScreen(
+                navController = navController,
+                activeGameViewModel = activeGameViewModel
+            )
         }
     }
 }

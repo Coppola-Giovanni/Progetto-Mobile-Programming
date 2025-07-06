@@ -7,10 +7,12 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.sudokuMaster.data.converter.SudokuGraphConverter
 import com.sudokuMaster.data.dao.GameSessionDao
+import com.sudokuMaster.data.dao.UserStatisticsDAO
 import com.sudokuMaster.data.model.GameSession
+import com.sudokuMaster.data.model.UserStatistics
 
 @Database(
-    entities = [GameSession::class], // Tutte le entità del tuo database
+    entities = [GameSession::class, UserStatistics::class], // Tutte le entità del tuo database
     version = 1,                     // La versione del database. Incrementala per le migrazioni.
     exportSchema = false             // Imposta a true per esportare lo schema per le migrazioni in produzione.
 )
@@ -19,6 +21,7 @@ abstract class AppDatabase : RoomDatabase() {
 
     // Metodi astratti per ottenere le istanze dei DAO
     abstract fun gameSessionDao(): GameSessionDao
+    abstract fun userStatisticsDao(): UserStatisticsDAO
 
     companion object {
         // La singola istanza del database per evitare problemi di concorrenza.

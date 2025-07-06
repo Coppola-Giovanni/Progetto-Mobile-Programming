@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.sudokuMaster.common.ProductionDispatcherProvider
 import com.sudokuMaster.common.toTime
 import com.sudokuMaster.data.database.AppDatabase
@@ -37,42 +38,26 @@ import com.sudokuMaster.data.source.SudokuRemoteDataSource
 import com.sudokuMaster.data.source.SudokuApiService
 import com.sudokuMaster.data.source.ApiResponse
 import com.sudokuMaster.data.userPreferencesDataStore
-import com.sudokuMaster.domain.UserStatistics
 import com.sudokuMaster.ui.theme.GraphSudokuTheme
+import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatisticsScreen(
-    onBackClick: () -> Unit,
+    navController: NavController, // Now receiving NavController
+    statisticsViewModel: StatisticsViewModel, // Now receiving the ViewModel directly
     modifier: Modifier = Modifier,
-    // Dependency Injection per ViewModel in Compose
-    viewModel: StatisticsViewModel = viewModel(
-        factory = StatisticsViewModel.Factory(
-            gameRepository = GameRepositoryImpl(
-                gameSessionDao = AppDatabase.getDatabase(androidx.compose.ui.platform.LocalContext.current).gameSessionDao(),
-                userPreferencesRepository = UserPreferencesRepositoryImpl(androidx.compose.ui.platform.LocalContext.current.userPreferencesDataStore),
-                // Fornisci un'implementazione dummy o reale per SudokuRemoteDataSource
-                sudokuRemoteDataSource = SudokuRemoteDataSource(object : SudokuApiService {
-                    override suspend fun getNewSudoku(): ApiResponse {
-                        // Implementazione vuota o di test per evitare errori
-                        throw UnsupportedOperationException("API service not implemented for statistics view")
-                    }
-                })
-            ),
-            dispatcherProvider = ProductionDispatcherProvider
-        )
-    )
 ) {
-    val userStatistics by viewModel.userStatistics.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
-    val error by viewModel.error.collectAsState()
+    val userStatistics by statisticsViewModel.userStatistics.collectAsState()
+    val isLoading by statisticsViewModel.isLoading.collectAsState()
+    val error by statisticsViewModel.error.collectAsState()
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Statistiche di Gioco") },
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
+                    IconButton(onClick = { navController.popBackStack() }) { // Use navController.popBackStack()
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Indietro")
                     }
                 },
@@ -109,16 +94,23 @@ fun StatisticsScreen(
                     modifier = Modifier.padding(16.dp)
                 )
             } else {
+                // Now directly access properties from UserStatisticsEntity
                 userStatistics?.let { stats ->
+                    Text("Statistiche Utente", style = MaterialTheme.typography.headlineLarge)
+                    Spacer(modifier = Modifier.height(16.dp))
+
                     StatsRow("Partite Giocate Totali:", stats.totalGamesPlayed.toString())
                     StatsRow("Partite Risolte Totali:", stats.totalGamesSolved.toString())
-                    StatsRow("Tempo Medio Risoluzione:", stats.averageSolveTimeMillis?.let { (it / 1000L).toTime() } ?: "N/A")
+                    // Use formatMillis helper function
+                    StatsRow("Tempo Medio Risoluzione:", formatMillis(stats.averageSolveTimeMillis))
+
                     Spacer(modifier = Modifier.height(24.dp))
                     Text("Migliori Tempi per Difficoltà:", style = MaterialTheme.typography.titleMedium)
                     Spacer(modifier = Modifier.height(8.dp))
-                    StatsRow("Facile:", stats.bestSolveTimeEasyMillis?.let { (it / 1000L).toTime() } ?: "N/A")
-                    StatsRow("Medio:", stats.bestSolveTimeMediumMillis?.let { (it / 1000L).toTime() } ?: "N/A")
-                    StatsRow("Difficile:", stats.bestSolveTimeHardMillis?.let { (it / 1000L).toTime() } ?: "N/A")
+                    // Handle nullable Longs for best times
+                    StatsRow("Facile:", stats.bestSolveTimeEasyMillis?.let { formatMillis(it) } ?: "N/A")
+                    StatsRow("Medio:", stats.bestSolveTimeMediumMillis?.let { formatMillis(it) } ?: "N/A")
+                    StatsRow("Difficile:", stats.bestSolveTimeHardMillis?.let { formatMillis(it) } ?: "N/A")
                 }
             }
         }
@@ -137,4 +129,12 @@ fun StatsRow(label: String, value: String) {
         Text(text = label, style = MaterialTheme.typography.bodyLarge)
         Text(text = value, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.primary)
     }
+}
+
+// Helper function to format milliseconds to MM:SS
+fun formatMillis(millis: Long): String {
+    val seconds = TimeUnit.MILLISECONDS.toSeconds(millis)
+    val minutes = TimeUnit.SECONDS.toMinutes(seconds)
+    val remainingSeconds = seconds - TimeUnit.MINUTES.toSeconds(minutes)
+    return String.format("%02d:%02d", minutes, remainingSeconds)
 }

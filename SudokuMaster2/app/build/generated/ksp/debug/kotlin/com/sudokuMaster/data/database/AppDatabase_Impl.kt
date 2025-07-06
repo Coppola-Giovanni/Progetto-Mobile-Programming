@@ -11,6 +11,8 @@ import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 import com.sudokuMaster.`data`.dao.GameSessionDao
 import com.sudokuMaster.`data`.dao.GameSessionDao_Impl
+import com.sudokuMaster.`data`.dao.UserStatisticsDAO
+import com.sudokuMaster.`data`.dao.UserStatisticsDAO_Impl
 import javax.`annotation`.processing.Generated
 import kotlin.Lazy
 import kotlin.String
@@ -33,17 +35,23 @@ public class AppDatabase_Impl : AppDatabase() {
     GameSessionDao_Impl(this)
   }
 
+  private val _userStatisticsDAO: Lazy<UserStatisticsDAO> = lazy {
+    UserStatisticsDAO_Impl(this)
+  }
+
   protected override fun createOpenDelegate(): RoomOpenDelegate {
     val _openDelegate: RoomOpenDelegate = object : RoomOpenDelegate(1,
-        "ae2cc2b745b425f1662e64f19d6044cd", "c00702bd0f4e8d04c1b8235303f7c7c3") {
+        "4bdd5911d4725b844d44bf00de4efd47", "78e54aea1d6de9f421bb6967ef728697") {
       public override fun createAllTables(connection: SQLiteConnection) {
         connection.execSQL("CREATE TABLE IF NOT EXISTS `game_sessions` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `difficulty` TEXT NOT NULL, `initial_grid` TEXT NOT NULL, `current_grid` TEXT NOT NULL, `start_time_millis` INTEGER NOT NULL, `end_time_millis` INTEGER, `duration_seconds` INTEGER, `points_scored` INTEGER NOT NULL, `is_solved` INTEGER NOT NULL, `date_played_millis` INTEGER NOT NULL)")
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `user_statistics` (`id` INTEGER NOT NULL, `totalGamesPlayed` INTEGER NOT NULL, `totalGamesSolved` INTEGER NOT NULL, `averageSolveTimeMillis` INTEGER NOT NULL, `bestSolveTimeEasyMillis` INTEGER, `bestSolveTimeMediumMillis` INTEGER, `bestSolveTimeHardMillis` INTEGER, PRIMARY KEY(`id`))")
         connection.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)")
-        connection.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ae2cc2b745b425f1662e64f19d6044cd')")
+        connection.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4bdd5911d4725b844d44bf00de4efd47')")
       }
 
       public override fun dropAllTables(connection: SQLiteConnection) {
         connection.execSQL("DROP TABLE IF EXISTS `game_sessions`")
+        connection.execSQL("DROP TABLE IF EXISTS `user_statistics`")
       }
 
       public override fun onCreate(connection: SQLiteConnection) {
@@ -97,6 +105,39 @@ public class AppDatabase_Impl : AppDatabase() {
               | Found:
               |""".trimMargin() + _existingGameSessions)
         }
+        val _columnsUserStatistics: MutableMap<String, TableInfo.Column> = mutableMapOf()
+        _columnsUserStatistics.put("id", TableInfo.Column("id", "INTEGER", true, 1, null,
+            TableInfo.CREATED_FROM_ENTITY))
+        _columnsUserStatistics.put("totalGamesPlayed", TableInfo.Column("totalGamesPlayed",
+            "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY))
+        _columnsUserStatistics.put("totalGamesSolved", TableInfo.Column("totalGamesSolved",
+            "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY))
+        _columnsUserStatistics.put("averageSolveTimeMillis",
+            TableInfo.Column("averageSolveTimeMillis", "INTEGER", true, 0, null,
+            TableInfo.CREATED_FROM_ENTITY))
+        _columnsUserStatistics.put("bestSolveTimeEasyMillis",
+            TableInfo.Column("bestSolveTimeEasyMillis", "INTEGER", false, 0, null,
+            TableInfo.CREATED_FROM_ENTITY))
+        _columnsUserStatistics.put("bestSolveTimeMediumMillis",
+            TableInfo.Column("bestSolveTimeMediumMillis", "INTEGER", false, 0, null,
+            TableInfo.CREATED_FROM_ENTITY))
+        _columnsUserStatistics.put("bestSolveTimeHardMillis",
+            TableInfo.Column("bestSolveTimeHardMillis", "INTEGER", false, 0, null,
+            TableInfo.CREATED_FROM_ENTITY))
+        val _foreignKeysUserStatistics: MutableSet<TableInfo.ForeignKey> = mutableSetOf()
+        val _indicesUserStatistics: MutableSet<TableInfo.Index> = mutableSetOf()
+        val _infoUserStatistics: TableInfo = TableInfo("user_statistics", _columnsUserStatistics,
+            _foreignKeysUserStatistics, _indicesUserStatistics)
+        val _existingUserStatistics: TableInfo = read(connection, "user_statistics")
+        if (!_infoUserStatistics.equals(_existingUserStatistics)) {
+          return RoomOpenDelegate.ValidationResult(false, """
+              |user_statistics(com.sudokuMaster.data.model.UserStatistics).
+              | Expected:
+              |""".trimMargin() + _infoUserStatistics + """
+              |
+              | Found:
+              |""".trimMargin() + _existingUserStatistics)
+        }
         return RoomOpenDelegate.ValidationResult(true, null)
       }
     }
@@ -106,16 +147,18 @@ public class AppDatabase_Impl : AppDatabase() {
   protected override fun createInvalidationTracker(): InvalidationTracker {
     val _shadowTablesMap: MutableMap<String, String> = mutableMapOf()
     val _viewTables: MutableMap<String, Set<String>> = mutableMapOf()
-    return InvalidationTracker(this, _shadowTablesMap, _viewTables, "game_sessions")
+    return InvalidationTracker(this, _shadowTablesMap, _viewTables, "game_sessions",
+        "user_statistics")
   }
 
   public override fun clearAllTables() {
-    super.performClear(false, "game_sessions")
+    super.performClear(false, "game_sessions", "user_statistics")
   }
 
   protected override fun getRequiredTypeConverterClasses(): Map<KClass<*>, List<KClass<*>>> {
     val _typeConvertersMap: MutableMap<KClass<*>, List<KClass<*>>> = mutableMapOf()
     _typeConvertersMap.put(GameSessionDao::class, GameSessionDao_Impl.getRequiredConverters())
+    _typeConvertersMap.put(UserStatisticsDAO::class, UserStatisticsDAO_Impl.getRequiredConverters())
     return _typeConvertersMap
   }
 
@@ -132,4 +175,6 @@ public class AppDatabase_Impl : AppDatabase() {
   }
 
   public override fun gameSessionDao(): GameSessionDao = _gameSessionDao.value
+
+  public override fun userStatisticsDao(): UserStatisticsDAO = _userStatisticsDAO.value
 }

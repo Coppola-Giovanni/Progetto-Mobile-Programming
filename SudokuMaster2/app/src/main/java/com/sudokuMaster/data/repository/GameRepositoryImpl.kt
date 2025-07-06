@@ -1,27 +1,27 @@
 package com.sudokuMaster.data.repository
 
+import android.util.Log
 import com.sudokuMaster.common.toDifficultyLevel
 import com.sudokuMaster.common.toGameSession
 import com.sudokuMaster.data.DifficultyLevel
 import com.sudokuMaster.data.model.GameSession
 import com.sudokuMaster.data.dao.GameSessionDao
-import com.sudokuMaster.domain.UserStatistics
+import com.sudokuMaster.data.dao.UserStatisticsDAO
+import com.sudokuMaster.data.model.UserStatistics
 import com.sudokuMaster.data.source.SudokuRemoteDataSource
 import com.sudokuMaster.domain.GameRepositoryInterface
 import com.sudokuMaster.domain.SudokuNode
 import com.sudokuMaster.domain.SudokuPuzzle
 import com.sudokuMaster.domain.UserPreferencesRepositoryInterface
-import com.sudokuMaster.logic.allSquaresAreFilled
-import com.sudokuMaster.logic.isComplete
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
-import java.util.Date // Import per Date
 import java.util.LinkedList
 
 class GameRepositoryImpl(
     private val gameSessionDao: GameSessionDao,
+    private val userStatisticsDao: UserStatisticsDAO,
     private val userPreferencesRepository: UserPreferencesRepositoryInterface,
     private val sudokuRemoteDataSource: SudokuRemoteDataSource
 ) : GameRepositoryInterface {
@@ -103,7 +103,12 @@ class GameRepositoryImpl(
                 onSuccess(newGameSession.copy(id = gameId))
 
             }.onFailure { throwable ->
-                onError(Exception("Failed to get new sudoku puzzle from API: ${throwable.message}", throwable))
+                onError(
+                    Exception(
+                        "Failed to get new sudoku puzzle from API: ${throwable.message}",
+                        throwable
+                    )
+                )
             }
 
         } catch (e: Exception) {
@@ -136,49 +141,6 @@ class GameRepositoryImpl(
         }
     }
 
-    override suspend fun updateGameNodeAndSave(
-        puzzle: SudokuPuzzle,
-        onSuccess: (GameSession) -> Unit,
-        onError: (Throwable) -> Unit
-    ) {
-        try {
-            // Aggiorna la GameSession con i dati del puzzle corrente
-            val updatedGameSession = puzzle.toGameSession(
-                existingId = puzzle.id, // Usa l'ID del puzzle per aggiornare la sessione esistente
-                isSolved = false, // Presupponiamo non risolto, verrà verificato
-                score = 0 // Il punteggio verrà calcolato alla risoluzione
-            )
-
-            // Verifica se il puzzle è completo e valido
-            val isPuzzleSolved = allSquaresAreFilled(puzzle) && puzzle.isComplete()
-
-            val finalGameSession: GameSession
-            if (isPuzzleSolved) {
-                // Se risolto, calcola endTimeMillis, score, isSolved, datePlayedMillis
-                val endTime = System.currentTimeMillis()
-                val score = calculateScore(puzzle.elapsedTime, puzzle.difficulty) // Implementa questa funzione
-                val initialGameSession = gameSessionDao.getGameSessionById(puzzle.id) // Recupera per startTimeMillis
-
-                finalGameSession = updatedGameSession.copy(
-                    endTimeMillis = endTime,
-                    durationSeconds = puzzle.elapsedTime,
-                    score = score,
-                    isSolved = true,
-                    datePlayedMillis = endTime
-                )
-                // Rimuovi l'ID del gioco non finito dalle preferenze utente
-                userPreferencesRepository.updateLastUnfinishedGameId(-1L)
-            } else {
-                // Altrimenti, è un semplice aggiornamento dello stato di gioco
-                finalGameSession = updatedGameSession
-            }
-
-            gameSessionDao.updateGameSession(finalGameSession)
-            onSuccess(finalGameSession)
-        } catch (e: Exception) {
-            onError(e)
-        }
-    }
 
     override suspend fun updateGameSession(
         gameSession: GameSession,
@@ -186,9 +148,74 @@ class GameRepositoryImpl(
         onError: (Throwable) -> Unit
     ) {
         try {
-            gameSessionDao.updateGameSession(gameSession)
+            val existingGameSessionResult: GameSession? = gameSessionDao.getGameSessionById(gameSession.id).firstOrNull()
+
+            //val existingSession = gameSessionDao.getGameSessionById(gameSession.id)
+            val wasJustSolved = (existingGameSessionResult?.isSolved == false) && gameSession.isSolved
+
+
+
+            val finalGameSession: GameSession = if (wasJustSolved) {
+                val endTime = System.currentTimeMillis()
+                val score = calculateScore(
+                    gameSession.durationSeconds!!,
+                    gameSession.difficulty.toDifficultyLevel()
+                )
+
+                gameSession.copy(
+                    endTimeMillis = endTime,
+                    score = score,
+                    datePlayedMillis = endTime // Data di completamento
+                )
+            } else {
+                gameSession
+            }
+            gameSessionDao.updateGameSession(finalGameSession)
+
+            if (wasJustSolved) {
+                // Rimuovi l'ID del gioco non finito dalle preferenze utente
+                userPreferencesRepository.updateLastUnfinishedGameId(-1L)
+
+                // Aggiorna le statistiche generali e i tempi record
+                val currentStats = userStatisticsDao.getUserStatistics().first() // Questo non dovrebbe più dare errore
+
+                // Inizializza con valori di default se non esistono ancora statistiche (prima volta)
+                val currentGamesPlayed = currentStats?.totalGamesPlayed ?: 0
+                val currentGamesSolved = currentStats?.totalGamesSolved ?: 0
+                val currentAverageTime = currentStats?.averageSolveTimeMillis ?: 0L
+                val currentBestEasy = currentStats?.bestSolveTimeEasyMillis
+                val currentBestMedium = currentStats?.bestSolveTimeMediumMillis
+                val currentBestHard = currentStats?.bestSolveTimeHardMillis
+                // Mappa a dominio, o crea nuovo
+
+                val newTotalGamesPlayed = currentGamesPlayed + 1
+                val newTotalGamesSolved = currentGamesSolved + 1
+                val newAverageSolveTime =
+                    if (newTotalGamesSolved > 0) {
+                        (currentAverageTime * currentGamesSolved + (finalGameSession.durationSeconds ?: 0L) * 1000L) / newTotalGamesSolved
+                    } else {
+                        (finalGameSession.durationSeconds ?: 0L) * 1000L
+                    }
+
+                val newBestSolveTimeEasy = updateBestTime(currentBestEasy, finalGameSession.difficulty, DifficultyLevel.EASY, finalGameSession.durationSeconds)
+                val newBestSolveTimeMedium = updateBestTime(currentBestMedium, finalGameSession.difficulty, DifficultyLevel.MEDIUM, finalGameSession.durationSeconds)
+                val newBestSolveTimeHard = updateBestTime(currentBestHard, finalGameSession.difficulty, DifficultyLevel.HARD, finalGameSession.durationSeconds)
+
+                val updatedStatsEntity = UserStatistics(
+                    totalGamesPlayed = newTotalGamesPlayed,
+                    totalGamesSolved = newTotalGamesSolved,
+                    averageSolveTimeMillis = newAverageSolveTime,
+                    bestSolveTimeEasyMillis = newBestSolveTimeEasy,
+                    bestSolveTimeMediumMillis = newBestSolveTimeMedium,
+                    bestSolveTimeHardMillis = newBestSolveTimeHard
+                )
+                userStatisticsDao.insertUserStatistics(updatedStatsEntity) // Usa insert con REPLACE strategy
+                Log.d("GameRepositoryImpl", "User Statistics updated after game ${finalGameSession.id} solved.")
+            }
+
             onSuccess(gameSession)
         } catch (e: Exception) {
+            Log.e("GameRepositoryImpl", "Error updating game session: ${e.message}", e)
             onError(e)
         }
     }
@@ -220,7 +247,8 @@ class GameRepositoryImpl(
                 }
             }
 
-            val averageSolveTimeMillis = if (totalGamesSolved > 0) totalSolveTimeMillis / totalGamesSolved else 0L
+            val averageSolveTimeMillis =
+                if (totalGamesSolved > 0) totalSolveTimeMillis / totalGamesSolved else 0L
 
             UserStatistics(
                 totalGamesPlayed = totalGamesPlayed,
@@ -242,10 +270,32 @@ class GameRepositoryImpl(
             DifficultyLevel.EASY -> 1
             DifficultyLevel.MEDIUM -> 2
             DifficultyLevel.HARD -> 3
-            else-> 1 // Fallback
+            else -> 1 // Fallback
         }
 
         val rawScore = baseScore - (elapsedTimeSeconds * timePenaltyFactor)
-        return (rawScore * difficultyMultiplier).coerceAtLeast(0).toInt() // Assicura che il punteggio non sia negativo
+        return (rawScore * difficultyMultiplier).coerceAtLeast(0)
+            .toInt() // Assicura che il punteggio non sia negativo
     }
+
+    private fun updateBestTime(
+        currentBest: Long?,
+        gameDifficultyString: String,
+        targetDifficulty: DifficultyLevel,
+        gameDurationSeconds: Long?
+    ): Long? {
+        if (gameDurationSeconds == null) return currentBest
+        val gameDurationMillis = gameDurationSeconds * 1000L
+
+        return if (gameDifficultyString.toDifficultyLevel() == targetDifficulty) {
+            if (currentBest == null || gameDurationMillis < currentBest) {
+                gameDurationMillis
+            } else {
+                currentBest
+            }
+        } else {
+            currentBest
+        }
+    }
+
 }

@@ -29,7 +29,7 @@ data class GameSession(
     val score: Int,
 
     @ColumnInfo(name = "is_solved")
-    val isSolved: Boolean,
+    val isSolved: Boolean = false,
 
     @ColumnInfo(name = "date_played_millis")
     val datePlayedMillis: Long

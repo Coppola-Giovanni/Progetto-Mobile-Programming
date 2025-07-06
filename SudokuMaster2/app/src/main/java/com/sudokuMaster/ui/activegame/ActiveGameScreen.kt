@@ -26,6 +26,7 @@ import androidx.navigation.NavController
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -36,29 +37,26 @@ import androidx.compose.material3.TopAppBarDefaults
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActiveGameScreen(
-    viewModelFactory: ActiveGameViewModelFactory,
+    activeGameViewModel: ActiveGameViewModel,
     navController: NavController, // NavController viene passato dalla MainActivity
     modifier: Modifier = Modifier,
 ) {
-    val viewModel: ActiveGameViewModel = viewModel(
-        factory = viewModelFactory
-    )
 
-    val activeGameScreenState by viewModel.activeGameScreenState.collectAsState()
-    val sudokuTiles by viewModel.sudokuTiles.collectAsState() // Ora risolto dal ViewModel
-    val timerState by viewModel.timerState.collectAsState()
-    val selectedTile by viewModel.selectedTile.collectAsState()
-    val isSolved by viewModel.isSolved.collectAsState()
-    val currentDifficulty by viewModel.currentDifficulty.collectAsState() // Ora risolto dal ViewModel
-    val isNewRecord by viewModel.isNewRecord.collectAsState()
+    val activeGameScreenState by activeGameViewModel.activeGameScreenState.collectAsState() // Usa activeGameViewModel
+    val sudokuTiles by activeGameViewModel.sudokuTiles.collectAsState() // Usa activeGameViewModel
+    val timerState by activeGameViewModel.timerState.collectAsState() // Usa activeGameViewModel
+    val selectedTile by activeGameViewModel.selectedTile.collectAsState() // Usa activeGameViewModel
+    val isSolved by activeGameViewModel.isSolved.collectAsState() // Usa activeGameViewModel
+    val currentDifficulty by activeGameViewModel.currentDifficulty.collectAsState() // Usa activeGameViewModel
+    val isNewRecord by activeGameViewModel.isNewRecord.collectAsState() // Usa activeGameViewModel
 
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val lifecycle = lifecycleOwner.lifecycle
         val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
             when (event) {
-                androidx.lifecycle.Lifecycle.Event.ON_START -> viewModel.onEvent(ActiveGameEvent.OnStart)
-                androidx.lifecycle.Lifecycle.Event.ON_STOP -> viewModel.onEvent(ActiveGameEvent.OnStop)
+                androidx.lifecycle.Lifecycle.Event.ON_START -> activeGameViewModel.onEvent(ActiveGameEvent.OnStart)
+                androidx.lifecycle.Lifecycle.Event.ON_STOP -> activeGameViewModel.onEvent(ActiveGameEvent.OnStop)
                 else -> {}
             }
         }
@@ -81,7 +79,7 @@ fun ActiveGameScreen(
                         navController.popBackStack()
                     }) {
                         Icon(
-                            imageVector = Icons.Filled.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Torna indietro",
                             tint = MaterialTheme.colorScheme.onPrimaryContainer
                         )
@@ -118,13 +116,13 @@ fun ActiveGameScreen(
                     SudokuGrid(
                         tiles = sudokuTiles,
                         selectedTile = selectedTile,
-                        onTileClick = { x, y -> viewModel.onEvent(ActiveGameEvent.onTileFocused(x, y)) }
+                        onTileClick = { x, y -> activeGameViewModel.onEvent(ActiveGameEvent.onTileFocused(x, y))  }
                     )
 
                     Spacer(Modifier.height(16.dp))
 
                     NumberInput(onNumberClick = { number ->
-                        viewModel.onEvent(ActiveGameEvent.onInput(number))
+                        activeGameViewModel.onEvent(ActiveGameEvent.onInput(number))
                     })
                 }
                 ActiveGameScreenState.COMPLETE -> {
@@ -132,7 +130,7 @@ fun ActiveGameScreen(
                         timerState = timerState,
                         difficulty = currentDifficulty,
                         isNewRecord = isNewRecord,
-                        onNewGameClick = { viewModel.onEvent(ActiveGameEvent.OnNewGameClicked) }
+                        onNewGameClick = { activeGameViewModel.onEvent(ActiveGameEvent.OnNewGameClicked) }
                     )
                 }
                 ActiveGameScreenState.ERROR -> {
