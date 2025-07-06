@@ -13,6 +13,8 @@ import com.sudokuMaster.ui.activegame.ActiveGameScreenState
 import com.sudokuMaster.ui.activegame.ActiveGameViewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.res.stringResource
+import com.SudokuMaster.R
 import com.sudokuMaster.ui.Screen
 import java.util.concurrent.TimeUnit
 
@@ -38,25 +40,25 @@ fun WinScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Congratulazioni!",
+                text = stringResource(R.string.congratulazioni),
                 style = MaterialTheme.typography.headlineLarge,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             Text(
-                text = "Hai risolto il Sudoku!",
+                text = stringResource(R.string.hai_risolto_il_sudoku),
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
             Text(
-                text = "Tempo impiegato: ${formatTime(timerState)}",
+                text = stringResource(R.string.tempo_impiegato, formatTime(timerState)),
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
             if (isNewRecord) { // Se vuoi mostrare se è un nuovo record
                 Text(
-                    text = "Nuovo record personale!",
+                    text = stringResource(R.string.nuovo_record_personale),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(bottom = 16.dp)
@@ -72,7 +74,7 @@ fun WinScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Torna alla Home")
+                Text(stringResource(R.string.back_to_home))
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -86,7 +88,7 @@ fun WinScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Gioca una nuova partita")
+                Text(stringResource(R.string.start_new_game))
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -97,7 +99,7 @@ fun WinScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Vedi Statistiche")
+                Text(stringResource(R.string.vedi_statistiche))
             }
         }
     } else {
