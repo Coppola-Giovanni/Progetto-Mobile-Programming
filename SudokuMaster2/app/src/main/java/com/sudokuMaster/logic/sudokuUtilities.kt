@@ -16,6 +16,23 @@ internal fun SudokuPuzzle.isComplete(): Boolean {
     }
 }
 
+internal fun currentGridMatchesSolution(puzzle: SudokuPuzzle): Boolean {
+    val boundary = puzzle.boundary
+    for (row in 0 until boundary) {
+        for (col in 0 until boundary) {
+            val currentNode = puzzle.currentGraph[row]?.find { it.x == col }
+            val solutionNode = puzzle.solutionGraph[row]?.find { it.x == col }
+
+            // Se uno dei nodi è nullo o i valori non corrispondono, la griglia non è risolta correttamente
+            if (currentNode == null || solutionNode == null || currentNode.color != solutionNode.color) {
+                return false
+            }
+        }
+    }
+    return true // Tutte le celle corrispondono alla soluzione
+}
+
+
 internal fun SudokuPuzzle.isValid(): Boolean {
     return when {
         rowsAreInvalid(this) -> false

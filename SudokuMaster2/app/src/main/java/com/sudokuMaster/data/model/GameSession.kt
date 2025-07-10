@@ -16,6 +16,9 @@ data class GameSession(
     @ColumnInfo(name = "current_grid")
     val currentGrid: String,
 
+    @ColumnInfo(name = "solution_grid")
+    val solutionGrid: String,
+
     @ColumnInfo(name = "start_time_millis")
     val startTimeMillis: Long,
 

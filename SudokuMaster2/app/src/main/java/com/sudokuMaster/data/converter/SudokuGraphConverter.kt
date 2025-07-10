@@ -21,6 +21,9 @@ class SudokuGraphConverter {
     @TypeConverter
     fun toGraph(graphString: String): LinkedHashMap<Int, LinkedList<SudokuNode>> {
         val type = object : TypeToken<LinkedHashMap<Int, LinkedList<SudokuNode>>>() {}.type
+        if (graphString.isEmpty() || graphString == "{}") { // Gestisce il default della migrazione
+            return LinkedHashMap() // Ritorna una mappa vuota se la stringa è vuota o solo parentesi graffe
+        }
         return gson.fromJson(graphString, type)
     }
 }

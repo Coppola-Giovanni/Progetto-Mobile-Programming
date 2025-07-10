@@ -12,9 +12,9 @@
     <string name="congratulazioni">Congratulazioni!</string>
     <string name="continua_partita">Continua Partita</string>
     <string name="difficolt">Difficoltà: %1$s</string>
+    <string name="difficolt2">Difficoltà: %1$s</string>
+    <string name="difficolt3">Difficoltà: %1$s</string>
     <string name="difficolt_predefinita">Difficoltà predefinita:</string>
-    <string name="difficult">Difficoltà: %1$s</string>
-    <string name="difficult2">Difficoltà: %1$s</string>
     <string name="difficulty">Difficoltà</string>
     <string name="difficulty2">Difficolta: %1$s</string>
     <string name="difficulty_easy">Facile</string>
@@ -29,6 +29,7 @@
     <string name="hai_risolto_il_sudoku">Hai Completato il Sudoku!</string>
     <string name="hard">Difficile</string>
     <string name="impostazioni_utente">Impostazioni utente</string>
+    <string name="invalid_numbers_message">Attenzione: Numeri In Rosso Incorretti!!</string>
     <string name="loading">Caricamento</string>
     <string name="loading_puzzle">Caricamento Puzzle...</string>
     <string name="loading_sudoku">Caricamento Sudoku</string>

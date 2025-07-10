@@ -25,9 +25,9 @@ string clear_button
 string congratulazioni
 string continua_partita
 string difficolt
+string difficolt2
+string difficolt3
 string difficolt_predefinita
-string difficult
-string difficult2
 string difficulty
 string difficulty2
 string difficulty_easy
@@ -42,6 +42,7 @@ string generic_error
 string hai_risolto_il_sudoku
 string hard
 string impostazioni_utente
+string invalid_numbers_message
 string loading
 string loading_puzzle
 string loading_sudoku

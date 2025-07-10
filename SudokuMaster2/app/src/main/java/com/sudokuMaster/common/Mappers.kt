@@ -1,83 +1,43 @@
 package com.sudokuMaster.common
 
 import com.sudokuMaster.data.DifficultyLevel
+import com.sudokuMaster.data.converter.SudokuGraphConverter
 import com.sudokuMaster.data.model.GameSession
-import com.sudokuMaster.domain.SudokuNode
 import com.sudokuMaster.domain.SudokuPuzzle
-import java.util.LinkedHashMap
-import java.util.LinkedList
+
+private val SudokuGraphConverter = SudokuGraphConverter()
 
 fun SudokuPuzzle.toGameSession(existingId: Long = 0L, isSolved: Boolean = false, score: Int = 0): GameSession {
-    val initialGridString = StringBuilder()
-    this.initialGraph.forEach { (_, nodes) ->
-        nodes.sortBy { it.x }
-        nodes.forEach { node ->
-            initialGridString.append(node.color)
-        }
-    }
-
-    val currentGridString = StringBuilder()
-    this.currentGraph.forEach { (_, nodes) ->
-        nodes.sortBy { it.x }
-        nodes.forEach { node ->
-            currentGridString.append(node.color)
-        }
-    }
+    // Serializza i LinkedHashMap in stringhe JSON usando il converter
+    val initialGridJson = SudokuGraphConverter.fromGraph(this.initialGraph)
+    val currentGridJson = SudokuGraphConverter.fromGraph(this.currentGraph)
+    val solutionGridJson = SudokuGraphConverter.fromGraph(this.solutionGraph)
 
     val currentTimestamp = System.currentTimeMillis()
 
     return GameSession(
-        id = existingId, // 0 per un nuovo gioco
+        id = existingId,
         difficulty = this.difficulty.name,
-        initialGrid = initialGridString.toString(),
-        currentGrid = currentGridString.toString(),
-        startTimeMillis = currentTimestamp - (this.elapsedTime * 1000L), // Stima del tempo di inizio
+        initialGrid = initialGridJson,
+        currentGrid = currentGridJson,
+        startTimeMillis = currentTimestamp - (this.elapsedTime * 1000L),
         endTimeMillis = if (isSolved) currentTimestamp else null,
-        durationSeconds = this.elapsedTime, // Tempo trascorso in secondi
+        durationSeconds = this.elapsedTime,
         score = score,
         isSolved = isSolved,
-        datePlayedMillis = if (isSolved) currentTimestamp else 0L // Data di gioco solo se risolto
+        datePlayedMillis = if (isSolved) currentTimestamp else 0L,
+        solutionGrid = solutionGridJson
     )
 }
 
+
 fun GameSession.toSudokuPuzzle(): SudokuPuzzle {
-    val boundary = 9
+    val boundary = 9 // Assumiamo 9x9 per tutti i Sudoku
 
-    val initialGraph = LinkedHashMap<Int, LinkedList<SudokuNode>>()
-    val currentGraph = LinkedHashMap<Int, LinkedList<SudokuNode>>()
-
-    // Ricostruisce initialGraph e currentGraph dalle stringhe della griglia
-    for (row in 0 until boundary) {
-        val initialRowList = LinkedList<SudokuNode>()
-        val currentRowList = LinkedList<SudokuNode>()
-        for (col in 0 until boundary) {
-            val initialValue = this.initialGrid[row * boundary + col].toString().toInt()
-            val currentValue = this.currentGrid[row * boundary + col].toString().toInt()
-
-            initialRowList.add(
-                SudokuNode(
-                    x = col,
-                    y = row,
-                    color = initialValue,
-                    readOnly = initialValue != 0
-                )
-            )
-            currentRowList.add(
-                SudokuNode(
-                    x = col,
-                    y = row,
-                    color = currentValue,
-                    readOnly = initialValue != 0
-                )
-            )
-        }
-        initialGraph[row] = initialRowList
-        currentGraph[row] = currentRowList
-    }
-
-
-    initialGraph.forEach { (_, list) -> list.sortBy { it.x } }
-    currentGraph.forEach { (_, list) -> list.sortBy { it.x } }
+    // Deserializza le stringhe JSON in LinkedHashMap usando il converter
+    val initialGraph = SudokuGraphConverter.toGraph(this.initialGrid)
+    val currentGraph = SudokuGraphConverter.toGraph(this.currentGrid)
+    val solutionGraph = SudokuGraphConverter.toGraph(this.solutionGrid)
 
     return SudokuPuzzle(
         id = this.id,
@@ -85,15 +45,17 @@ fun GameSession.toSudokuPuzzle(): SudokuPuzzle {
         difficulty = DifficultyLevel.valueOf(this.difficulty),
         initialGraph = initialGraph,
         currentGraph = currentGraph,
+        solutionGraph = solutionGraph,
         elapsedTime = this.durationSeconds ?: 0L
     )
 }
+
 
 fun String.toDifficultyLevel(): DifficultyLevel {
     return try {
         DifficultyLevel.valueOf(this.uppercase())
     } catch (e: IllegalArgumentException) {
-        DifficultyLevel.MEDIUM // Fallback a MEDIUM o un altro default sensato
+        DifficultyLevel.MEDIUM
     }
 }
 

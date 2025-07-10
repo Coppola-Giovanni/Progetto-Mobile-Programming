@@ -34,26 +34,29 @@ class GameRepositoryImpl(
         try {
             val apiResult = sudokuRemoteDataSource.getNewSudokuPuzzleData(difficulty)
 
-            apiResult.onSuccess { (initialGridData, actualDifficulty) ->
+            apiResult.onSuccess { (initialGridData, solutionGridData, actualDifficulty)  ->
 
                 val boundary = 9 // Assumiamo 9x9
 
                  // Costruisce initialGraph e currentGraph dal initialGridData ricevuto dall'API
                 val initialGraph = LinkedHashMap<Int, LinkedList<SudokuNode>>()
                 val currentGraph = LinkedHashMap<Int, LinkedList<SudokuNode>>()
+                val solutionGraph = LinkedHashMap<Int, LinkedList<SudokuNode>>()
 
                 for (row in 0 until boundary) {
                     val initialRowList = LinkedList<SudokuNode>()
                     val currentRowList = LinkedList<SudokuNode>()
+                    val solutionRowList = LinkedList<SudokuNode>()
                     for (col in 0 until boundary) {
-                        val value = initialGridData[row][col] // Valore iniziale dal board dell'API
-                        val isReadOnly = value != 0
+                        val initialValue = initialGridData[row][col]
+                        val solutionValue = solutionGridData[row][col]
+                        val isReadOnly = initialValue != 0
 
                         initialRowList.add(
                             SudokuNode(
                                 x = col,
                                 y = row,
-                                color = value,
+                                color = initialValue,
                                 readOnly = isReadOnly
                             )
                         )
@@ -61,16 +64,27 @@ class GameRepositoryImpl(
                             SudokuNode(
                                 x = col,
                                 y = row,
-                                color = value,
+                                color = initialValue,
                                 readOnly = isReadOnly
                             )
                         )
+                        solutionRowList.add( // <<< Aggiungi il nodo alla soluzione
+                            SudokuNode(
+                                x = col,
+                                y = row,
+                                color = solutionValue, // Il valore della soluzione
+                                readOnly = true // La soluzione è sempre readOnly per l'utente, non dovrebbe essere modificabile
+                            )
+                        )
+
                     }
                     initialGraph[row] = initialRowList
                     currentGraph[row] = currentRowList
+                    solutionGraph[row] = solutionRowList
                 }
                 initialGraph.forEach { (_, list) -> list.sortBy { it.x } }
                 currentGraph.forEach { (_, list) -> list.sortBy { it.x } }
+                solutionGraph.forEach { (_, list) -> list.sortBy { it.x } }
 
 
                 val newSudokuPuzzle = SudokuPuzzle(
@@ -79,6 +93,7 @@ class GameRepositoryImpl(
                     difficulty = actualDifficulty,
                     initialGraph = initialGraph,
                     currentGraph = currentGraph,
+                    solutionGraph = solutionGraph,
                     elapsedTime = 0L
                 )
 

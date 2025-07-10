@@ -3930,9 +3930,9 @@ string continua_partita
 string default_error_message
 string default_popup_window_title
 string difficolt
+string difficolt2
+string difficolt3
 string difficolt_predefinita
-string difficult
-string difficult2
 string difficulty
 string difficulty2
 string difficulty_easy
@@ -3957,6 +3957,7 @@ string icon_content_description
 string impostazioni_utente
 string in_progress
 string indeterminate
+string invalid_numbers_message
 string item_view_role_description
 string loading
 string loading_puzzle

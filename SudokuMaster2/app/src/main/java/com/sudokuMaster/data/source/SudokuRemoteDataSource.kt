@@ -33,26 +33,29 @@ interface SudokuApiService {
 // --- 3. Implementazione del Remote Data Source ---
 class SudokuRemoteDataSource(private val apiService: SudokuApiService) {
 
-    suspend fun getNewSudokuPuzzleData(requestedDifficulty: DifficultyLevel): Result<Pair<List<List<Int>>, DifficultyLevel>> {
+    suspend fun getNewSudokuPuzzleData(requestedDifficulty: DifficultyLevel): Result<Triple<List<List<Int>>, List<List<Int>>, DifficultyLevel>> {
         return withContext(Dispatchers.IO) { // Esegue la chiamata di rete su un thread I/O
             try {
                 val response = apiService.getNewSudoku()
-                val initialGridData = response.newBoard.grids.firstOrNull()?.value
+                val gridResponse = response.newBoard.grids.firstOrNull()
                     ?: throw IllegalStateException("API response did not contain grid data.")
-                val apiDifficultyString = response.newBoard.grids.firstOrNull()?.difficulty
-                    ?: "DIFFICULTY_UNSPECIFIED" // Default se non specificato
 
-                // Mappa la stringa della difficoltà API al tuo enum DifficultyLevel
+                val initialGridData = gridResponse.value
+                val solutionGridData = gridResponse.solution
+                val apiDifficultyString = gridResponse.difficulty
+                    ?: "DIFFICULTY_UNSPECIFIED"
+
                 val actualDifficulty = try {
                     DifficultyLevel.valueOf(apiDifficultyString.uppercase())
                 } catch (e: IllegalArgumentException) {
                     DifficultyLevel.DIFFICULTY_UNSPECIFIED
                 }
 
-                Result.success(Pair(initialGridData, actualDifficulty))
+                Result.success(Triple(initialGridData, solutionGridData, actualDifficulty))
             } catch (e: Exception) {
                 Result.failure(e)
             }
         }
     }
 }
+

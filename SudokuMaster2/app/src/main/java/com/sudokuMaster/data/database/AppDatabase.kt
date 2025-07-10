@@ -13,7 +13,7 @@ import com.sudokuMaster.data.model.UserStatistics
 
 @Database(
     entities = [GameSession::class, UserStatistics::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(SudokuGraphConverter::class)

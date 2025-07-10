@@ -160,7 +160,7 @@ class ActiveGameViewModel(
                         _activeGameScreenState.value = ActiveGameScreenState.ACTIVE
                         startTimer()
                     },
-                    onError = { throwable ->
+                    onError = { _ ->
                         _activeGameScreenState.value = ActiveGameScreenState.ERROR
                     }
                 )
@@ -264,7 +264,6 @@ class ActiveGameViewModel(
                     }
                 )
             }
-        } else {
         }
     }
 
