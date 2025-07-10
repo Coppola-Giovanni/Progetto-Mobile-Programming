@@ -1,5 +1,6 @@
 package com.sudokuMaster.ui.activegame
 
+
 import com.sudokuMaster.logic.isComplete
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -274,80 +275,93 @@ class ActiveGameViewModel(
     }
 
     private fun onSuggestMoveClicked() = viewModelScope.launch {
-        val currentPuzzle = _sudokuPuzzle.value ?: run {
-            return@launch
-        }
+        val currentPuzzle = _sudokuPuzzle.value ?: return@launch
 
-        val currentBoard = currentPuzzle.currentGraph.values.flatten().associateBy { getHash(it.x, it.y) }.toMutableMap()
-        val boundary = 9
-
-        var suggestedX: Int? = null
-        var suggestedY: Int? = null
-        var suggestedValue: Int? = null
+        // Get the solution graph
+        val solutionNodes = currentPuzzle.solutionGraph.values.flatten()
+        val solutionBoard = solutionNodes.associateBy { getHash(it.x, it.y) }
 
         val focusedTile = _selectedTile.value
 
+        // Check if the focused tile is empty and not readOnly
         if (focusedTile.value == 0 && !focusedTile.readOnly) {
-            for (num in 1..boundary) {
-                val tempBoardForCheck = currentBoard.toMutableMap()
-                val tempNode = SudokuNode(focusedTile.x, focusedTile.y, num, focusedTile.readOnly)
-                tempBoardForCheck[getHash(focusedTile.x, focusedTile.y)] = tempNode
-
-                if (isValidMove(tempBoardForCheck, focusedTile.x, focusedTile.y, num, boundary)) {
-                    suggestedX = focusedTile.x
-                    suggestedY = focusedTile.y
-                    suggestedValue = num
-                    break
+            val suggestedNode = solutionBoard[getHash(focusedTile.x, focusedTile.y)]
+            if (suggestedNode != null && suggestedNode.color != 0) {
+                // Apply the solution's value to the focused tile
+                val updatedNodesMap = LinkedHashMap<Int, LinkedList<SudokuNode>>()
+                currentPuzzle.currentGraph.forEach { (row, nodes) ->
+                    updatedNodesMap[row] = LinkedList(nodes.map { node ->
+                        if (node.x == focusedTile.x && node.y == focusedTile.y) {
+                            node.copy(color = suggestedNode.color)
+                        } else {
+                            node.copy()
+                        }
+                    })
                 }
+                _sudokuPuzzle.value = currentPuzzle.copy(currentGraph = updatedNodesMap)
+
+                _selectedTile.value = SudokuTile(
+                    focusedTile.x,
+                    focusedTile.y,
+                    suggestedNode.color,
+                    true,
+                    focusedTile.readOnly
+                )
+
+                // Check for completion after the suggestion
+                _sudokuPuzzle.value?.let { updatedPuzzle ->
+                    if (updatedPuzzle.isComplete()) {
+                        _isSolved.value = true
+                        stopTimer()
+                        saveCurrentGameSession(isSolved = true)
+                        _activeGameScreenState.value = ActiveGameScreenState.COMPLETE
+                    } else {
+                        saveCurrentGameSession()
+                    }
+                }
+                return@launch // Suggestion applied, exit
             }
         }
 
-        if (suggestedValue == null) {
-            outerLoop@ for (y in 0 until boundary) {
-                for (x in 0 until boundary) {
-                    val node = currentBoard[getHash(x, y)]
-                    if (node != null && node.color == 0 && !node.readOnly) {
-                        for (num in 1..boundary) {
-                            val tempBoardForCheck = currentBoard.toMutableMap()
-                            val tempNode = SudokuNode(x, y, num, node.readOnly)
-                            tempBoardForCheck[getHash(x, y)] = tempNode
-
-                            if (isValidMove(tempBoardForCheck, x, y, num, boundary)) {
-                                suggestedX = x
-                                suggestedY = y
-                                suggestedValue = num
-                                Log.d("SudokuDebug", "    Found valid suggestion $num for ($x, $y).")
-                                break@outerLoop
+        // Fallback: If focused tile cannot be suggested or no focused tile, find the first empty non-readOnly cell
+        // and apply its solution value.
+        val currentBoardNodes = currentPuzzle.currentGraph.values.flatten()
+        for (node in currentBoardNodes) {
+            if (node.color == 0 && !node.readOnly) {
+                val suggestedNode = solutionBoard[getHash(node.x, node.y)]
+                if (suggestedNode != null && suggestedNode.color != 0) {
+                    val updatedNodesMap = LinkedHashMap<Int, LinkedList<SudokuNode>>()
+                    currentPuzzle.currentGraph.forEach { (row, nodes) ->
+                        updatedNodesMap[row] = LinkedList(nodes.map { n ->
+                            if (n.x == node.x && n.y == node.y) {
+                                n.copy(color = suggestedNode.color)
+                            } else {
+                                n.copy()
                             }
+                        })
+                    }
+                    _sudokuPuzzle.value = currentPuzzle.copy(currentGraph = updatedNodesMap)
+
+                    _selectedTile.value = SudokuTile(
+                        node.x,
+                        node.y,
+                        suggestedNode.color,
+                        true,
+                        node.readOnly
+                    )
+
+                    // Check for completion after the suggestion
+                    _sudokuPuzzle.value?.let { updatedPuzzle ->
+                        if (updatedPuzzle.isComplete()) {
+                            _isSolved.value = true
+                            stopTimer()
+                            saveCurrentGameSession(isSolved = true)
+                            _activeGameScreenState.value = ActiveGameScreenState.COMPLETE
+                        } else {
+                            saveCurrentGameSession()
                         }
                     }
-                }
-            }
-        }
-
-        if (suggestedX != null && suggestedY != null && suggestedValue != null) {
-            val updatedNodesMap = LinkedHashMap<Int, LinkedList<SudokuNode>>()
-            currentPuzzle.currentGraph.forEach { (row, nodes) ->
-                updatedNodesMap[row] = LinkedList(nodes.map { node ->
-                    if (node.x == suggestedX && node.y == suggestedY) {
-                        node.copy(color = suggestedValue)
-                    } else {
-                        node.copy()
-                    }
-                })
-            }
-            _sudokuPuzzle.value = currentPuzzle.copy(currentGraph = updatedNodesMap)
-
-            _selectedTile.value = SudokuTile(suggestedX, suggestedY, suggestedValue, true, false)
-
-            _sudokuPuzzle.value?.let { updatedPuzzle ->
-                if (updatedPuzzle.isComplete()) {
-                    _isSolved.value = true
-                    stopTimer()
-                    saveCurrentGameSession(isSolved = true)
-                    _activeGameScreenState.value = ActiveGameScreenState.COMPLETE
-                } else {
-                    saveCurrentGameSession()
+                    return@launch // Suggestion applied, exit
                 }
             }
         }
