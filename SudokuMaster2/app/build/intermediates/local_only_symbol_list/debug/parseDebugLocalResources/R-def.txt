@@ -51,6 +51,8 @@ string medium
 string migliori_tempi_per_difficolt
 string nessuna_statistica_disponibile_gioca_la_tua_prima_partita
 string new_record
+string notes_mode_off
+string notes_mode_on
 string nuova_partita
 string nuovo_record_personale
 string partite_giocate_totali

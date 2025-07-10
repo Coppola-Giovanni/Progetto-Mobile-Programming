@@ -4,7 +4,8 @@ data class SudokuNode(
     val x: Int,
     val y: Int,
     var color: Int = 0,
-    var readOnly: Boolean = true
+    var readOnly: Boolean = true,
+    var notes: Set<Int> = emptySet()
 ) {
     override fun hashCode(): Int {
         return getHash(x,y)

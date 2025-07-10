@@ -31,6 +31,7 @@ data class SudokuTile(
     var value: Int,
     var hasFocus: Boolean,
     var readOnly: Boolean,
+    var notes: Set<Int> = emptySet(),
     val isInvalid: Boolean = false
 )
 
@@ -70,9 +71,11 @@ class ActiveGameViewModel(
     private val _currentDifficulty = MutableStateFlow(DifficultyLevel.MEDIUM)
     val currentDifficulty: StateFlow<DifficultyLevel> = _currentDifficulty.asStateFlow()
 
-    // NUOVA PROPRIETÀ: Indica se ci sono celle invalide nel puzzle
     private val _hasInvalidTiles = MutableStateFlow(false)
     val hasInvalidTiles: StateFlow<Boolean> = _hasInvalidTiles.asStateFlow()
+
+    private val _isNotesMode = MutableStateFlow(false)
+    val isNotesMode: StateFlow<Boolean> = _isNotesMode.asStateFlow()
 
     val sudokuTiles: StateFlow<List<SudokuTile>> = _sudokuPuzzle.map { puzzle ->
         puzzle?.let {
@@ -85,6 +88,7 @@ class ActiveGameViewModel(
                     value = node.color,
                     hasFocus = false,
                     readOnly = node.readOnly,
+                    notes = node.notes,
                     isInvalid = !isNodeValid && node.color != 0
                 )
             }.map { tile ->
@@ -127,7 +131,14 @@ class ActiveGameViewModel(
                 createNewGame()
             }
             is ActiveGameEvent.onInput -> {
-                updateGameData(event.input)
+                if (_isNotesMode.value) {
+                    updateNotes(event.input)
+                } else {
+                    updateGameData(event.input)
+                }
+            }
+            is ActiveGameEvent.onNoteInput -> { // Gestisce specificamente l'input delle note
+                updateNotes(event.input)
             }
             is ActiveGameEvent.onTileFocused -> {
                 _selectedTile.value = _selectedTile.value.copy(
@@ -137,6 +148,11 @@ class ActiveGameViewModel(
                 )
             }
             ActiveGameEvent.OnSuggestMoveClicked -> onSuggestMoveClicked()
+
+            ActiveGameEvent.OnToggleNotesMode -> { // Alterna la modalità note
+                _isNotesMode.value = !_isNotesMode.value
+            }
+            else ->{}
         }
     }
 
@@ -208,7 +224,8 @@ class ActiveGameViewModel(
             currentPuzzle.currentGraph.forEach { (row, nodes) ->
                 updatedCurrentGraph[row] = LinkedList(nodes.map { node ->
                     if (node.x == selectedTile.value.x && node.y == selectedTile.value.y && !node.readOnly) {
-                        node.copy(color = input)
+                        // Quando si inserisce un valore definitivo, le note devono essere cancellate per quella cella
+                        node.copy(color = input, notes = emptySet())
                     } else {
                         node.copy()
                     }
@@ -226,6 +243,37 @@ class ActiveGameViewModel(
             } else {
                 saveCurrentGameSession()
             }
+        }
+    }
+
+    private fun updateNotes(input: Int) {
+        _sudokuPuzzle.value?.let { currentPuzzle ->
+            val updatedCurrentGraph = LinkedHashMap<Int, LinkedList<SudokuNode>>()
+            val focusedTile = _selectedTile.value
+
+            currentPuzzle.currentGraph.forEach { (row, nodes) ->
+                updatedCurrentGraph[row] = LinkedList(nodes.map { node ->
+                    if (node.x == focusedTile.x && node.y == focusedTile.y && !node.readOnly) {
+                        // Una cella con un valore definitivo (color != 0) non può avere note.
+                        if (node.color == 0) {
+                            val newNotes = if (node.notes.contains(input)) {
+                                node.notes - input
+                            } else {
+                                (node.notes + input).filter { it in 1..9 }.toSet() // Aggiungi la nota se non presente, filtra numeri validi
+                            }
+                            node.copy(notes = newNotes)
+                        } else {
+                            node.copy() // Non modificare se la cella ha un valore definitivo
+                        }
+                    } else {
+                        node.copy()
+                    }
+                })
+            }
+
+            val updatedPuzzle = currentPuzzle.copy(currentGraph = updatedCurrentGraph)
+            _sudokuPuzzle.value = updatedPuzzle
+            saveCurrentGameSession() // Salva lo stato del gioco dopo aver aggiornato le note
         }
     }
 
@@ -274,84 +322,101 @@ class ActiveGameViewModel(
     }
 
     private fun onSuggestMoveClicked() = viewModelScope.launch {
-        val currentPuzzle = _sudokuPuzzle.value ?: run {
-            return@launch
-        }
+        val currentPuzzle = _sudokuPuzzle.value ?: return@launch
 
-        val currentBoard = currentPuzzle.currentGraph.values.flatten().associateBy { getHash(it.x, it.y) }.toMutableMap()
-        val boundary = 9
-
-        var suggestedX: Int? = null
-        var suggestedY: Int? = null
-        var suggestedValue: Int? = null
+        // Get the solution graph
+        val solutionNodes = currentPuzzle.solutionGraph.values.flatten()
+        val solutionBoard = solutionNodes.associateBy { getHash(it.x, it.y) }
 
         val focusedTile = _selectedTile.value
 
+        // Check if the focused tile is empty and not readOnly
         if (focusedTile.value == 0 && !focusedTile.readOnly) {
-            for (num in 1..boundary) {
-                val tempBoardForCheck = currentBoard.toMutableMap()
-                val tempNode = SudokuNode(focusedTile.x, focusedTile.y, num, focusedTile.readOnly)
-                tempBoardForCheck[getHash(focusedTile.x, focusedTile.y)] = tempNode
-
-                if (isValidMove(tempBoardForCheck, focusedTile.x, focusedTile.y, num, boundary)) {
-                    suggestedX = focusedTile.x
-                    suggestedY = focusedTile.y
-                    suggestedValue = num
-                    break
+            val suggestedNode = solutionBoard[getHash(focusedTile.x, focusedTile.y)]
+            if (suggestedNode != null && suggestedNode.color != 0) {
+                // Apply the solution's value to the focused tile
+                val updatedNodesMap = LinkedHashMap<Int, LinkedList<SudokuNode>>()
+                currentPuzzle.currentGraph.forEach { (row, nodes) ->
+                    updatedNodesMap[row] = LinkedList(nodes.map { node ->
+                        if (node.x == focusedTile.x && node.y == focusedTile.y) {
+                            node.copy(color = suggestedNode.color, notes = emptySet())
+                        } else {
+                            node.copy()
+                        }
+                    })
                 }
+                _sudokuPuzzle.value = currentPuzzle.copy(currentGraph = updatedNodesMap)
+
+                _selectedTile.value = SudokuTile(
+                    focusedTile.x,
+                    focusedTile.y,
+                    suggestedNode.color,
+                    true,
+                    focusedTile.readOnly,
+                    notes = emptySet()
+                )
+
+                // Check for completion after the suggestion
+                _sudokuPuzzle.value?.let { updatedPuzzle ->
+                    if (updatedPuzzle.isComplete()) {
+                        _isSolved.value = true
+                        stopTimer()
+                        saveCurrentGameSession(isSolved = true)
+                        _activeGameScreenState.value = ActiveGameScreenState.COMPLETE
+                    } else {
+                        saveCurrentGameSession()
+                    }
+                }
+                return@launch // Suggestion applied, exit
             }
         }
 
-        if (suggestedValue == null) {
-            outerLoop@ for (y in 0 until boundary) {
-                for (x in 0 until boundary) {
-                    val node = currentBoard[getHash(x, y)]
-                    if (node != null && node.color == 0 && !node.readOnly) {
-                        for (num in 1..boundary) {
-                            val tempBoardForCheck = currentBoard.toMutableMap()
-                            val tempNode = SudokuNode(x, y, num, node.readOnly)
-                            tempBoardForCheck[getHash(x, y)] = tempNode
-
-                            if (isValidMove(tempBoardForCheck, x, y, num, boundary)) {
-                                suggestedX = x
-                                suggestedY = y
-                                suggestedValue = num
-                                Log.d("SudokuDebug", "    Found valid suggestion $num for ($x, $y).")
-                                break@outerLoop
+        // Fallback: If focused tile cannot be suggested or no focused tile, find the first empty non-readOnly cell
+        // and apply its solution value.
+        val currentBoardNodes = currentPuzzle.currentGraph.values.flatten()
+        for (node in currentBoardNodes) {
+            if (node.color == 0 && !node.readOnly) {
+                val suggestedNode = solutionBoard[getHash(node.x, node.y)]
+                if (suggestedNode != null && suggestedNode.color != 0) {
+                    val updatedNodesMap = LinkedHashMap<Int, LinkedList<SudokuNode>>()
+                    currentPuzzle.currentGraph.forEach { (row, nodes) ->
+                        updatedNodesMap[row] = LinkedList(nodes.map { n ->
+                            if (n.x == node.x && n.y == node.y) {
+                                // Imposta il colore e svuota le note
+                                n.copy(color = suggestedNode.color, notes = emptySet()) // <<< MODIFICA QUI
+                            } else {
+                                n.copy()
                             }
+                        })
+                    }
+                    _sudokuPuzzle.value = currentPuzzle.copy(currentGraph = updatedNodesMap)
+
+                    _selectedTile.value = SudokuTile(
+                        node.x,
+                        node.y,
+                        suggestedNode.color,
+                        true,
+                        node.readOnly,
+                        notes = emptySet() // <<< MODIFICA QUI: Svuota le note anche nella tile selezionata
+                    )
+
+                    // Check for completion after the suggestion
+                    _sudokuPuzzle.value?.let { updatedPuzzle ->
+                        if (updatedPuzzle.isComplete()) {
+                            _isSolved.value = true
+                            stopTimer()
+                            saveCurrentGameSession(isSolved = true)
+                            _activeGameScreenState.value = ActiveGameScreenState.COMPLETE
+                        } else {
+                            saveCurrentGameSession()
                         }
                     }
-                }
-            }
-        }
-
-        if (suggestedX != null && suggestedY != null && suggestedValue != null) {
-            val updatedNodesMap = LinkedHashMap<Int, LinkedList<SudokuNode>>()
-            currentPuzzle.currentGraph.forEach { (row, nodes) ->
-                updatedNodesMap[row] = LinkedList(nodes.map { node ->
-                    if (node.x == suggestedX && node.y == suggestedY) {
-                        node.copy(color = suggestedValue)
-                    } else {
-                        node.copy()
-                    }
-                })
-            }
-            _sudokuPuzzle.value = currentPuzzle.copy(currentGraph = updatedNodesMap)
-
-            _selectedTile.value = SudokuTile(suggestedX, suggestedY, suggestedValue, true, false)
-
-            _sudokuPuzzle.value?.let { updatedPuzzle ->
-                if (updatedPuzzle.isComplete()) {
-                    _isSolved.value = true
-                    stopTimer()
-                    saveCurrentGameSession(isSolved = true)
-                    _activeGameScreenState.value = ActiveGameScreenState.COMPLETE
-                } else {
-                    saveCurrentGameSession()
+                    return@launch // Suggestion applied, exit
                 }
             }
         }
     }
+
 
     private fun isValidMove(
         board: MutableMap<Int, SudokuNode>,

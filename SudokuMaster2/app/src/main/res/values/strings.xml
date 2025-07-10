@@ -61,4 +61,6 @@
     <string name="difficolt2">Difficult: %1$s</string>
     <string name="difficolt3">Difficult: %1$s</string>
     <string name="invalid_numbers_message">Attention: Incorrect Numbers in Red!!</string>
+    <string name="notes_mode_on">Notes ON</string>
+    <string name="notes_mode_off">Notes OFF</string>
 </resources>

@@ -45,7 +45,8 @@ fun ActiveGameScreen(
     val isSolved by activeGameViewModel.isSolved.collectAsState()
     val currentDifficulty by activeGameViewModel.currentDifficulty.collectAsState()
     val isNewRecord by activeGameViewModel.isNewRecord.collectAsState()
-    val hasInvalidTiles by activeGameViewModel.hasInvalidTiles.collectAsState() // <-- Osserva lo stato hasInvalidTiles
+    val hasInvalidTiles by activeGameViewModel.hasInvalidTiles.collectAsState()
+    val isNotesMode by activeGameViewModel.isNotesMode.collectAsState() // <<< NUOVO: Osserva lo stato della modalità note
 
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
@@ -165,7 +166,6 @@ fun ActiveGameScreen(
                                 )
                             }
 
-                            // <--- AGGIUNGI QUI IL MESSAGGIO PER LANDSCAPE ---
                             if (hasInvalidTiles) {
                                 Text(
                                     text = stringResource(R.string.invalid_numbers_message),
@@ -175,24 +175,45 @@ fun ActiveGameScreen(
                                     modifier = Modifier.padding(bottom = 8.dp)
                                 )
                             }
-                            // ----------------------------------------------
 
-
-                            Button(
-                                onClick = { activeGameViewModel.onEvent(ActiveGameEvent.OnSuggestMoveClicked) },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                            // --- CONTROLLI AGGIUNTI ---
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceEvenly,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(stringResource(R.string.suggest_move))
+                                Button(
+                                    onClick = { activeGameViewModel.onEvent(ActiveGameEvent.OnSuggestMoveClicked) },
+                                    modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
+                                ) {
+                                    Text(stringResource(R.string.suggest_move))
+                                }
+                                Button(
+                                    onClick = { activeGameViewModel.onEvent(ActiveGameEvent.OnToggleNotesMode) },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = if (isNotesMode) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
+                                        contentColor = if (isNotesMode) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onPrimary
+                                    ),
+                                    modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
+                                ) {
+                                    Text(if (isNotesMode) stringResource(R.string.notes_mode_on) else stringResource(R.string.notes_mode_off)) // R.string.notes_mode_on/off vanno aggiunte in strings.xml
+                                }
                             }
+                            // --- FINE CONTROLLI AGGIUNTI ---
 
-                            NumberInput(onNumberClick = { number ->
-                                activeGameViewModel.onEvent(ActiveGameEvent.onInput(number))
-                            })
+                            NumberInput(
+                                onNumberClick = { number ->
+                                    // Invia l'evento corretto in base alla modalità corrente
+                                    if (isNotesMode) {
+                                        activeGameViewModel.onEvent(ActiveGameEvent.onNoteInput(number))
+                                    } else {
+                                        activeGameViewModel.onEvent(ActiveGameEvent.onInput(number))
+                                    }
+                                }
+                            )
                         }
                     }
-                } else {
+                } else { // Portrait
                     Column(
                         modifier = modifier
                             .fillMaxSize()
@@ -218,7 +239,6 @@ fun ActiveGameScreen(
                             )
                         }
 
-                        // <--- AGGIUNGI QUI IL MESSAGGIO PER PORTRAIT ---
                         if (hasInvalidTiles) {
                             Text(
                                 text = stringResource(R.string.invalid_numbers_message),
@@ -228,7 +248,6 @@ fun ActiveGameScreen(
                                 modifier = Modifier.padding(bottom = 8.dp)
                             )
                         }
-                        // ----------------------------------------------
 
                         SudokuGrid(
                             tiles = sudokuTiles,
@@ -238,19 +257,39 @@ fun ActiveGameScreen(
 
                         Spacer(Modifier.height(16.dp))
 
-                        Button(
-                            onClick = { activeGameViewModel.onEvent(ActiveGameEvent.OnSuggestMoveClicked) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
+                        // --- CONTROLLI AGGIUNTI ---
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(stringResource(R.string.suggest_move))
+                            Button(
+                                onClick = { activeGameViewModel.onEvent(ActiveGameEvent.OnSuggestMoveClicked) },
+                                modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
+                            ) {
+                                Text(stringResource(R.string.suggest_move))
+                            }
+                            Button(
+                                onClick = { activeGameViewModel.onEvent(ActiveGameEvent.OnToggleNotesMode) },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (isNotesMode) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
+                                    contentColor = if (isNotesMode) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onPrimary
+                                ),
+                                modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
+                            ) {
+                                Text(if (isNotesMode) stringResource(R.string.notes_mode_on) else stringResource(R.string.notes_mode_off))
+                            }
                         }
+                        // --- FINE CONTROLLI AGGIUNTI ---
 
                         Spacer(modifier = Modifier.height(16.dp))
 
                         NumberInput(onNumberClick = { number ->
-                            activeGameViewModel.onEvent(ActiveGameEvent.onInput(number))
+                            if (isNotesMode) {
+                                activeGameViewModel.onEvent(ActiveGameEvent.onNoteInput(number))
+                            } else {
+                                activeGameViewModel.onEvent(ActiveGameEvent.onInput(number))
+                            }
                         })
 
                         Spacer(modifier = Modifier.weight(0.5f))
@@ -287,6 +326,7 @@ fun ActiveGameScreen(
         }
     }
 }
+
 
 @Composable
 fun SudokuGrid(
@@ -383,7 +423,7 @@ fun SudokuCell(
     }
 
     val textColor = when {
-        tile.isInvalid ->Color.Red
+        tile.isInvalid -> Color.Red
         isInitial -> MaterialTheme.colorScheme.onPrimary
         else -> MaterialTheme.colorScheme.onSurface
     }
@@ -394,7 +434,7 @@ fun SudokuCell(
             .clickable(enabled = !isInitial, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        if (tile.value != 0) {
+        if (tile.value != 0) { // Se c'è un valore definitivo, mostralo
             Text(
                 text = tile.value.toString(),
                 style = MaterialTheme.typography.bodyLarge.copy(
@@ -404,9 +444,44 @@ fun SudokuCell(
                 ),
                 color = textColor
             )
+        } else { // Se la cella è vuota, mostra le note
+            if (tile.notes.isNotEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.SpaceAround,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // Crea una griglia 3x3 per le note
+                    for (row in 0 until 3) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceAround
+                        ) {
+                            for (col in 0 until 3) {
+                                val number = row * 3 + col + 1
+                                if (tile.notes.contains(number)) {
+                                    Text(
+                                        text = number.toString(),
+                                        style = MaterialTheme.typography.bodySmall.copy(
+                                            fontSize = 10.sp // Dimensione ridotta per le note
+                                        ),
+                                        color = textColor,
+                                        modifier = Modifier.weight(1f),
+                                        textAlign = TextAlign.Center
+                                    )
+                                } else {
+                                    // Spazio vuoto se la nota non è presente
+                                    Spacer(modifier = Modifier.weight(1f))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
+
 
 fun ColorScheme.isDark(): Boolean {
     return background.luminance() < 0.5f

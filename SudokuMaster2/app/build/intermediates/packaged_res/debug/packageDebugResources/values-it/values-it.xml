@@ -38,6 +38,8 @@
     <string name="migliori_tempi_per_difficolt">Migliori Tempi per Difficoltà</string>
     <string name="nessuna_statistica_disponibile_gioca_la_tua_prima_partita">Nessuna statistica disponibile. Gioca la tua prima partita!</string>
     <string name="new_record">NUOVO RECORD!</string>
+    <string name="notes_mode_off">Note disattivate</string>
+    <string name="notes_mode_on">Note attivate</string>
     <string name="nuova_partita">Nuova Partita</string>
     <string name="nuovo_record_personale">Nuovo record personale</string>
     <string name="partite_giocate_totali">Partite Giocate Totali</string>
