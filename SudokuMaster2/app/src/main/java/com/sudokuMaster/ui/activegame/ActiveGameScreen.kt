@@ -27,6 +27,7 @@ import com.SudokuMaster.R
 import com.sudokuMaster.data.DifficultyLevel
 import java.util.concurrent.TimeUnit
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.material3.ColorScheme
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,6 +45,7 @@ fun ActiveGameScreen(
     val isSolved by activeGameViewModel.isSolved.collectAsState()
     val currentDifficulty by activeGameViewModel.currentDifficulty.collectAsState()
     val isNewRecord by activeGameViewModel.isNewRecord.collectAsState()
+    val hasInvalidTiles by activeGameViewModel.hasInvalidTiles.collectAsState() // <-- Osserva lo stato hasInvalidTiles
 
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
@@ -115,18 +117,17 @@ fun ActiveGameScreen(
             }
             ActiveGameScreenState.ACTIVE -> {
                 if (isLandscape) {
-                    // --- Layout per Landscape ---
+
                     Row(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(paddingValues)
-                            .padding(horizontal = 8.dp, vertical = 4.dp), // Padding generale per Landscape
-                        verticalAlignment = Alignment.CenterVertically // Centra verticalmente l'intera riga
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Sudoku Grid (Left side)
                         Column(
                             modifier = Modifier
-                                .weight(0.6f) // Maggiore spazio per la griglia
+                                .weight(0.6f)
                                 .fillMaxHeight(),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
@@ -137,19 +138,17 @@ fun ActiveGameScreen(
                                 onTileClick = { x, y -> activeGameViewModel.onEvent(ActiveGameEvent.onTileFocused(x, y)) },
                                 modifier = Modifier
                                     .fillMaxHeight()
-                                    .padding(end = 8.dp) // Spazio tra griglia e controlli
+                                    .padding(end = 8.dp)
                             )
                         }
 
-                        // Controls (Right side)
                         Column(
                             modifier = Modifier
-                                .weight(0.4f) // Meno spazio per i controlli
+                                .weight(0.4f)
                                 .fillMaxHeight(),
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.SpaceAround // Distribuisce lo spazio
+                            verticalArrangement = Arrangement.SpaceAround
                         ) {
-                            // Timer and Difficulty
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
                                     text = stringResource(R.string.time, formatTime(timerState)),
@@ -158,7 +157,7 @@ fun ActiveGameScreen(
                                 )
                                 Text(
                                     text = stringResource(
-                                        R.string.difficult,
+                                        R.string.difficolt,
                                         currentDifficulty?.name ?: "N/A"
                                     ),
                                     style = MaterialTheme.typography.titleMedium,
@@ -166,35 +165,43 @@ fun ActiveGameScreen(
                                 )
                             }
 
-                            // Suggestion Button
+                            // <--- AGGIUNGI QUI IL MESSAGGIO PER LANDSCAPE ---
+                            if (hasInvalidTiles) {
+                                Text(
+                                    text = stringResource(R.string.invalid_numbers_message),
+                                    color = Color.Red,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                )
+                            }
+                            // ----------------------------------------------
+
+
                             Button(
                                 onClick = { activeGameViewModel.onEvent(ActiveGameEvent.OnSuggestMoveClicked) },
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp) // Padding adeguato
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
                             ) {
                                 Text(stringResource(R.string.suggest_move))
                             }
 
-                            // Number Input
                             NumberInput(onNumberClick = { number ->
                                 activeGameViewModel.onEvent(ActiveGameEvent.onInput(number))
                             })
                         }
                     }
                 } else {
-                    // --- Layout per Portrait ---
                     Column(
                         modifier = modifier
                             .fillMaxSize()
                             .padding(paddingValues),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.SpaceAround // Distribuisce lo spazio in verticale
+                        verticalArrangement = Arrangement.SpaceAround
                     ) {
-                        // Usiamo un Spacer con weight per spingere gli elementi verso l'alto
-                        Spacer(modifier = Modifier.weight(0.5f)) // Spazio superiore
+                        Spacer(modifier = Modifier.weight(0.5f))
 
-                        // Timer and Difficulty
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
                                 text = stringResource(R.string.time, formatTime(timerState)),
@@ -203,7 +210,7 @@ fun ActiveGameScreen(
                             )
                             Text(
                                 text = stringResource(
-                                    R.string.difficult2,
+                                    R.string.difficolt2,
                                     currentDifficulty?.name ?: "N/A"
                                 ),
                                 style = MaterialTheme.typography.titleMedium,
@@ -211,13 +218,25 @@ fun ActiveGameScreen(
                             )
                         }
 
+                        // <--- AGGIUNGI QUI IL MESSAGGIO PER PORTRAIT ---
+                        if (hasInvalidTiles) {
+                            Text(
+                                text = stringResource(R.string.invalid_numbers_message),
+                                color = Color.Red,
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                        }
+                        // ----------------------------------------------
+
                         SudokuGrid(
                             tiles = sudokuTiles,
                             selectedTile = selectedTile,
                             onTileClick = { x, y -> activeGameViewModel.onEvent(ActiveGameEvent.onTileFocused(x, y)) }
                         )
 
-                        Spacer(Modifier.height(16.dp)) // Spazio tra griglia e suggestion button
+                        Spacer(Modifier.height(16.dp))
 
                         Button(
                             onClick = { activeGameViewModel.onEvent(ActiveGameEvent.OnSuggestMoveClicked) },
@@ -228,15 +247,13 @@ fun ActiveGameScreen(
                             Text(stringResource(R.string.suggest_move))
                         }
 
-                        // Usiamo un Spacer per dare respiro ai bottoni se necessario
                         Spacer(modifier = Modifier.height(16.dp))
 
                         NumberInput(onNumberClick = { number ->
                             activeGameViewModel.onEvent(ActiveGameEvent.onInput(number))
                         })
 
-                        // Usiamo un Spacer con weight per assicurare che i bottoni non siano schiacciati in basso
-                        Spacer(modifier = Modifier.weight(0.5f)) // Spazio inferiore
+                        Spacer(modifier = Modifier.weight(0.5f))
                     }
                 }
             }
@@ -280,8 +297,7 @@ fun SudokuGrid(
 ) {
     val gridSize = 9
     val thinLine = 1.dp
-    val thickLine = 3.dp // Border for 3x3 blocks
-
+    val thickLine = 3.dp
     val borderColor = MaterialTheme.colorScheme.inversePrimary
 
     Column(
@@ -313,28 +329,24 @@ fun SudokuGrid(
                             .weight(1f)
                             .aspectRatio(1f)
                             .drawBehind {
-                                // Draw top border
                                 drawLine(
                                     color = borderColor,
                                     start = Offset(0f, 0f),
                                     end = Offset(size.width, 0f),
                                     strokeWidth = topBorder.toPx()
                                 )
-                                // Draw left border
                                 drawLine(
                                     color = borderColor,
                                     start = Offset(0f, 0f),
                                     end = Offset(0f, size.height),
                                     strokeWidth = leftBorder.toPx()
                                 )
-                                // Draw right border
                                 drawLine(
                                     color = borderColor,
                                     start = Offset(size.width, 0f),
                                     end = Offset(size.width, size.height),
                                     strokeWidth = rightBorder.toPx()
                                 )
-                                // Draw bottom border
                                 drawLine(
                                     color = borderColor,
                                     start = Offset(0f, size.height),
@@ -371,6 +383,7 @@ fun SudokuCell(
     }
 
     val textColor = when {
+        tile.isInvalid ->Color.Red
         isInitial -> MaterialTheme.colorScheme.onPrimary
         else -> MaterialTheme.colorScheme.onSurface
     }
@@ -396,7 +409,6 @@ fun SudokuCell(
 }
 
 fun ColorScheme.isDark(): Boolean {
-    // Determina se il tema è scuro e controlla la luminanza del colore di sfondo.
     return background.luminance() < 0.5f
 }
 

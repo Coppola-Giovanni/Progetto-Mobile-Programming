@@ -30,7 +30,8 @@ data class SudokuTile(
     val y: Int,
     var value: Int,
     var hasFocus: Boolean,
-    var readOnly: Boolean
+    var readOnly: Boolean,
+    val isInvalid: Boolean = false
 )
 
 enum class ActiveGameScreenState {
@@ -66,25 +67,36 @@ class ActiveGameViewModel(
 
     private var _currentPuzzleId = MutableStateFlow(0L)
 
-
     private val _currentDifficulty = MutableStateFlow(DifficultyLevel.MEDIUM)
     val currentDifficulty: StateFlow<DifficultyLevel> = _currentDifficulty.asStateFlow()
 
+    // NUOVA PROPRIETÀ: Indica se ci sono celle invalide nel puzzle
+    private val _hasInvalidTiles = MutableStateFlow(false)
+    val hasInvalidTiles: StateFlow<Boolean> = _hasInvalidTiles.asStateFlow()
+
     val sudokuTiles: StateFlow<List<SudokuTile>> = _sudokuPuzzle.map { puzzle ->
         puzzle?.let {
-            it.currentGraph.values.flatten().map { node ->
+            val tiles = it.currentGraph.values.flatten().map { node ->
+                val tempBoardForCheck = puzzle.currentGraph.values.flatten().associateBy { getHash(it.x, it.y) }.toMutableMap()
+                val isNodeValid = isValidMove(tempBoardForCheck, node.x, node.y, node.color, 9)
                 SudokuTile(
                     x = node.x,
                     y = node.y,
                     value = node.color,
                     hasFocus = false,
-                    readOnly = node.readOnly
+                    readOnly = node.readOnly,
+                    isInvalid = !isNodeValid && node.color != 0
                 )
+            }.map { tile ->
+                tile.copy(hasFocus = (_selectedTile.value.x == tile.x && _selectedTile.value.y == tile.y))
             }
+            // Aggiorna lo stato _hasInvalidTiles in base ai risultati del mapping
+            _hasInvalidTiles.value = tiles.any { it.isInvalid }
+            tiles
         } ?: emptyList()
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000), // Mantiene la flow attiva per 5 secondi dopo che nessun collector è attivo
+        started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
 
@@ -95,7 +107,7 @@ class ActiveGameViewModel(
     init {
         if (initialGameType == "new") {
             loadNewGame()
-        } else { // "continue" o qualsiasi altra stringa
+        } else {
             loadExistingGame()
         }
     }
@@ -124,7 +136,7 @@ class ActiveGameViewModel(
                     hasFocus = true
                 )
             }
-            ActiveGameEvent.OnSuggestMoveClicked ->onSuggestMoveClicked()
+            ActiveGameEvent.OnSuggestMoveClicked -> onSuggestMoveClicked()
         }
     }
 
@@ -157,7 +169,6 @@ class ActiveGameViewModel(
             }
         }
     }
-
 
     private fun loadExistingGame() {
         _activeGameScreenState.value = ActiveGameScreenState.LOADING
@@ -193,6 +204,7 @@ class ActiveGameViewModel(
     private fun updateGameData(input: Int) {
         _sudokuPuzzle.value?.let { currentPuzzle ->
             val updatedCurrentGraph = LinkedHashMap<Int, LinkedList<SudokuNode>>()
+
             currentPuzzle.currentGraph.forEach { (row, nodes) ->
                 updatedCurrentGraph[row] = LinkedList(nodes.map { node ->
                     if (node.x == selectedTile.value.x && node.y == selectedTile.value.y && !node.readOnly) {
@@ -268,14 +280,7 @@ class ActiveGameViewModel(
         }
 
         val currentBoard = currentPuzzle.currentGraph.values.flatten().associateBy { getHash(it.x, it.y) }.toMutableMap()
-        val boundary = 9 // Assuming a 9x9 grid
-
-        for (y in 0 until boundary) {
-            val rowValues = (0 until boundary).map { x ->
-                currentBoard[getHash(x, y)]?.color ?: 0
-            }
-
-        }
+        val boundary = 9
 
         var suggestedX: Int? = null
         var suggestedY: Int? = null
@@ -293,20 +298,17 @@ class ActiveGameViewModel(
                     suggestedX = focusedTile.x
                     suggestedY = focusedTile.y
                     suggestedValue = num
-                    break // Found a suggestion for the focused tile
+                    break
                 }
             }
         }
 
-        // If no move was found for the focused cell, or if there wasn't an empty/mutable focused cell,
-        // search for the first empty and mutable cell.
         if (suggestedValue == null) {
             outerLoop@ for (y in 0 until boundary) {
                 for (x in 0 until boundary) {
                     val node = currentBoard[getHash(x, y)]
-                    if (node != null && node.color == 0 && !node.readOnly) { // Empty and mutable cell
-                        for (num in 1..boundary) { // Try numbers from 1 to 9
-                            // Create a temporary board for validity check
+                    if (node != null && node.color == 0 && !node.readOnly) {
+                        for (num in 1..boundary) {
                             val tempBoardForCheck = currentBoard.toMutableMap()
                             val tempNode = SudokuNode(x, y, num, node.readOnly)
                             tempBoardForCheck[getHash(x, y)] = tempNode
@@ -316,7 +318,7 @@ class ActiveGameViewModel(
                                 suggestedY = y
                                 suggestedValue = num
                                 Log.d("SudokuDebug", "    Found valid suggestion $num for ($x, $y).")
-                                break@outerLoop // Found a suggestion, exit all loops
+                                break@outerLoop
                             }
                         }
                     }
@@ -325,8 +327,6 @@ class ActiveGameViewModel(
         }
 
         if (suggestedX != null && suggestedY != null && suggestedValue != null) {
-
-            // Create a new SudokuPuzzle with the updated tile
             val updatedNodesMap = LinkedHashMap<Int, LinkedList<SudokuNode>>()
             currentPuzzle.currentGraph.forEach { (row, nodes) ->
                 updatedNodesMap[row] = LinkedList(nodes.map { node ->
@@ -339,10 +339,8 @@ class ActiveGameViewModel(
             }
             _sudokuPuzzle.value = currentPuzzle.copy(currentGraph = updatedNodesMap)
 
-            // Update _selectedTile to reflect the newly focused tile
-            _selectedTile.value = SudokuTile(suggestedX, suggestedY, suggestedValue, true, false) // The suggested tile is never readOnly
+            _selectedTile.value = SudokuTile(suggestedX, suggestedY, suggestedValue, true, false)
 
-            // Check if the puzzle is complete after the suggestion
             _sudokuPuzzle.value?.let { updatedPuzzle ->
                 if (updatedPuzzle.isComplete()) {
                     _isSolved.value = true
@@ -353,13 +351,11 @@ class ActiveGameViewModel(
                     saveCurrentGameSession()
                 }
             }
-
         }
     }
 
-
     private fun isValidMove(
-        board: MutableMap<Int, SudokuNode>, // Changed to MutableMap<Int, SudokuNode> to match usage
+        board: MutableMap<Int, SudokuNode>,
         row: Int,
         col: Int,
         num: Int,
@@ -368,7 +364,6 @@ class ActiveGameViewModel(
         // 1. Check the row
         for (c in 0 until boundary) {
             val node = board[getHash(row, c)]
-            // Do not check the cell itself
             if (c != col && node != null && node.color == num) {
                 return false
             }
@@ -377,7 +372,6 @@ class ActiveGameViewModel(
         // 2. Check the column
         for (r in 0 until boundary) {
             val node = board[getHash(r, col)]
-            // Do not check the cell itself
             if (r != row && node != null && node.color == num) {
                 return false
             }
@@ -391,7 +385,6 @@ class ActiveGameViewModel(
         for (r in startRow until startRow + subgridSize) {
             for (c in startCol until startCol + subgridSize) {
                 val node = board[getHash(r, c)]
-                // Do not check the cell itself
                 if ((r != row || c != col) && node != null && node.color == num) {
                     return false
                 }

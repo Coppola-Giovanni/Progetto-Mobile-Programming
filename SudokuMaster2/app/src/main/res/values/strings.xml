@@ -4,7 +4,7 @@
     <string name="medium">Medium</string>
     <string name="hard">Hard</string>
     <string name="loading" >Loading</string>
-    <string name="difficulty" >Difficulty</string>
+    <string name="difficulty" >Difficult</string>
     <string name="game_complete" >Game Complete!</string>
     <string name="logo_description" >Logo description</string>
     <string name="nuova_partita">New Game</string>
@@ -58,6 +58,7 @@
     <string name="salva_e_torna_indietro">Save and Go Back</string>
     <string name="difficolt_predefinita">Default difficulty:</string>
     <string name="tema_app">App Theme:</string>
-    <string name="difficult2">Difficulty: %1$s</string>
-    <string name="difficult">difficulty</string>
+    <string name="difficolt2">Difficult: %1$s</string>
+    <string name="difficolt3">Difficult: %1$s</string>
+    <string name="invalid_numbers_message">Attention: Incorrect Numbers in Red!!</string>
 </resources>

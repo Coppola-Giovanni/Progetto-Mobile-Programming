@@ -57,6 +57,7 @@
     <string name="salva_e_torna_indietro">Salva e Torna Indietro</string>
     <string name="difficolt_predefinita">Difficoltà predefinita:</string>
     <string name="tema_app">Tema App:</string>
-    <string name="difficult2">Difficoltà: %1$s</string>
-    <string name="difficult">Difficoltà: %1$s</string>
+    <string name="difficolt2">Difficoltà: %1$s</string>
+    <string name="difficolt3">Difficoltà: %1$s</string>
+    <string name="invalid_numbers_message">Attenzione: Numeri In Rosso Incorretti!!</string>
 </resources>
