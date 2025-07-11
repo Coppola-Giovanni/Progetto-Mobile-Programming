@@ -324,17 +324,14 @@ class ActiveGameViewModel(
     private fun onSuggestMoveClicked() = viewModelScope.launch {
         val currentPuzzle = _sudokuPuzzle.value ?: return@launch
 
-        // Get the solution graph
         val solutionNodes = currentPuzzle.solutionGraph.values.flatten()
         val solutionBoard = solutionNodes.associateBy { getHash(it.x, it.y) }
 
         val focusedTile = _selectedTile.value
 
-        // Check if the focused tile is empty and not readOnly
         if (focusedTile.value == 0 && !focusedTile.readOnly) {
             val suggestedNode = solutionBoard[getHash(focusedTile.x, focusedTile.y)]
             if (suggestedNode != null && suggestedNode.color != 0) {
-                // Apply the solution's value to the focused tile
                 val updatedNodesMap = LinkedHashMap<Int, LinkedList<SudokuNode>>()
                 currentPuzzle.currentGraph.forEach { (row, nodes) ->
                     updatedNodesMap[row] = LinkedList(nodes.map { node ->
@@ -356,7 +353,6 @@ class ActiveGameViewModel(
                     notes = emptySet()
                 )
 
-                // Check for completion after the suggestion
                 _sudokuPuzzle.value?.let { updatedPuzzle ->
                     if (updatedPuzzle.isComplete()) {
                         _isSolved.value = true
@@ -367,12 +363,10 @@ class ActiveGameViewModel(
                         saveCurrentGameSession()
                     }
                 }
-                return@launch // Suggestion applied, exit
+                return@launch
             }
         }
 
-        // Fallback: If focused tile cannot be suggested or no focused tile, find the first empty non-readOnly cell
-        // and apply its solution value.
         val currentBoardNodes = currentPuzzle.currentGraph.values.flatten()
         for (node in currentBoardNodes) {
             if (node.color == 0 && !node.readOnly) {
@@ -383,7 +377,7 @@ class ActiveGameViewModel(
                         updatedNodesMap[row] = LinkedList(nodes.map { n ->
                             if (n.x == node.x && n.y == node.y) {
                                 // Imposta il colore e svuota le note
-                                n.copy(color = suggestedNode.color, notes = emptySet()) // <<< MODIFICA QUI
+                                n.copy(color = suggestedNode.color, notes = emptySet())
                             } else {
                                 n.copy()
                             }
@@ -397,7 +391,7 @@ class ActiveGameViewModel(
                         suggestedNode.color,
                         true,
                         node.readOnly,
-                        notes = emptySet() // <<< MODIFICA QUI: Svuota le note anche nella tile selezionata
+                        notes = emptySet()
                     )
 
                     // Check for completion after the suggestion
@@ -411,7 +405,7 @@ class ActiveGameViewModel(
                             saveCurrentGameSession()
                         }
                     }
-                    return@launch // Suggestion applied, exit
+                    return@launch
                 }
             }
         }
@@ -425,7 +419,7 @@ class ActiveGameViewModel(
         num: Int,
         boundary: Int
     ): Boolean {
-        // 1. Check the row
+        // 1. Controlla la riga
         for (c in 0 until boundary) {
             val node = board[getHash(row, c)]
             if (c != col && node != null && node.color == num) {
@@ -433,7 +427,7 @@ class ActiveGameViewModel(
             }
         }
 
-        // 2. Check the column
+        // 2. Controlla la collonna
         for (r in 0 until boundary) {
             val node = board[getHash(r, col)]
             if (r != row && node != null && node.color == num) {
@@ -441,7 +435,7 @@ class ActiveGameViewModel(
             }
         }
 
-        // 3. Check the 3x3 block
+        // 3. Controlla il bloco 3x3
         val subgridSize = Math.sqrt(boundary.toDouble()).toInt()
         val startRow = (row / subgridSize) * subgridSize
         val startCol = (col / subgridSize) * subgridSize

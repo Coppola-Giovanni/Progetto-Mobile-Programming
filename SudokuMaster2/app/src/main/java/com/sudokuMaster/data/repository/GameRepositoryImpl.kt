@@ -36,7 +36,7 @@ class GameRepositoryImpl(
 
             apiResult.onSuccess { (initialGridData, solutionGridData, actualDifficulty)  ->
 
-                val boundary = 9 // Assumiamo 9x9
+                val boundary = 9
 
                  // Costruisce initialGraph e currentGraph dal initialGridData ricevuto dall'API
                 val initialGraph = LinkedHashMap<Int, LinkedList<SudokuNode>>()

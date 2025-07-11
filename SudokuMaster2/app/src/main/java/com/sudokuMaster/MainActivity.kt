@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // --- INIEZIONE DELLE DIPENDENZE ---
+
         val userPreferencesDataStore = applicationContext.userPreferencesDataStore
         userPreferencesRepository = UserPreferencesRepositoryImpl(userPreferencesDataStore)
 
@@ -69,7 +69,6 @@ class MainActivity : ComponentActivity() {
             userPreferencesRepository = userPreferencesRepository,
             sudokuRemoteDataSource = sudokuRemoteDataSource
         )
-        // --- FINE INIEZIONE DIPENDENZE ---
 
         setContent {
             GraphSudokuTheme(userPreferencesRepository = userPreferencesRepository) {
