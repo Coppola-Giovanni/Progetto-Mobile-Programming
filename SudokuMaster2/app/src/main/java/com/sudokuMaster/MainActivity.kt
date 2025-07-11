@@ -1,5 +1,6 @@
 package com.sudokuMaster
 
+import GraphSudokuTheme
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -33,7 +34,6 @@ import com.sudokuMaster.ui.home.HomeScreen
 import com.sudokuMaster.ui.home.WinScreen
 import com.sudokuMaster.ui.stats.StatisticsScreen
 import com.sudokuMaster.ui.stats.StatisticsViewModel
-import com.sudokuMaster.ui.theme.GraphSudokuTheme
 import com.sudokuMaster.ui.userpreferences.UserPreferencesScreen
 import com.sudokuMaster.ui.userpreferences.UserPreferencesViewModel
 import retrofit2.Retrofit
@@ -72,10 +72,10 @@ class MainActivity : ComponentActivity() {
         // --- FINE INIEZIONE DIPENDENZE ---
 
         setContent {
-            GraphSudokuTheme(userPreferencesRepository = userPreferencesRepository) { // <-- MODIFICATO QUI
+            GraphSudokuTheme(userPreferencesRepository = userPreferencesRepository) {
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    modifier = Modifier.fillMaxSize()
+                    // Rimuovi 'color = MaterialTheme.colorScheme.background'
                 ) {
                     val navController = rememberNavController()
                     SudokuAppNavigation(

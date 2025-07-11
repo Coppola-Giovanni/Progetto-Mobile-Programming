@@ -17,7 +17,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.SudokuMaster.R
-import com.sudokuMaster.ui.theme.GraphSudokuTheme
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale // Importa ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import com.sudokuMaster.ui.theme.isDark
 import com.sudokuMaster.data.AppTheme
 import com.sudokuMaster.data.DifficultyLevel
 import com.sudokuMaster.data.UserPreferences
@@ -32,42 +40,74 @@ fun HomeScreen(
     onViewStatisticsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "Sudoku Master",
-            style = MaterialTheme.typography.headlineLarge,
-            modifier = Modifier.padding(bottom = 48.dp)
+    val isCurrentThemeDark = MaterialTheme.colorScheme.isDark()
+
+    Box(modifier = modifier.fillMaxSize()) {
+        Image(
+            painter = painterResource(
+                id = if (isCurrentThemeDark) R.drawable.dark_mode_background else R.drawable.light_mode_background
+            ),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
         )
 
-        Button(
-            onClick = onNewGameClick,
-            modifier = Modifier.widthIn(min = 200.dp)
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(stringResource(R.string.nuova_partita))
-        }
+            Text(
+                text = "Sudoku Master",
+                style = MaterialTheme.typography.headlineLarge.copy(
+                    fontSize = 60.sp,              // Più grande
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Cursive, // Font "rotondo" (Cursive è un esempio, valuta di aggiungere un font personalizzato se vuoi uno specifico)
+                    color = if (isCurrentThemeDark) Color.White else Color.Black
+                ),
+                modifier = Modifier.padding(bottom = 48.dp)
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            // Per tutti i pulsanti:
+            Button(
+                onClick = onNewGameClick,
+                modifier = Modifier.widthIn(min = 200.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.nuova_partita),
+                    color = Color.White, // Testo bianco
+                    fontSize = 20.sp     // Più grande
+                )
+            }
 
-        Button(
-            onClick = onContinueGameClick,
-            modifier = Modifier.widthIn(min = 200.dp)
-        ) {
-            Text(stringResource(R.string.continua_partita))
-        }
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = onContinueGameClick,
+                modifier = Modifier.widthIn(min = 200.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.continua_partita),
+                    color = Color.White,
+                    fontSize = 20.sp
+                )
+            }
 
-        Button(
-            onClick = onViewStatisticsClick,
-            modifier = Modifier.widthIn(min = 200.dp)
-        ) {
-            Text(stringResource(R.string.statistiche_di_gioco))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = onViewStatisticsClick,
+                modifier = Modifier.widthIn(min = 200.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.statistiche_di_gioco),
+                    color = Color.White,
+                    fontSize = 20.sp
+                )
+            }
         }
     }
 }

@@ -31,6 +31,8 @@ import androidx.navigation.NavController
 import com.SudokuMaster.R
 import com.sudokuMaster.data.AppTheme
 import com.sudokuMaster.data.DifficultyLevel
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,7 +41,7 @@ fun UserPreferencesScreen(
     userPreferencesViewModel: UserPreferencesViewModel,
     modifier: Modifier = Modifier
 ) {
-    val userPreferences by userPreferencesViewModel.userPreferencesFlow.collectAsState(initial = null) // Usa initial = null
+    val userPreferences by userPreferencesViewModel.userPreferencesFlow.collectAsState(initial = null)
 
     Scaffold(
         topBar = {
@@ -59,6 +61,7 @@ fun UserPreferencesScreen(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    // Corrected parameter name here:
                     navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             )
@@ -74,31 +77,35 @@ fun UserPreferencesScreen(
             userPreferences?.let { prefs ->
                 Text(text = stringResource(R.string.tema_app), style = MaterialTheme.typography.titleMedium)
 
-                Button(onClick = {
-                    val nextTheme = when (prefs.appTheme) {
-                        AppTheme.LIGHT -> AppTheme.DARK
-                        AppTheme.DARK -> AppTheme.SYSTEM_DEFAULT
-                        AppTheme.SYSTEM_DEFAULT -> AppTheme.LIGHT
-                        AppTheme.THEME_UNSPECIFIED -> AppTheme.LIGHT
-                        else -> AppTheme.LIGHT
+                Button(
+                    onClick = {
+                        val nextTheme = when (prefs.appTheme) {
+                            AppTheme.LIGHT -> AppTheme.DARK
+                            AppTheme.DARK -> AppTheme.SYSTEM_DEFAULT
+                            AppTheme.SYSTEM_DEFAULT -> AppTheme.LIGHT
+                            AppTheme.THEME_UNSPECIFIED -> AppTheme.LIGHT
+                            else -> AppTheme.LIGHT
+                        }
+                        userPreferencesViewModel.updateAppTheme(nextTheme)
                     }
-                    userPreferencesViewModel.updateAppTheme(nextTheme)
-                }) {
+                ) {
                     Text(stringResource(R.string.tema_attuale, prefs.appTheme.name))
                 }
                 Spacer(Modifier.height(16.dp))
 
                 Text(text = stringResource(R.string.difficolt_predefinita), style = MaterialTheme.typography.titleMedium)
-                Button(onClick = {
-                    val nextDifficulty = when (prefs.defaultDifficulty) {
-                        DifficultyLevel.EASY -> DifficultyLevel.MEDIUM
-                        DifficultyLevel.MEDIUM -> DifficultyLevel.HARD
-                        DifficultyLevel.HARD -> DifficultyLevel.EASY
-                        DifficultyLevel.DIFFICULTY_UNSPECIFIED -> DifficultyLevel.EASY
-                        else -> DifficultyLevel.EASY
+                Button(
+                    onClick = {
+                        val nextDifficulty = when (prefs.defaultDifficulty) {
+                            DifficultyLevel.EASY -> DifficultyLevel.MEDIUM
+                            DifficultyLevel.MEDIUM -> DifficultyLevel.HARD
+                            DifficultyLevel.HARD -> DifficultyLevel.EASY
+                            DifficultyLevel.DIFFICULTY_UNSPECIFIED -> DifficultyLevel.EASY
+                            else -> DifficultyLevel.EASY
+                        }
+                        userPreferencesViewModel.updateDefaultDifficulty(nextDifficulty)
                     }
-                    userPreferencesViewModel.updateDefaultDifficulty(nextDifficulty)
-                }) {
+                ) {
                     Text(stringResource(R.string.difficolt, prefs.defaultDifficulty.name))
                 }
                 Spacer(Modifier.height(16.dp))
@@ -111,14 +118,21 @@ fun UserPreferencesScreen(
                     Text(text = stringResource(R.string.suono_abilitato), style = MaterialTheme.typography.titleMedium)
                     Switch(
                         checked = prefs.soundEnabled,
-                        onCheckedChange = { userPreferencesViewModel.updateSoundEnabled(it) }
+                        onCheckedChange = { userPreferencesViewModel.updateSoundEnabled(it) },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = MaterialTheme.colorScheme.primary,
+                            uncheckedThumbColor = MaterialTheme.colorScheme.secondaryContainer,
+                            uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                            checkedBorderColor = Color.White
+                        )
                     )
                 }
             } ?: run {
                 Text(stringResource(R.string.caricamento_preferenze), style = MaterialTheme.typography.titleMedium)
             }
 
-            Spacer(Modifier.weight(1f)) // Spinge il bottone sotto
+            Spacer(Modifier.weight(1f))
 
             Button(onClick = { navController.popBackStack() }) {
                 Text(stringResource(R.string.salva_e_torna_indietro))
