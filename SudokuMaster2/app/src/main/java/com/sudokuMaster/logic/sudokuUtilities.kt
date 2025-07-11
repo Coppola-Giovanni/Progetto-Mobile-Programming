@@ -16,23 +16,6 @@ internal fun SudokuPuzzle.isComplete(): Boolean {
     }
 }
 
-internal fun currentGridMatchesSolution(puzzle: SudokuPuzzle): Boolean {
-    val boundary = puzzle.boundary
-    for (row in 0 until boundary) {
-        for (col in 0 until boundary) {
-            val currentNode = puzzle.currentGraph[row]?.find { it.x == col }
-            val solutionNode = puzzle.solutionGraph[row]?.find { it.x == col }
-
-            // Se uno dei nodi è nullo o i valori non corrispondono, la griglia non è risolta correttamente
-            if (currentNode == null || solutionNode == null || currentNode.color != solutionNode.color) {
-                return false
-            }
-        }
-    }
-    return true // Tutte le celle corrispondono alla soluzione
-}
-
-
 internal fun SudokuPuzzle.isValid(): Boolean {
     return when {
         rowsAreInvalid(this) -> false
@@ -84,7 +67,7 @@ internal fun subgridsAreInvalid(puzzle: SudokuPuzzle): Boolean {
 
             // Verifica le occorrenze dei valori all'interno di questa singola sottogriglia
             (1..boundary).forEach { value ->
-                val occurrences = subgridNodes.count { it.color == value && it.color != 0 } // Aggiunto check != 0
+                val occurrences = subgridNodes.count { it.color == value && it.color != 0 }
                 if (occurrences > 1) return true // Se un numero > 0 appare più di una volta, la sottogriglia è invalida
             }
         }

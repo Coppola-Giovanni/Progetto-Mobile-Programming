@@ -42,11 +42,10 @@ fun ActiveGameScreen(
     val sudokuTiles by activeGameViewModel.sudokuTiles.collectAsState()
     val timerState by activeGameViewModel.timerState.collectAsState()
     val selectedTile by activeGameViewModel.selectedTile.collectAsState()
-    val isSolved by activeGameViewModel.isSolved.collectAsState()
     val currentDifficulty by activeGameViewModel.currentDifficulty.collectAsState()
     val isNewRecord by activeGameViewModel.isNewRecord.collectAsState()
     val hasInvalidTiles by activeGameViewModel.hasInvalidTiles.collectAsState()
-    val isNotesMode by activeGameViewModel.isNotesMode.collectAsState() // <<< NUOVO: Osserva lo stato della modalità note
+    val isNotesMode by activeGameViewModel.isNotesMode.collectAsState()
 
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
@@ -176,7 +175,6 @@ fun ActiveGameScreen(
                                 )
                             }
 
-                            // --- CONTROLLI AGGIUNTI ---
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceEvenly,
@@ -199,7 +197,6 @@ fun ActiveGameScreen(
                                     Text(if (isNotesMode) stringResource(R.string.notes_mode_on) else stringResource(R.string.notes_mode_off)) // R.string.notes_mode_on/off vanno aggiunte in strings.xml
                                 }
                             }
-                            // --- FINE CONTROLLI AGGIUNTI ---
 
                             NumberInput(
                                 onNumberClick = { number ->
@@ -257,7 +254,6 @@ fun ActiveGameScreen(
 
                         Spacer(Modifier.height(16.dp))
 
-                        // --- CONTROLLI AGGIUNTI ---
                         Row(
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                             horizontalArrangement = Arrangement.SpaceEvenly,
@@ -280,7 +276,6 @@ fun ActiveGameScreen(
                                 Text(if (isNotesMode) stringResource(R.string.notes_mode_on) else stringResource(R.string.notes_mode_off))
                             }
                         }
-                        // --- FINE CONTROLLI AGGIUNTI ---
 
                         Spacer(modifier = Modifier.height(16.dp))
 

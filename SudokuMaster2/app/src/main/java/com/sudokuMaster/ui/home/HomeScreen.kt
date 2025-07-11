@@ -14,16 +14,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.SudokuMaster.R
-import com.sudokuMaster.ui.theme.GraphSudokuTheme
-import com.sudokuMaster.data.AppTheme
-import com.sudokuMaster.data.DifficultyLevel
-import com.sudokuMaster.data.UserPreferences
-import com.sudokuMaster.domain.UserPreferencesRepositoryInterface
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 
 @Composable
 fun HomeScreen(
