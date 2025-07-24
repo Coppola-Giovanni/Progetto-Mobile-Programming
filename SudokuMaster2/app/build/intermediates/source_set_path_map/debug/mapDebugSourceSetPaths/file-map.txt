@@ -70,10 +70,10 @@ com.SudokuMaster.app-appcompat-1.6.1-68 C:\Users\UTENTE\.gradle\caches\8.11.1\tr
 com.SudokuMaster.app-lifecycle-viewmodel-ktx-2.9.1-69 C:\Users\UTENTE\.gradle\caches\8.11.1\transforms\fb94edf37da01dfc85f4b41da05255ce\transformed\lifecycle-viewmodel-ktx-2.9.1\res
 com.SudokuMaster.app-datastore-release-70 C:\Users\UTENTE\.gradle\caches\8.11.1\transforms\fc082602d0a402cc17aaeec10582a563\transformed\datastore-release\res
 com.SudokuMaster.app-animation-release-71 C:\Users\UTENTE\.gradle\caches\8.11.1\transforms\ff83b7495f3c7a6827467e3a1d75f800\transformed\animation-release\res
-com.SudokuMaster.app-pngs-72 C:\Users\UTENTE\AndroidStudioProjects\AVG\SudokuMaster2\app\build\generated\res\pngs\debug
-com.SudokuMaster.app-resValues-73 C:\Users\UTENTE\AndroidStudioProjects\AVG\SudokuMaster2\app\build\generated\res\resValues\debug
-com.SudokuMaster.app-packageDebugResources-74 C:\Users\UTENTE\AndroidStudioProjects\AVG\SudokuMaster2\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
-com.SudokuMaster.app-packageDebugResources-75 C:\Users\UTENTE\AndroidStudioProjects\AVG\SudokuMaster2\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
-com.SudokuMaster.app-debug-76 C:\Users\UTENTE\AndroidStudioProjects\AVG\SudokuMaster2\app\build\intermediates\merged_res\debug\mergeDebugResources
-com.SudokuMaster.app-debug-77 C:\Users\UTENTE\AndroidStudioProjects\AVG\SudokuMaster2\app\src\debug\res
-com.SudokuMaster.app-main-78 C:\Users\UTENTE\AndroidStudioProjects\AVG\SudokuMaster2\app\src\main\res
+com.SudokuMaster.app-pngs-72 C:\Users\UTENTE\AndroidStudioProjects\Progetto-Mobile-Programming\SudokuMaster2\app\build\generated\res\pngs\debug
+com.SudokuMaster.app-resValues-73 C:\Users\UTENTE\AndroidStudioProjects\Progetto-Mobile-Programming\SudokuMaster2\app\build\generated\res\resValues\debug
+com.SudokuMaster.app-packageDebugResources-74 C:\Users\UTENTE\AndroidStudioProjects\Progetto-Mobile-Programming\SudokuMaster2\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.SudokuMaster.app-packageDebugResources-75 C:\Users\UTENTE\AndroidStudioProjects\Progetto-Mobile-Programming\SudokuMaster2\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.SudokuMaster.app-debug-76 C:\Users\UTENTE\AndroidStudioProjects\Progetto-Mobile-Programming\SudokuMaster2\app\build\intermediates\merged_res\debug\mergeDebugResources
+com.SudokuMaster.app-debug-77 C:\Users\UTENTE\AndroidStudioProjects\Progetto-Mobile-Programming\SudokuMaster2\app\src\debug\res
+com.SudokuMaster.app-main-78 C:\Users\UTENTE\AndroidStudioProjects\Progetto-Mobile-Programming\SudokuMaster2\app\src\main\res

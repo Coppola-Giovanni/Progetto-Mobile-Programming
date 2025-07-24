@@ -1,86 +1,74 @@
 [
     {
-        "merged": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-debug-76:\\mipmap-xxhdpi_ic_launcher.webp.flat",
-        "source": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-main-78:\\mipmap-xxhdpi\\ic_launcher.webp"
+        "merged": "com.SudokuMaster.app-debug-76:/mipmap-hdpi_ic_launcher_round.webp.flat",
+        "source": "com.SudokuMaster.app-main-78:/mipmap-hdpi/ic_launcher_round.webp"
     },
     {
-        "merged": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-debug-76:\\drawable_light_mode_screen.jpg.flat",
-        "source": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-main-78:\\drawable\\light_mode_screen.jpg"
+        "merged": "com.SudokuMaster.app-debug-76:/mipmap-xxxhdpi_ic_launcher.webp.flat",
+        "source": "com.SudokuMaster.app-main-78:/mipmap-xxxhdpi/ic_launcher.webp"
     },
     {
-        "merged": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-debug-76:\\mipmap-mdpi_ic_launcher_round.webp.flat",
-        "source": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-main-78:\\mipmap-mdpi\\ic_launcher_round.webp"
+        "merged": "com.SudokuMaster.app-debug-76:/mipmap-hdpi_ic_launcher.webp.flat",
+        "source": "com.SudokuMaster.app-main-78:/mipmap-hdpi/ic_launcher.webp"
     },
     {
-        "merged": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-debug-76:\\drawable_ic_launcher_foreground.xml.flat",
-        "source": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-main-78:\\drawable\\ic_launcher_foreground.xml"
+        "merged": "com.SudokuMaster.app-debug-76:/drawable_light_mode_background.jpg.flat",
+        "source": "com.SudokuMaster.app-main-78:/drawable/light_mode_background.jpg"
     },
     {
-        "merged": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-debug-76:\\mipmap-xxhdpi_ic_launcher_round.webp.flat",
-        "source": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-main-78:\\mipmap-xxhdpi\\ic_launcher_round.webp"
+        "merged": "com.SudokuMaster.app-debug-76:/drawable_ic_launcher_background.xml.flat",
+        "source": "com.SudokuMaster.app-main-78:/drawable/ic_launcher_background.xml"
     },
     {
-        "merged": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-debug-76:\\drawable_darkmode_screen.jpg.flat",
-        "source": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-main-78:\\drawable\\darkmode_screen.jpg"
+        "merged": "com.SudokuMaster.app-debug-76:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.SudokuMaster.app-main-78:/drawable/ic_launcher_foreground.xml"
     },
     {
-        "merged": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-debug-76:\\drawable_ic_launcher_background.xml.flat",
-        "source": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-main-78:\\drawable\\ic_launcher_background.xml"
+        "merged": "com.SudokuMaster.app-debug-76:/xml_data_extraction_rules.xml.flat",
+        "source": "com.SudokuMaster.app-main-78:/xml/data_extraction_rules.xml"
     },
     {
-        "merged": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-debug-76:\\mipmap-xxxhdpi_ic_launcher.webp.flat",
-        "source": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-main-78:\\mipmap-xxxhdpi\\ic_launcher.webp"
+        "merged": "com.SudokuMaster.app-debug-76:/mipmap-mdpi_ic_launcher_round.webp.flat",
+        "source": "com.SudokuMaster.app-main-78:/mipmap-mdpi/ic_launcher_round.webp"
     },
     {
-        "merged": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-debug-76:\\drawable_light_mode_background.jpg.flat",
-        "source": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-main-78:\\drawable\\light_mode_background.jpg"
+        "merged": "com.SudokuMaster.app-debug-76:/drawable_dark_mode_background.jpg.flat",
+        "source": "com.SudokuMaster.app-main-78:/drawable/dark_mode_background.jpg"
     },
     {
-        "merged": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-debug-76:\\mipmap-xhdpi_ic_launcher.webp.flat",
-        "source": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-main-78:\\mipmap-xhdpi\\ic_launcher.webp"
+        "merged": "com.SudokuMaster.app-debug-76:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
+        "source": "com.SudokuMaster.app-main-78:/mipmap-xxxhdpi/ic_launcher_round.webp"
     },
     {
-        "merged": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-debug-76:\\mipmap-anydpi_ic_launcher_round.xml.flat",
-        "source": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-main-78:\\mipmap-anydpi\\ic_launcher_round.xml"
+        "merged": "com.SudokuMaster.app-debug-76:/mipmap-xhdpi_ic_launcher_round.webp.flat",
+        "source": "com.SudokuMaster.app-main-78:/mipmap-xhdpi/ic_launcher_round.webp"
     },
     {
-        "merged": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-debug-76:\\mipmap-hdpi_ic_launcher_round.webp.flat",
-        "source": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-main-78:\\mipmap-hdpi\\ic_launcher_round.webp"
+        "merged": "com.SudokuMaster.app-debug-76:/mipmap-xxhdpi_ic_launcher.webp.flat",
+        "source": "com.SudokuMaster.app-main-78:/mipmap-xxhdpi/ic_launcher.webp"
     },
     {
-        "merged": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-debug-76:\\mipmap-anydpi_ic_launcher.xml.flat",
-        "source": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-main-78:\\mipmap-anydpi\\ic_launcher.xml"
+        "merged": "com.SudokuMaster.app-debug-76:/mipmap-mdpi_ic_launcher.webp.flat",
+        "source": "com.SudokuMaster.app-main-78:/mipmap-mdpi/ic_launcher.webp"
     },
     {
-        "merged": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-debug-76:\\drawable_game_screen_background.jpg.flat",
-        "source": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-main-78:\\drawable\\game_screen_background.jpg"
+        "merged": "com.SudokuMaster.app-debug-76:/mipmap-anydpi_ic_launcher.xml.flat",
+        "source": "com.SudokuMaster.app-main-78:/mipmap-anydpi/ic_launcher.xml"
     },
     {
-        "merged": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-debug-76:\\drawable_dark_mode_background.jpg.flat",
-        "source": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-main-78:\\drawable\\dark_mode_background.jpg"
+        "merged": "com.SudokuMaster.app-debug-76:/mipmap-xxhdpi_ic_launcher_round.webp.flat",
+        "source": "com.SudokuMaster.app-main-78:/mipmap-xxhdpi/ic_launcher_round.webp"
     },
     {
-        "merged": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-debug-76:\\mipmap-xxxhdpi_ic_launcher_round.webp.flat",
-        "source": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-main-78:\\mipmap-xxxhdpi\\ic_launcher_round.webp"
+        "merged": "com.SudokuMaster.app-debug-76:/mipmap-anydpi_ic_launcher_round.xml.flat",
+        "source": "com.SudokuMaster.app-main-78:/mipmap-anydpi/ic_launcher_round.xml"
     },
     {
-        "merged": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-debug-76:\\mipmap-xhdpi_ic_launcher_round.webp.flat",
-        "source": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-main-78:\\mipmap-xhdpi\\ic_launcher_round.webp"
+        "merged": "com.SudokuMaster.app-debug-76:/mipmap-xhdpi_ic_launcher.webp.flat",
+        "source": "com.SudokuMaster.app-main-78:/mipmap-xhdpi/ic_launcher.webp"
     },
     {
-        "merged": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-debug-76:\\mipmap-mdpi_ic_launcher.webp.flat",
-        "source": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-main-78:\\mipmap-mdpi\\ic_launcher.webp"
-    },
-    {
-        "merged": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-debug-76:\\xml_data_extraction_rules.xml.flat",
-        "source": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-main-78:\\xml\\data_extraction_rules.xml"
-    },
-    {
-        "merged": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-debug-76:\\mipmap-hdpi_ic_launcher.webp.flat",
-        "source": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-main-78:\\mipmap-hdpi\\ic_launcher.webp"
-    },
-    {
-        "merged": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-debug-76:\\xml_backup_rules.xml.flat",
-        "source": "C:\\Users\\Valerio\\.gradle\\daemon\\8.11.1\\com.SudokuMaster.app-main-78:\\xml\\backup_rules.xml"
+        "merged": "com.SudokuMaster.app-debug-76:/xml_backup_rules.xml.flat",
+        "source": "com.SudokuMaster.app-main-78:/xml/backup_rules.xml"
     }
 ]

@@ -98,9 +98,10 @@ fun SudokuAppNavigation(
         startDestination = Screen.HomeScreen.route as String) {
         composable(Screen.HomeScreen.route) {
             HomeScreen(
+                navController = navController,
                 onNewGameClick = { navController.navigate(Screen.ActiveGameScreen.createRoute("new")) },
                 onContinueGameClick = { navController.navigate(Screen.ActiveGameScreen.createRoute("continue")) },
-                onViewStatisticsClick = { navController.navigate(Screen.StatisticsScreen.route) }
+                onViewStatisticsClick = { navController.navigate(Screen.StatisticsScreen.route) },
             )
         }
         composable(

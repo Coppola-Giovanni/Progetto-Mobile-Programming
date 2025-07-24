@@ -31,6 +31,7 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.foundation.Image
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import com.sudokuMaster.ui.home.WinScreen
 import com.sudokuMaster.ui.theme.isDark
 import com.sudokuMaster.ui.theme.LightModeSelectedCellHighlight
 import com.sudokuMaster.ui.theme.DarkModeSelectedCellHighlight
@@ -53,7 +54,7 @@ fun ActiveGameScreen(
     val currentDifficulty by activeGameViewModel.currentDifficulty.collectAsState()
     val isNewRecord by activeGameViewModel.isNewRecord.collectAsState()
     val hasInvalidTiles by activeGameViewModel.hasInvalidTiles.collectAsState()
-    val isNotesMode by activeGameViewModel.isNotesMode.collectAsState() // <<< NUOVO: Osserva lo stato della modalità note
+    val isNotesMode by activeGameViewModel.isNotesMode.collectAsState()
 
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
@@ -111,7 +112,6 @@ fun ActiveGameScreen(
             )
         }
     ) { paddingValues ->
-        // Inserisci un Box per lo sfondo sotto tutto il contenuto dello Scaffold
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -159,7 +159,8 @@ fun ActiveGameScreen(
                             ) {
                                 SudokuGrid(
                                     tiles = sudokuTiles,
-                                    selectedTile = selectedTile,
+                                    selectedX = selectedTile?.x,
+                                    selectedY = selectedTile?.y,
                                     onTileClick = { x, y -> activeGameViewModel.onEvent(ActiveGameEvent.onTileFocused(x, y)) },
                                     modifier = Modifier
                                         .fillMaxHeight()
@@ -274,7 +275,8 @@ fun ActiveGameScreen(
 
                             SudokuGrid(
                                 tiles = sudokuTiles,
-                                selectedTile = selectedTile,
+                                selectedX = selectedTile?.x,
+                                selectedY = selectedTile?.y,
                                 onTileClick = { x, y -> activeGameViewModel.onEvent(ActiveGameEvent.onTileFocused(x, y)) }
                             )
 
@@ -318,11 +320,9 @@ fun ActiveGameScreen(
                     }
                 }
                 ActiveGameScreenState.COMPLETE -> {
-                    GameCompletionScreen(
-                        timerState = timerState,
-                        difficulty = currentDifficulty,
-                        isNewRecord = isNewRecord,
-                        onNewGameClick = { activeGameViewModel.onEvent(ActiveGameEvent.OnNewGameClicked) }
+                    WinScreen(
+                        navController = navController,
+                        activeGameViewModel = activeGameViewModel
                     )
                 }
                 ActiveGameScreenState.ERROR -> {
@@ -353,14 +353,24 @@ fun ActiveGameScreen(
 @Composable
 fun SudokuGrid(
     tiles: List<SudokuTile>,
-    selectedTile: SudokuTile?,
+    selectedX: Int?,
+    selectedY: Int?,
     onTileClick: (x: Int, y: Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val gridSize = 9
     val thinLine = 1.dp
     val thickLine = 3.dp
-    val borderColor = MaterialTheme.colorScheme.inversePrimary
+    val borderColor = MaterialTheme.colorScheme.secondary
+    val isCurrentThemeDark = MaterialTheme.colorScheme.isDark()
+
+    val highlightedColor = if (isCurrentThemeDark) {
+        // Colore per l'evidenziazione in modalità scura
+        DarkModeSelectedCellHighlight.copy(alpha = 0.5f)
+    } else {
+        // Colore per l'evidenziazione in modalità chiara
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+    }
 
     Column(
         modifier = modifier
@@ -373,19 +383,24 @@ fun SudokuGrid(
             ) {
                 for (col in 0 until gridSize) {
                     val tile = tiles.firstOrNull { it.x == col && it.y == row } ?: SudokuTile(col, row, 0, false, false)
-                    val isSelected = selectedTile?.x == col && selectedTile?.y == row
+                    val isSelected = selectedX == col && selectedY == row
                     val isInitial = tile.readOnly
+
+                    // Nuova logica per l'evidenziazione
+                    val isHighlighted = selectedX != null && selectedY != null &&
+                            (row == selectedY || col == selectedX ||
+                                    (row / 3 == selectedY / 3 && col / 3 == selectedX / 3))
 
                     val topBorder = if (row % 3 == 0) thickLine else thinLine
                     val leftBorder = if (col % 3 == 0) thickLine else thinLine
                     val rightBorder = if ((col + 1) % 3 == 0) thickLine else thinLine
                     val bottomBorder = if ((row + 1) % 3 == 0) thickLine else thinLine
 
-
                     SudokuCell(
                         tile = tile,
                         isSelected = isSelected,
                         isInitial = isInitial,
+                        isHighlighted = isHighlighted,
                         onClick = { onTileClick(col, row) },
                         modifier = Modifier
                             .weight(1f)
@@ -427,37 +442,29 @@ fun SudokuGrid(
 fun SudokuCell(
     tile: SudokuTile,
     isSelected: Boolean,
-    isInitial: Boolean, // Questo parametro indica se è un numero iniziale (readOnly)
+    isInitial: Boolean,
+    isHighlighted: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val isCurrentThemeDark = MaterialTheme.colorScheme.isDark()
 
     val backgroundColor = when {
-        isSelected -> {
-            if (isCurrentThemeDark) {
-                DarkModeSelectedCellHighlight
-            } else {
-                MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-            }
-        }
+        isSelected -> if (isCurrentThemeDark) DarkModeSelectedCellHighlight.copy(alpha = 0.8f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+        isHighlighted -> if (isCurrentThemeDark) DarkModeSelectedCellHighlight.copy(alpha = 0.3f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
         else -> MaterialTheme.colorScheme.surface
     }
 
     val textColor = when {
         tile.isInvalid -> Color.Red
-        isInitial -> {
-            if (isCurrentThemeDark) MaterialTheme.colorScheme.secondary // <-- Usa onPrimary per il ciano in Dark Mode
-            else MaterialTheme.colorScheme.primary // Usa primary (verde) per Light Mode
-        }
+        isInitial -> if (isCurrentThemeDark) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
         else -> MaterialTheme.colorScheme.onSurface
     }
-
 
     Box(
         modifier = modifier
             .background(backgroundColor)
-            .clickable(enabled = !isInitial, onClick = onClick),
+            .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         if (tile.value != 0) {
@@ -468,7 +475,7 @@ fun SudokuCell(
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
                 ),
-                color = textColor // Applica il colore determinato
+                color = textColor
             )
         } else {
             if (tile.notes.isNotEmpty()) {
@@ -490,7 +497,7 @@ fun SudokuCell(
                                         style = MaterialTheme.typography.bodySmall.copy(
                                             fontSize = 10.sp
                                         ),
-                                        color = textColor, // Anche le note usano textColor
+                                        color = textColor,
                                         modifier = Modifier.weight(1f),
                                         textAlign = TextAlign.Center
                                     )
@@ -559,34 +566,6 @@ fun InputButton(
             fontSize = 18.sp,
             // color = Color.White // Rimosso, usa contentColor di ButtonDefaults
         )
-    }
-}
-
-
-
-@Composable
-fun GameCompletionScreen(
-    timerState: Long,
-    difficulty: DifficultyLevel,
-    isNewRecord: Boolean,
-    onNewGameClick: () -> Unit
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Text(text = stringResource(R.string.puzzle_solved), style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(16.dp))
-        Text(text = stringResource(R.string.difficulty2, difficulty.name), style = MaterialTheme.typography.titleLarge)
-        Text(text = stringResource(R.string.time,formatTime(timerState)), style = MaterialTheme.typography.titleLarge)
-        if (isNewRecord) {
-            Text(text = stringResource(R.string.new_record), style = MaterialTheme.typography.headlineSmall, color = Color.Green)
-        }
-        Spacer(Modifier.height(32.dp))
-        Button(onClick = onNewGameClick) {
-            Text(stringResource(R.string.start_new_game))
-        }
     }
 }
 

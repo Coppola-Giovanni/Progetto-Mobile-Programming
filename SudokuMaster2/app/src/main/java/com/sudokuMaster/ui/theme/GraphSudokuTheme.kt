@@ -9,10 +9,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.sudokuMaster.data.AppTheme
 import com.sudokuMaster.domain.UserPreferencesRepositoryInterface
-import androidx.compose.ui.graphics.Color // Assicurati di importare Color
+import androidx.compose.ui.graphics.Color
 import com.sudokuMaster.ui.theme.DarkCellBackground
 import com.sudokuMaster.ui.theme.DarkGridLinePurple
-import com.sudokuMaster.ui.theme.DarkModeInitialNumberColor
 import com.sudokuMaster.ui.theme.DarkTextOnDarkBackground
 import com.sudokuMaster.ui.theme.lightGrey
 import com.sudokuMaster.ui.theme.primaryCharcoal

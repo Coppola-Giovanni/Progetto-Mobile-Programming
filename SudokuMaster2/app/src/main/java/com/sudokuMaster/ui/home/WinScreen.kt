@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit
 @Composable
 fun WinScreen(
     navController: NavController,
-    activeGameViewModel: ActiveGameViewModel // Passiamo il ViewModel per accedere allo stato
+    activeGameViewModel: ActiveGameViewModel
 ) {
     val isSolved by activeGameViewModel.isSolved.collectAsState()
     val timerState by activeGameViewModel.timerState.collectAsState()
@@ -47,13 +47,11 @@ fun WinScreen(
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
-
             Text(
                 text = stringResource(R.string.tempo_impiegato, formatTime(timerState)),
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
-
             if (isNewRecord) {
                 Text(
                     text = stringResource(R.string.nuovo_record_personale),
@@ -62,29 +60,34 @@ fun WinScreen(
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
             }
-
             Spacer(modifier = Modifier.height(32.dp))
 
-            Button(
-                onClick = {
-                    navController.popBackStack(Screen.HomeScreen.route, inclusive = false)
-                    navController.navigate(Screen.HomeScreen.route)
-                },
-                modifier = Modifier.fillMaxWidth()
+            // Ristrutturazione dei pulsanti in una Row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceAround
             ) {
-                Text(stringResource(R.string.back_to_home))
-            }
+                Button(
+                    onClick = {
+                        // Naviga alla HomeScreen e cancella le schermate precedenti dalla back stack
+                        navController.popBackStack(Screen.HomeScreen.route, inclusive = false)
+                        navController.navigate(Screen.HomeScreen.route)
+                    },
+                    modifier = Modifier.weight(1f).padding(end = 8.dp)
+                ) {
+                    Text(stringResource(R.string.back_to_home))
+                }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = {
-                    navController.popBackStack(Screen.ActiveGameScreen.route, inclusive = true)
-                    navController.navigate(Screen.ActiveGameScreen.createRoute("new"))
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(R.string.start_new_game))
+                Button(
+                    onClick = {
+                        // Inizia una nuova partita, cancellando la schermata attuale
+                        navController.popBackStack(Screen.ActiveGameScreen.route, inclusive = true)
+                        navController.navigate(Screen.ActiveGameScreen.createRoute("new"))
+                    },
+                    modifier = Modifier.weight(1f).padding(start = 8.dp)
+                ) {
+                    Text(stringResource(R.string.start_new_game))
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -107,6 +110,4 @@ fun formatTime(seconds: Long): String {
     val remainingSeconds = seconds - TimeUnit.MINUTES.toSeconds(minutes)
     return String.format("%02d:%02d", minutes, remainingSeconds)
 }
-
-
 
