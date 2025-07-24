@@ -52,7 +52,6 @@ class SudokuRemoteDataSource(private val apiService: SudokuApiService) {
                     val initialGridData = gridResponse.value
                     val solutionGridData = gridResponse.solution
                     val apiDifficultyString = gridResponse.difficulty
-                        ?: "DIFFICULTY_UNSPECIFIED"
 
                     val actualDifficulty = try {
                         DifficultyLevel.valueOf(apiDifficultyString.uppercase())

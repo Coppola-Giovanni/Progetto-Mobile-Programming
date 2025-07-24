@@ -23,7 +23,6 @@ import com.sudokuMaster.ui.theme.isDark
 import com.sudokuMaster.ui.userpreferences.UserPreferencesViewModel
 import com.sudokuMaster.ui.userpreferences.SoundPlayer
 import androidx.compose.ui.platform.LocalContext
-import com.sudokuMaster.domain.GameRepositoryInterface
 import androidx.compose.runtime.getValue
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,7 +30,6 @@ import androidx.compose.runtime.getValue
 fun HomeScreen(
     navController: NavController,
     userPreferencesViewModel: UserPreferencesViewModel,
-    gameRepository: GameRepositoryInterface,
     onNewGameClick: () -> Unit,
     onContinueGameClick: () -> Unit,
     onViewStatisticsClick: () -> Unit,

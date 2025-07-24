@@ -1,7 +1,6 @@
 package com.sudokuMaster.ui.activegame
 
 import com.sudokuMaster.logic.isComplete
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -54,7 +53,6 @@ class ActiveGameViewModel(
     val activeGameScreenState: StateFlow<ActiveGameScreenState> = _activeGameScreenState.asStateFlow()
 
     private val _sudokuPuzzle = MutableStateFlow<SudokuPuzzle?>(null)
-    val sudokuPuzzle: StateFlow<SudokuPuzzle?> = _sudokuPuzzle.asStateFlow()
 
     private val _selectedTile = MutableStateFlow(SudokuTile(0, 0, 0, true, true))
     val selectedTile: StateFlow<SudokuTile> = _selectedTile.asStateFlow()
@@ -90,7 +88,7 @@ class ActiveGameViewModel(
         puzzle?.let {
             val tiles = it.currentGraph.values.flatten().map { node ->
                 val tempBoardForCheck = puzzle.currentGraph.values.flatten().associateBy { getHash(it.x, it.y) }.toMutableMap()
-                val isNodeValid = isValidMove(tempBoardForCheck, node.x, node.y, node.color, 9)
+                val isNodeValid = isValidMove(tempBoardForCheck, node.x, node.y, node.color)
                 SudokuTile(
                     x = node.x,
                     y = node.y,
@@ -139,17 +137,17 @@ class ActiveGameViewModel(
             ActiveGameEvent.OnNewGameClicked -> {
                 createNewGame()
             }
-            is ActiveGameEvent.onInput -> {
+            is ActiveGameEvent.OnInput -> {
                 if (_isNotesMode.value) {
                     updateNotes(event.input)
                 } else {
                     updateGameData(event.input)
                 }
             }
-            is ActiveGameEvent.onNoteInput -> { // Gestisce specificamente l'input delle note
+            is ActiveGameEvent.OnNoteInput -> { // Gestisce specificamente l'input delle note
                 updateNotes(event.input)
             }
-            is ActiveGameEvent.onTileFocused -> {
+            is ActiveGameEvent.OnTileFocused -> {
                 _selectedTile.value = _selectedTile.value.copy(
                     x = event.x,
                     y = event.y,
@@ -161,7 +159,6 @@ class ActiveGameViewModel(
             ActiveGameEvent.OnToggleNotesMode -> { // Alterna la modalità note
                 _isNotesMode.value = !_isNotesMode.value
             }
-            else ->{}
         }
     }
 
@@ -429,10 +426,9 @@ class ActiveGameViewModel(
         row: Int,
         col: Int,
         num: Int,
-        boundary: Int
     ): Boolean {
         // 1. Controlla la riga
-        for (c in 0 until boundary) {
+        for (c in 0 until 9) {
             val node = board[getHash(row, c)]
             if (c != col && node != null && node.color == num) {
                 return false
@@ -440,7 +436,7 @@ class ActiveGameViewModel(
         }
 
         // 2. Controlla la collonna
-        for (r in 0 until boundary) {
+        for (r in 0 until 9) {
             val node = board[getHash(r, col)]
             if (r != row && node != null && node.color == num) {
                 return false
@@ -448,7 +444,7 @@ class ActiveGameViewModel(
         }
 
         // 3. Controlla il bloco 3x3
-        val subgridSize = Math.sqrt(boundary.toDouble()).toInt()
+        val subgridSize = 3
         val startRow = (row / subgridSize) * subgridSize
         val startCol = (col / subgridSize) * subgridSize
 

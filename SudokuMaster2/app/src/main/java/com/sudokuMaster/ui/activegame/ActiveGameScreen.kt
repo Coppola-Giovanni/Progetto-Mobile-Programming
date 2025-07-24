@@ -42,16 +42,13 @@ fun ActiveGameScreen(
     activeGameViewModel: ActiveGameViewModel,
     userPreferencesViewModel: UserPreferencesViewModel,
     navController: NavController,
-    modifier: Modifier = Modifier,
 ) {
 
     val activeGameScreenState by activeGameViewModel.activeGameScreenState.collectAsState()
     val sudokuTiles by activeGameViewModel.sudokuTiles.collectAsState()
     val timerState by activeGameViewModel.timerState.collectAsState()
     val selectedTile by activeGameViewModel.selectedTile.collectAsState()
-    val isSolved by activeGameViewModel.isSolved.collectAsState()
     val currentDifficulty by activeGameViewModel.currentDifficulty.collectAsState()
-    val isNewRecord by activeGameViewModel.isNewRecord.collectAsState()
     val hasInvalidTiles by activeGameViewModel.hasInvalidTiles.collectAsState()
     val isNotesMode by activeGameViewModel.isNotesMode.collectAsState()
     val userPreferences by userPreferencesViewModel.userPreferencesFlow.collectAsState(initial = null)
@@ -159,9 +156,9 @@ fun ActiveGameScreen(
                             ) {
                                 SudokuGrid(
                                     tiles = sudokuTiles,
-                                    selectedX = selectedTile?.x,
-                                    selectedY = selectedTile?.y,
-                                    onTileClick = { x, y -> activeGameViewModel.onEvent(ActiveGameEvent.onTileFocused(x, y)) },
+                                    selectedX = selectedTile.x,
+                                    selectedY = selectedTile.y,
+                                    onTileClick = { x, y -> activeGameViewModel.onEvent(ActiveGameEvent.OnTileFocused(x, y)) },
                                     modifier = Modifier
                                         .fillMaxHeight()
                                         .padding(end = 8.dp)
@@ -185,7 +182,7 @@ fun ActiveGameScreen(
                                     Text(
                                         text = stringResource(
                                             R.string.difficolt,
-                                            currentDifficulty?.name ?: "N/A"
+                                            currentDifficulty.name
                                         ),
                                         style = MaterialTheme.typography.titleMedium,
                                         color = MaterialTheme.colorScheme.onBackground, // Aggiusta il colore per lo sfondo
@@ -239,9 +236,9 @@ fun ActiveGameScreen(
                                         soundPlayer.playSound(R.raw.button_click_sound)
                                     }
                                     if (isNotesMode) {
-                                        activeGameViewModel.onEvent(ActiveGameEvent.onNoteInput(number))
+                                        activeGameViewModel.onEvent(ActiveGameEvent.OnNoteInput(number))
                                     } else {
-                                        activeGameViewModel.onEvent(ActiveGameEvent.onInput(number))
+                                        activeGameViewModel.onEvent(ActiveGameEvent.OnInput(number))
                                     }
                                 })
                             }
@@ -266,7 +263,7 @@ fun ActiveGameScreen(
                                 Text(
                                     text = stringResource(
                                         R.string.difficolt2,
-                                        currentDifficulty?.name ?: "N/A"
+                                        currentDifficulty.name
                                     ),
                                     style = MaterialTheme.typography.titleMedium,
                                     color = MaterialTheme.colorScheme.onBackground, // Aggiusta il colore per lo sfondo
@@ -286,9 +283,9 @@ fun ActiveGameScreen(
 
                             SudokuGrid(
                                 tiles = sudokuTiles,
-                                selectedX = selectedTile?.x,
-                                selectedY = selectedTile?.y,
-                                onTileClick = { x, y -> activeGameViewModel.onEvent(ActiveGameEvent.onTileFocused(x, y)) }
+                                selectedX = selectedTile.x,
+                                selectedY = selectedTile.y,
+                                onTileClick = { x, y -> activeGameViewModel.onEvent(ActiveGameEvent.OnTileFocused(x, y)) }
                             )
 
                             Spacer(Modifier.height(16.dp))
@@ -331,9 +328,9 @@ fun ActiveGameScreen(
                                     soundPlayer.playSound(R.raw.button_click_sound)
                                 }
                                 if (isNotesMode) {
-                                    activeGameViewModel.onEvent(ActiveGameEvent.onNoteInput(number))
+                                    activeGameViewModel.onEvent(ActiveGameEvent.OnNoteInput(number))
                                 } else {
-                                    activeGameViewModel.onEvent(ActiveGameEvent.onInput(number))
+                                    activeGameViewModel.onEvent(ActiveGameEvent.OnInput(number))
                                 }
                             })
 
@@ -389,15 +386,6 @@ fun SudokuGrid(
     val thinLine = 1.dp
     val thickLine = 3.dp
     val borderColor = MaterialTheme.colorScheme.secondary
-    val isCurrentThemeDark = MaterialTheme.colorScheme.isDark()
-
-    val highlightedColor = if (isCurrentThemeDark) {
-        // Colore per l'evidenziazione in modalità scura
-        DarkModeSelectedCellHighlight.copy(alpha = 0.5f)
-    } else {
-        // Colore per l'evidenziazione in modalità chiara
-        MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-    }
 
     Column(
         modifier = modifier

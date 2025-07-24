@@ -1,6 +1,6 @@
 package com.sudokuMaster
 
-import GraphSudokuTheme
+import com.sudokuMaster.ui.theme.GraphSudokuTheme
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -37,8 +37,6 @@ import com.sudokuMaster.ui.userpreferences.UserPreferencesScreen
 import com.sudokuMaster.ui.userpreferences.UserPreferencesViewModel
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import com.sudokuMaster.ui.home.HomeScreen
-import com.sudokuMaster.ui.userpreferences.UserPreferencesScreen
 
 
 
@@ -102,12 +100,11 @@ fun SudokuAppNavigation(
     )
 
     NavHost( navController = navController,
-        startDestination = Screen.HomeScreen.route as String) {
+        startDestination = Screen.HomeScreen.route) {
         composable(Screen.HomeScreen.route) {
             HomeScreen(
                 navController = navController,
-                userPreferencesViewModel = userPreferencesViewModel, // Passa la ViewModel qui
-                gameRepository = gameRepository,
+                userPreferencesViewModel = userPreferencesViewModel,
                 onNewGameClick = { navController.navigate(Screen.ActiveGameScreen.createRoute("new")) },
                 onContinueGameClick = { navController.navigate(Screen.ActiveGameScreen.createRoute("continue")) },
                 onViewStatisticsClick = { navController.navigate(Screen.StatisticsScreen.route) },

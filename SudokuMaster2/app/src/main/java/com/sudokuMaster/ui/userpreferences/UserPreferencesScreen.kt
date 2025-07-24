@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -33,9 +33,7 @@ import com.sudokuMaster.data.AppTheme
 import com.sudokuMaster.data.DifficultyLevel
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.ui.graphics.Color
-import com.sudokuMaster.ui.userpreferences.SoundPlayer
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.runtime.remember
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,7 +54,7 @@ fun UserPreferencesScreen(
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
-                            imageVector = Icons.Filled.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.torna_indietro),
                             tint = MaterialTheme.colorScheme.onPrimaryContainer
                         )
@@ -130,7 +128,7 @@ fun UserPreferencesScreen(
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = Color.White,
                             checkedTrackColor = MaterialTheme.colorScheme.primary,
-                            uncheckedThumbColor = MaterialTheme.colorScheme.secondaryContainer,
+                            uncheckedThumbColor = Color.White,
                             uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
                             checkedBorderColor = Color.White
                         )
