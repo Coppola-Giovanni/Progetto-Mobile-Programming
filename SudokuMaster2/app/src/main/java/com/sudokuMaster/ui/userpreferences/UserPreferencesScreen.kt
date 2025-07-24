@@ -105,9 +105,9 @@ fun UserPreferencesScreen(
                         val nextDifficulty = when (prefs.defaultDifficulty) {
                             DifficultyLevel.EASY -> DifficultyLevel.MEDIUM
                             DifficultyLevel.MEDIUM -> DifficultyLevel.HARD
-                            DifficultyLevel.HARD -> DifficultyLevel.EASY
+                            DifficultyLevel.HARD -> DifficultyLevel.DIFFICULTY_UNSPECIFIED
                             DifficultyLevel.DIFFICULTY_UNSPECIFIED -> DifficultyLevel.EASY
-                            else -> DifficultyLevel.EASY
+                            else -> DifficultyLevel.HARD
                         }
                         userPreferencesViewModel.updateDefaultDifficulty(nextDifficulty)
                     }
