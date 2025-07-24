@@ -22,6 +22,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import java.util.LinkedList
 
@@ -168,10 +170,13 @@ class ActiveGameViewModel(
         gameJob?.cancel()
         gameJob = viewModelScope.launch {
             try {
-                val difficultyForApi = DifficultyLevel.UNRECOGNIZED
+                val userPreferences = userPreferencesFlow
+                    .filterNotNull()
+                    .first()
+                val preferredDifficulty = userPreferences.defaultDifficulty
 
                 gameRepository.createNewGameAndSave(
-                    difficulty = difficultyForApi,
+                    difficulty = preferredDifficulty,
                     onSuccess = { gameSession ->
                         _currentPuzzleId.value = gameSession.id
                         val puzzle = gameSession.toSudokuPuzzle()
