@@ -37,6 +37,8 @@ import com.sudokuMaster.ui.userpreferences.UserPreferencesScreen
 import com.sudokuMaster.ui.userpreferences.UserPreferencesViewModel
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import com.sudokuMaster.ui.home.HomeScreen
+import com.sudokuMaster.ui.userpreferences.UserPreferencesScreen
 
 
 
@@ -91,23 +93,31 @@ fun SudokuAppNavigation(
     navController: NavHostController,
     gameRepository: GameRepositoryInterface,
     userPreferencesRepository: UserPreferencesRepositoryInterface
-) {
+) { val navController = rememberNavController()
+
+    val userPreferencesViewModel: UserPreferencesViewModel = viewModel(
+        factory = UserPreferencesViewModel.UserPreferencesViewModelFactory(
+            userPreferencesRepository
+        )
+    )
+
     NavHost( navController = navController,
         startDestination = Screen.HomeScreen.route as String) {
         composable(Screen.HomeScreen.route) {
             HomeScreen(
                 navController = navController,
+                userPreferencesViewModel = userPreferencesViewModel, // Passa la ViewModel qui
+                gameRepository = gameRepository,
                 onNewGameClick = { navController.navigate(Screen.ActiveGameScreen.createRoute("new")) },
                 onContinueGameClick = { navController.navigate(Screen.ActiveGameScreen.createRoute("continue")) },
                 onViewStatisticsClick = { navController.navigate(Screen.StatisticsScreen.route) },
             )
         }
         composable(
-            route = Screen.ActiveGameScreen.route,
+            route = Screen.ActiveGameScreen.route + "?initialGameType={initialGameType}",
             arguments = listOf(navArgument("initialGameType") { type = NavType.StringType })
         ) { backStackEntry ->
             val initialGameType = backStackEntry.arguments?.getString("initialGameType") ?: "new"
-
             val activeGameViewModel: ActiveGameViewModel = viewModel(
                 factory = ActiveGameViewModelFactory(
                     gameRepository = gameRepository,
@@ -118,7 +128,8 @@ fun SudokuAppNavigation(
 
             ActiveGameScreen(
                 activeGameViewModel = activeGameViewModel,
-                navController = navController
+                navController = navController,
+                userPreferencesViewModel = userPreferencesViewModel
             )
         }
         composable(Screen.StatisticsScreen.route) {

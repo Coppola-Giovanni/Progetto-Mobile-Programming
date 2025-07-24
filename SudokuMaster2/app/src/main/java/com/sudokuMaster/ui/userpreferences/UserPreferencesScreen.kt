@@ -33,6 +33,9 @@ import com.sudokuMaster.data.AppTheme
 import com.sudokuMaster.data.DifficultyLevel
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.ui.graphics.Color
+import com.sudokuMaster.ui.userpreferences.SoundPlayer
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.remember
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,6 +45,7 @@ fun UserPreferencesScreen(
     modifier: Modifier = Modifier
 ) {
     val userPreferences by userPreferencesViewModel.userPreferencesFlow.collectAsState(initial = null)
+    val soundPlayer = SoundPlayer(LocalContext.current)
 
     Scaffold(
         topBar = {
@@ -79,6 +83,7 @@ fun UserPreferencesScreen(
 
                 Button(
                     onClick = {
+                        if (prefs.soundEnabled) soundPlayer.playSound(R.raw.button_click_sound)
                         val nextTheme = when (prefs.appTheme) {
                             AppTheme.LIGHT -> AppTheme.DARK
                             AppTheme.DARK -> AppTheme.SYSTEM_DEFAULT
@@ -96,6 +101,7 @@ fun UserPreferencesScreen(
                 Text(text = stringResource(R.string.difficolt_predefinita), style = MaterialTheme.typography.titleMedium)
                 Button(
                     onClick = {
+                        if (prefs.soundEnabled) soundPlayer.playSound(R.raw.button_click_sound)
                         val nextDifficulty = when (prefs.defaultDifficulty) {
                             DifficultyLevel.EASY -> DifficultyLevel.MEDIUM
                             DifficultyLevel.MEDIUM -> DifficultyLevel.HARD
@@ -118,7 +124,9 @@ fun UserPreferencesScreen(
                     Text(text = stringResource(R.string.suono_abilitato), style = MaterialTheme.typography.titleMedium)
                     Switch(
                         checked = prefs.soundEnabled,
-                        onCheckedChange = { userPreferencesViewModel.updateSoundEnabled(it) },
+                        onCheckedChange = {
+                            if (prefs.soundEnabled) soundPlayer.playSound(R.raw.button_click_sound)
+                            userPreferencesViewModel.updateSoundEnabled(it) },
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = Color.White,
                             checkedTrackColor = MaterialTheme.colorScheme.primary,

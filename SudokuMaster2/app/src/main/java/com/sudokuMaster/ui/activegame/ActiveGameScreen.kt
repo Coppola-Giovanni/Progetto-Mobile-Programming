@@ -33,12 +33,14 @@ import com.sudokuMaster.ui.theme.isDark
 import com.sudokuMaster.ui.theme.DarkModeSelectedCellHighlight
 import com.sudokuMaster.ui.userpreferences.SoundPlayer
 import androidx.compose.ui.platform.LocalContext
+import com.sudokuMaster.ui.userpreferences.UserPreferencesViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActiveGameScreen(
     activeGameViewModel: ActiveGameViewModel,
+    userPreferencesViewModel: UserPreferencesViewModel,
     navController: NavController,
     modifier: Modifier = Modifier,
 ) {
@@ -52,7 +54,7 @@ fun ActiveGameScreen(
     val isNewRecord by activeGameViewModel.isNewRecord.collectAsState()
     val hasInvalidTiles by activeGameViewModel.hasInvalidTiles.collectAsState()
     val isNotesMode by activeGameViewModel.isNotesMode.collectAsState()
-    val userPreferences by activeGameViewModel.userPreferencesFlow.collectAsState(initial = null)
+    val userPreferences by userPreferencesViewModel.userPreferencesFlow.collectAsState(initial = null)
     val soundPlayer = SoundPlayer(LocalContext.current)
 
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -207,13 +209,21 @@ fun ActiveGameScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Button(
-                                        onClick = { activeGameViewModel.onEvent(ActiveGameEvent.OnSuggestMoveClicked) },
+                                        onClick = {
+                                            if (userPreferences?.soundEnabled == true) {
+                                                soundPlayer.playSound(R.raw.button_click_sound)
+                                            }
+                                            activeGameViewModel.onEvent(ActiveGameEvent.OnSuggestMoveClicked) },
                                         modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
                                     ) {
                                         Text(stringResource(R.string.suggest_move))
                                     }
                                     Button(
-                                        onClick = { activeGameViewModel.onEvent(ActiveGameEvent.OnToggleNotesMode) },
+                                        onClick = {
+                                            if (userPreferences?.soundEnabled == true) {
+                                                soundPlayer.playSound(R.raw.button_click_sound)
+                                            }
+                                            activeGameViewModel.onEvent(ActiveGameEvent.OnToggleNotesMode) },
                                         colors = ButtonDefaults.buttonColors(
                                             containerColor = if (isNotesMode) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
                                             contentColor = if (isNotesMode) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onPrimary
@@ -289,13 +299,21 @@ fun ActiveGameScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Button(
-                                    onClick = { activeGameViewModel.onEvent(ActiveGameEvent.OnSuggestMoveClicked) },
+                                    onClick = {
+                                        if (userPreferences?.soundEnabled == true) {
+                                            soundPlayer.playSound(R.raw.button_click_sound)
+                                        }
+                                        activeGameViewModel.onEvent(ActiveGameEvent.OnSuggestMoveClicked) },
                                     modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
                                 ) {
                                     Text(stringResource(R.string.suggest_move))
                                 }
                                 Button(
-                                    onClick = { activeGameViewModel.onEvent(ActiveGameEvent.OnToggleNotesMode) },
+                                    onClick = {
+                                        if (userPreferences?.soundEnabled == true) {
+                                            soundPlayer.playSound(R.raw.button_click_sound)
+                                        }
+                                        activeGameViewModel.onEvent(ActiveGameEvent.OnToggleNotesMode) },
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = if (isNotesMode) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
                                         contentColor = if (isNotesMode) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onPrimary
@@ -328,6 +346,11 @@ fun ActiveGameScreen(
                         navController = navController,
                         activeGameViewModel = activeGameViewModel
                     )
+                    LaunchedEffect(Unit) {
+                        if (userPreferences?.soundEnabled == true) {
+                            soundPlayer.playSound(R.raw.win_sound)
+                        }
+                    }
                 }
                 ActiveGameScreenState.ERROR -> {
                     Column(

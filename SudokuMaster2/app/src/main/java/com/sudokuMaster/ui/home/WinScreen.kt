@@ -34,13 +34,8 @@ fun WinScreen(
     val userPreferences by activeGameViewModel.userPreferencesFlow.collectAsState(initial = null)
     val soundPlayer = SoundPlayer(LocalContext.current)
 
-    LaunchedEffect(key1 = isSolved) {
-        if (isSolved && userPreferences?.soundEnabled == true) {
-            soundPlayer.playSound(R.raw.win_sound)
-        }
-    }
-
     if (activeGameScreenState == ActiveGameScreenState.COMPLETE && isSolved) {
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -80,7 +75,7 @@ fun WinScreen(
             ) {
                 Button(
                     onClick = {
-                        // Naviga alla HomeScreen e cancella le schermate precedenti dalla back stack
+                        if (userPreferences?.soundEnabled == true) soundPlayer.playSound(R.raw.button_click_sound)
                         navController.popBackStack(Screen.HomeScreen.route, inclusive = false)
                         navController.navigate(Screen.HomeScreen.route)
                     },
@@ -91,7 +86,7 @@ fun WinScreen(
 
                 Button(
                     onClick = {
-                        // Inizia una nuova partita, cancellando la schermata attuale
+                        if (userPreferences?.soundEnabled == true) soundPlayer.playSound(R.raw.button_click_sound)
                         navController.popBackStack(Screen.ActiveGameScreen.route, inclusive = true)
                         navController.navigate(Screen.ActiveGameScreen.createRoute("new"))
                     },
@@ -105,6 +100,7 @@ fun WinScreen(
 
             Button(
                 onClick = {
+                    if (userPreferences?.soundEnabled == true) soundPlayer.playSound(R.raw.button_click_sound)
                     navController.navigate(Screen.StatisticsScreen.route)
                 },
                 modifier = Modifier.fillMaxWidth()

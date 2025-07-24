@@ -6,6 +6,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -14,30 +15,31 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.SudokuMaster.R
-import com.sudokuMaster.data.AppTheme
-import com.sudokuMaster.data.DifficultyLevel
-import com.sudokuMaster.data.UserPreferences
-import com.sudokuMaster.domain.UserPreferencesRepositoryInterface
 import com.sudokuMaster.ui.theme.isDark
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import com.sudokuMaster.ui.userpreferences.UserPreferencesViewModel
+import com.sudokuMaster.ui.userpreferences.SoundPlayer
+import androidx.compose.ui.platform.LocalContext
+import com.sudokuMaster.domain.GameRepositoryInterface
+import androidx.compose.runtime.getValue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    navController: NavController, // Aggiunto NavController qui
+    navController: NavController,
+    userPreferencesViewModel: UserPreferencesViewModel,
+    gameRepository: GameRepositoryInterface,
     onNewGameClick: () -> Unit,
     onContinueGameClick: () -> Unit,
     onViewStatisticsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val isCurrentThemeDark = MaterialTheme.colorScheme.isDark()
+    val prefs by userPreferencesViewModel.userPreferencesFlow.collectAsState(initial = null)
+    val soundPlayer = SoundPlayer(LocalContext.current)
 
     Scaffold(
         topBar = {
@@ -93,7 +95,10 @@ fun HomeScreen(
                 )
 
                 Button(
-                    onClick = onNewGameClick,
+                    onClick = {
+                        if (prefs?.soundEnabled == true) soundPlayer.playSound(R.raw.button_click_sound)
+                        onNewGameClick()
+                    },
                     modifier = Modifier.widthIn(min = 200.dp)
                 ) {
                     Text(
@@ -106,7 +111,10 @@ fun HomeScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Button(
-                    onClick = onContinueGameClick,
+                    onClick = {
+                        if (prefs?.soundEnabled == true) soundPlayer.playSound(R.raw.button_click_sound)
+                        onContinueGameClick()
+                    },
                     modifier = Modifier.widthIn(min = 200.dp)
                 ) {
                     Text(
@@ -119,7 +127,10 @@ fun HomeScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Button(
-                    onClick = onViewStatisticsClick,
+                    onClick = {
+                        if (prefs?.soundEnabled == true) soundPlayer.playSound(R.raw.button_click_sound)
+                        onViewStatisticsClick()
+                    },
                     modifier = Modifier.widthIn(min = 200.dp)
                 ) {
                     Text(
