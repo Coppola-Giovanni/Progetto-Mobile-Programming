@@ -41,7 +41,7 @@ class SudokuRemoteDataSource(private val apiService: SudokuApiService) {
     private val RETRY_DELAY_MS = 10L
 
     suspend fun getNewSudokuPuzzleData(requestedDifficulty: DifficultyLevel): Result<Triple<List<List<Int>>, List<List<Int>>, DifficultyLevel>> {
-        return withContext(Dispatchers.IO) { // Esegue la chiamata di rete su un thread I/O
+        return withContext(Dispatchers.IO) {
             var currentRetries = 0
             while (currentRetries < MAX_RETRIES) {
                 try {
@@ -76,7 +76,6 @@ class SudokuRemoteDataSource(private val apiService: SudokuApiService) {
                     }
                 }
             }
-            // Se si raggiungono i tentativi massimi senza trovare la difficoltà desiderata
             Result.failure(Exception("Could not find a Sudoku puzzle with the requested difficulty after $MAX_RETRIES attempts."))
         }
     }

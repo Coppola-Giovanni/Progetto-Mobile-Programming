@@ -67,7 +67,6 @@ fun WinScreen(
             }
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Ristrutturazione dei pulsanti in una Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceAround

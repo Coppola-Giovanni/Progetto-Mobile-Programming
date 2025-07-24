@@ -46,7 +46,6 @@ class StatisticsViewModel(
         }
     }
 
-    // Factory per instanziare StatisticsViewModel con dipendenze
     class Factory(
         private val gameRepository: GameRepositoryInterface,
         private val dispatcherProvider: DispatcherProvider

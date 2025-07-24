@@ -403,7 +403,6 @@ class ActiveGameViewModel(
                         notes = emptySet()
                     )
 
-                    // Check for completion after the suggestion
                     _sudokuPuzzle.value?.let { updatedPuzzle ->
                         if (updatedPuzzle.isComplete()) {
                             _isSolved.value = true

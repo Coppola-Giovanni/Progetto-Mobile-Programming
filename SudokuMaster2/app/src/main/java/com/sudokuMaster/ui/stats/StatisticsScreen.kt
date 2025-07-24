@@ -120,7 +120,6 @@ fun StatsRow(label: String, value: String) {
     }
 }
 
-// Helper function to format milliseconds to MM:SS
 @SuppressLint("DefaultLocale")
 fun formatMillis(millis: Long): String {
     val seconds = TimeUnit.MILLISECONDS.toSeconds(millis)

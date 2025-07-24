@@ -39,7 +39,6 @@ class UserPreferencesViewModel(
         }
     }
 
-    // ViewModel Factory per l'iniezione delle dipendenze
     class UserPreferencesViewModelFactory(
         private val userPreferencesRepository: UserPreferencesRepositoryInterface
     ) : ViewModelProvider.Factory {
