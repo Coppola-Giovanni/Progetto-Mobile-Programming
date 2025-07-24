@@ -31,10 +31,6 @@ public interface UserPreferencesOrBuilder extends
   com.sudokuMaster.data.DifficultyLevel getDefaultDifficulty();
 
   /**
-   * <pre>
-   *bool showTutorial = 5;               not implemented yet!
-   * </pre>
-   *
    * <code>bool soundEnabled = 3;</code>
    * @return The soundEnabled.
    */

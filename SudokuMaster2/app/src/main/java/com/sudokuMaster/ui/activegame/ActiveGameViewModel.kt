@@ -77,6 +77,13 @@ class ActiveGameViewModel(
     private val _isNotesMode = MutableStateFlow(false)
     val isNotesMode: StateFlow<Boolean> = _isNotesMode.asStateFlow()
 
+    val userPreferencesFlow = userPreferencesRepository.userPreferencesFlow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = null
+        )
+
     val sudokuTiles: StateFlow<List<SudokuTile>> = _sudokuPuzzle.map { puzzle ->
         puzzle?.let {
             val tiles = it.currentGraph.values.flatten().map { node ->

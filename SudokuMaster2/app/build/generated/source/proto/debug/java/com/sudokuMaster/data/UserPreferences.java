@@ -101,10 +101,6 @@ public  final class UserPreferences extends
   public static final int SOUNDENABLED_FIELD_NUMBER = 3;
   private boolean soundEnabled_;
   /**
-   * <pre>
-   *bool showTutorial = 5;               not implemented yet!
-   * </pre>
-   *
    * <code>bool soundEnabled = 3;</code>
    * @return The soundEnabled.
    */
@@ -113,10 +109,6 @@ public  final class UserPreferences extends
     return soundEnabled_;
   }
   /**
-   * <pre>
-   *bool showTutorial = 5;               not implemented yet!
-   * </pre>
-   *
    * <code>bool soundEnabled = 3;</code>
    * @param value The soundEnabled to set.
    */
@@ -125,10 +117,6 @@ public  final class UserPreferences extends
     soundEnabled_ = value;
   }
   /**
-   * <pre>
-   *bool showTutorial = 5;               not implemented yet!
-   * </pre>
-   *
    * <code>bool soundEnabled = 3;</code>
    */
   private void clearSoundEnabled() {
@@ -390,10 +378,6 @@ public  final class UserPreferences extends
     }
 
     /**
-     * <pre>
-     *bool showTutorial = 5;               not implemented yet!
-     * </pre>
-     *
      * <code>bool soundEnabled = 3;</code>
      * @return The soundEnabled.
      */
@@ -402,10 +386,6 @@ public  final class UserPreferences extends
       return instance.getSoundEnabled();
     }
     /**
-     * <pre>
-     *bool showTutorial = 5;               not implemented yet!
-     * </pre>
-     *
      * <code>bool soundEnabled = 3;</code>
      * @param value The soundEnabled to set.
      * @return This builder for chaining.
@@ -416,10 +396,6 @@ public  final class UserPreferences extends
       return this;
     }
     /**
-     * <pre>
-     *bool showTutorial = 5;               not implemented yet!
-     * </pre>
-     *
      * <code>bool soundEnabled = 3;</code>
      * @return This builder for chaining.
      */

@@ -13,6 +13,8 @@ drawable ic_launcher_foreground
 drawable light_mode_background
 mipmap ic_launcher
 mipmap ic_launcher_round
+raw button_click_sound
+raw win_sound
 string Difficulty
 string active_game
 string active_game_title

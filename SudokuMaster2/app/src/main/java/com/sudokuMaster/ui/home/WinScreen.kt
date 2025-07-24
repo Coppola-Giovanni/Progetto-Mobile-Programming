@@ -6,6 +6,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -18,6 +19,8 @@ import androidx.compose.ui.res.stringResource
 import com.SudokuMaster.R
 import com.sudokuMaster.ui.Screen
 import java.util.concurrent.TimeUnit
+import com.sudokuMaster.ui.userpreferences.SoundPlayer
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun WinScreen(
@@ -28,6 +31,14 @@ fun WinScreen(
     val timerState by activeGameViewModel.timerState.collectAsState()
     val isNewRecord by activeGameViewModel.isNewRecord.collectAsState()
     val activeGameScreenState by activeGameViewModel.activeGameScreenState.collectAsState()
+    val userPreferences by activeGameViewModel.userPreferencesFlow.collectAsState(initial = null)
+    val soundPlayer = SoundPlayer(LocalContext.current)
+
+    LaunchedEffect(key1 = isSolved) {
+        if (isSolved && userPreferences?.soundEnabled == true) {
+            soundPlayer.playSound(R.raw.win_sound)
+        }
+    }
 
     if (activeGameScreenState == ActiveGameScreenState.COMPLETE && isSolved) {
         Column(

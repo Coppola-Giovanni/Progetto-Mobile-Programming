@@ -5,7 +5,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -40,6 +39,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 
+
 class MainActivity : ComponentActivity() {
 
     private lateinit var gameRepository: GameRepositoryInterface
@@ -47,7 +47,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
 
         val userPreferencesDataStore = applicationContext.userPreferencesDataStore
         userPreferencesRepository = UserPreferencesRepositoryImpl(userPreferencesDataStore)
@@ -74,7 +73,6 @@ class MainActivity : ComponentActivity() {
             GraphSudokuTheme(userPreferencesRepository = userPreferencesRepository) {
                 Surface(
                     modifier = Modifier.fillMaxSize()
-                    // Rimuovi 'color = MaterialTheme.colorScheme.background'
                 ) {
                     val navController = rememberNavController()
                     SudokuAppNavigation(

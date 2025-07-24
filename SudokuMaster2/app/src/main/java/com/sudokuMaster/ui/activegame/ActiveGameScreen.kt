@@ -24,18 +24,15 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.SudokuMaster.R
-import com.sudokuMaster.data.DifficultyLevel
 import java.util.concurrent.TimeUnit
-import androidx.compose.ui.graphics.luminance
-import androidx.compose.material3.ColorScheme
 import androidx.compose.foundation.Image
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import com.sudokuMaster.ui.home.WinScreen
 import com.sudokuMaster.ui.theme.isDark
-import com.sudokuMaster.ui.theme.LightModeSelectedCellHighlight
 import com.sudokuMaster.ui.theme.DarkModeSelectedCellHighlight
-
+import com.sudokuMaster.ui.userpreferences.SoundPlayer
+import androidx.compose.ui.platform.LocalContext
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,6 +52,8 @@ fun ActiveGameScreen(
     val isNewRecord by activeGameViewModel.isNewRecord.collectAsState()
     val hasInvalidTiles by activeGameViewModel.hasInvalidTiles.collectAsState()
     val isNotesMode by activeGameViewModel.isNotesMode.collectAsState()
+    val userPreferences by activeGameViewModel.userPreferencesFlow.collectAsState(initial = null)
+    val soundPlayer = SoundPlayer(LocalContext.current)
 
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
@@ -146,7 +145,6 @@ fun ActiveGameScreen(
                         Row(
                             modifier = Modifier
                                 .fillMaxSize()
-                                //.padding(paddingValues) // Rimosso, il padding è già sul Box esterno
                                 .padding(horizontal = 8.dp, vertical = 4.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -227,6 +225,9 @@ fun ActiveGameScreen(
                                 }
 
                                 NumberInput(onNumberClick = { number ->
+                                    if (userPreferences?.soundEnabled == true) {
+                                        soundPlayer.playSound(R.raw.button_click_sound)
+                                    }
                                     if (isNotesMode) {
                                         activeGameViewModel.onEvent(ActiveGameEvent.onNoteInput(number))
                                     } else {
@@ -308,6 +309,9 @@ fun ActiveGameScreen(
                             Spacer(modifier = Modifier.height(16.dp))
 
                             NumberInput(onNumberClick = { number ->
+                                if (userPreferences?.soundEnabled == true) {
+                                    soundPlayer.playSound(R.raw.button_click_sound)
+                                }
                                 if (isNotesMode) {
                                     activeGameViewModel.onEvent(ActiveGameEvent.onNoteInput(number))
                                 } else {
@@ -557,14 +561,13 @@ fun InputButton(
             .size(48.dp),
         contentPadding = PaddingValues(0.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.primary, // I pulsanti usano primary
-            contentColor = MaterialTheme.colorScheme.onPrimary // Il testo qui userà onPrimary (che sarà Bianco con le mie modifiche al tema)
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
         )
     ) {
         Text(
             text = displayValue,
             fontSize = 18.sp,
-            // color = Color.White // Rimosso, usa contentColor di ButtonDefaults
         )
     }
 }
