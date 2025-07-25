@@ -31,8 +31,6 @@ import androidx.compose.ui.res.painterResource
 import com.sudokuMaster.ui.home.WinScreen
 import com.sudokuMaster.ui.theme.isDark
 import com.sudokuMaster.ui.theme.DarkModeSelectedCellHighlight
-import com.sudokuMaster.ui.userpreferences.SoundPlayer
-import androidx.compose.ui.platform.LocalContext
 import com.sudokuMaster.ui.userpreferences.UserPreferencesViewModel
 
 
@@ -52,9 +50,32 @@ fun ActiveGameScreen(
     val hasInvalidTiles by activeGameViewModel.hasInvalidTiles.collectAsState()
     val isNotesMode by activeGameViewModel.isNotesMode.collectAsState()
     val userPreferences by userPreferencesViewModel.userPreferencesFlow.collectAsState(initial = null)
-    val soundPlayer = SoundPlayer(LocalContext.current)
+
+    LaunchedEffect(sudokuTiles) {
+        activeGameViewModel.setHasInvalidTiles(sudokuTiles.any { it.isInvalid })
+    }
+
+    LaunchedEffect(activeGameScreenState, userPreferences?.soundEnabled, userPreferences?.musicEnabled) {
+        if (activeGameScreenState == ActiveGameScreenState.COMPLETE) {
+            // Se il gioco è completo e i suoni sono abilitati, mette in pausa la musica
+            if (userPreferences?.musicEnabled == true) {
+                userPreferencesViewModel.pauseBackgroundMusic()
+            }
+            // Riproduce il suono di vittoria se i suoni sono abilitati
+            if (userPreferences?.soundEnabled == true) {
+                userPreferencesViewModel.playSoundEffect(R.raw.win_sound)
+            }
+        } else {
+            // Se il gioco non è completo e la musica è abilitata, riprendi la musica
+            if (userPreferences?.musicEnabled == true) {
+                userPreferencesViewModel.resumeBackgroundMusic()
+            }
+        }
+    }
+
 
     val lifecycleOwner = LocalLifecycleOwner.current
+
     DisposableEffect(lifecycleOwner) {
         val lifecycle = lifecycleOwner.lifecycle
         val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
@@ -69,6 +90,7 @@ fun ActiveGameScreen(
             lifecycle.removeObserver(observer)
         }
     }
+
 
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
@@ -208,7 +230,7 @@ fun ActiveGameScreen(
                                     Button(
                                         onClick = {
                                             if (userPreferences?.soundEnabled == true) {
-                                                soundPlayer.playSound(R.raw.button_click_sound)
+                                                userPreferencesViewModel.playSoundEffect(R.raw.button_click_sound)
                                             }
                                             activeGameViewModel.onEvent(ActiveGameEvent.OnSuggestMoveClicked) },
                                         modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
@@ -218,7 +240,7 @@ fun ActiveGameScreen(
                                     Button(
                                         onClick = {
                                             if (userPreferences?.soundEnabled == true) {
-                                                soundPlayer.playSound(R.raw.button_click_sound)
+                                                userPreferencesViewModel.playSoundEffect(R.raw.button_click_sound)
                                             }
                                             activeGameViewModel.onEvent(ActiveGameEvent.OnToggleNotesMode) },
                                         colors = ButtonDefaults.buttonColors(
@@ -233,7 +255,7 @@ fun ActiveGameScreen(
 
                                 NumberInput(onNumberClick = { number ->
                                     if (userPreferences?.soundEnabled == true) {
-                                        soundPlayer.playSound(R.raw.button_click_sound)
+                                        userPreferencesViewModel.playSoundEffect(R.raw.button_click_sound)
                                     }
                                     if (isNotesMode) {
                                         activeGameViewModel.onEvent(ActiveGameEvent.OnNoteInput(number))
@@ -298,7 +320,7 @@ fun ActiveGameScreen(
                                 Button(
                                     onClick = {
                                         if (userPreferences?.soundEnabled == true) {
-                                            soundPlayer.playSound(R.raw.button_click_sound)
+                                            userPreferencesViewModel.playSoundEffect(R.raw.button_click_sound)
                                         }
                                         activeGameViewModel.onEvent(ActiveGameEvent.OnSuggestMoveClicked) },
                                     modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
@@ -308,7 +330,7 @@ fun ActiveGameScreen(
                                 Button(
                                     onClick = {
                                         if (userPreferences?.soundEnabled == true) {
-                                            soundPlayer.playSound(R.raw.button_click_sound)
+                                            userPreferencesViewModel.playSoundEffect(R.raw.button_click_sound)
                                         }
                                         activeGameViewModel.onEvent(ActiveGameEvent.OnToggleNotesMode) },
                                     colors = ButtonDefaults.buttonColors(
@@ -325,7 +347,7 @@ fun ActiveGameScreen(
 
                             NumberInput(onNumberClick = { number ->
                                 if (userPreferences?.soundEnabled == true) {
-                                    soundPlayer.playSound(R.raw.button_click_sound)
+                                    userPreferencesViewModel.playSoundEffect(R.raw.button_click_sound)
                                 }
                                 if (isNotesMode) {
                                     activeGameViewModel.onEvent(ActiveGameEvent.OnNoteInput(number))
@@ -341,19 +363,14 @@ fun ActiveGameScreen(
                 ActiveGameScreenState.COMPLETE -> {
                     WinScreen(
                         navController = navController,
-                        activeGameViewModel = activeGameViewModel
+                        activeGameViewModel = activeGameViewModel,
+                        userPreferencesViewModel = userPreferencesViewModel
                     )
-                    LaunchedEffect(Unit) {
-                        if (userPreferences?.soundEnabled == true) {
-                            soundPlayer.playSound(R.raw.win_sound)
-                        }
-                    }
                 }
                 ActiveGameScreenState.ERROR -> {
                     Column(
                         modifier = Modifier
                             .fillMaxSize(),
-                        //.padding(paddingValues), // Rimosso, il padding è già sul Box esterno
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {

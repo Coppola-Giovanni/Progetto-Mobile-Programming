@@ -18,20 +18,19 @@ import androidx.compose.ui.res.stringResource
 import com.SudokuMaster.R
 import com.sudokuMaster.ui.Screen
 import java.util.concurrent.TimeUnit
-import com.sudokuMaster.ui.userpreferences.SoundPlayer
-import androidx.compose.ui.platform.LocalContext
+import com.sudokuMaster.ui.userpreferences.UserPreferencesViewModel
 
 @Composable
 fun WinScreen(
     navController: NavController,
-    activeGameViewModel: ActiveGameViewModel
+    activeGameViewModel: ActiveGameViewModel,
+    userPreferencesViewModel: UserPreferencesViewModel
 ) {
     val isSolved by activeGameViewModel.isSolved.collectAsState()
     val timerState by activeGameViewModel.timerState.collectAsState()
     val isNewRecord by activeGameViewModel.isNewRecord.collectAsState()
     val activeGameScreenState by activeGameViewModel.activeGameScreenState.collectAsState()
-    val userPreferences by activeGameViewModel.userPreferencesFlow.collectAsState(initial = null)
-    val soundPlayer = SoundPlayer(LocalContext.current)
+    val userPreferences by userPreferencesViewModel.userPreferencesFlow.collectAsState(initial = null) // Ora collezioniamo da userPreferencesViewModel
 
     if (activeGameScreenState == ActiveGameScreenState.COMPLETE && isSolved) {
 
@@ -73,7 +72,8 @@ fun WinScreen(
             ) {
                 Button(
                     onClick = {
-                        if (userPreferences?.soundEnabled == true) soundPlayer.playSound(R.raw.button_click_sound)
+                        if (userPreferences?.soundEnabled == true) userPreferencesViewModel.playSoundEffect(R.raw.button_click_sound)
+                        userPreferencesViewModel.resumeBackgroundMusic()
                         navController.popBackStack(Screen.HomeScreen.route, inclusive = false)
                         navController.navigate(Screen.HomeScreen.route)
                     },
@@ -84,7 +84,8 @@ fun WinScreen(
 
                 Button(
                     onClick = {
-                        if (userPreferences?.soundEnabled == true) soundPlayer.playSound(R.raw.button_click_sound)
+                        if (userPreferences?.soundEnabled == true) userPreferencesViewModel.playSoundEffect(R.raw.button_click_sound)
+                        userPreferencesViewModel.resumeBackgroundMusic()
                         navController.popBackStack(Screen.ActiveGameScreen.route, inclusive = true)
                         navController.navigate(Screen.ActiveGameScreen.createRoute("new"))
                     },
@@ -98,7 +99,8 @@ fun WinScreen(
 
             Button(
                 onClick = {
-                    if (userPreferences?.soundEnabled == true) soundPlayer.playSound(R.raw.button_click_sound)
+                    if (userPreferences?.soundEnabled == true) userPreferencesViewModel.playSoundEffect(R.raw.button_click_sound)
+                    userPreferencesViewModel.resumeBackgroundMusic()
                     navController.navigate(Screen.StatisticsScreen.route)
                 },
                 modifier = Modifier.fillMaxWidth()

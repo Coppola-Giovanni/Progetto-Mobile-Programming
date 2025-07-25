@@ -35,7 +35,14 @@ class UserPreferencesRepositoryImpl(
         }
     }
 
-     override suspend fun updateLastUnfinishedGameId(gameId: Long) {
+    override suspend fun updateMusicEnabled(enabled: Boolean) { // NUOVO METODO
+        userPreferencesDataStore.updateData { currentPreferences ->
+            currentPreferences.toBuilder().setMusicEnabled(enabled).build()
+        }
+    }
+
+
+    override suspend fun updateLastUnfinishedGameId(gameId: Long) {
         userPreferencesDataStore.updateData { currentPreferences ->
             currentPreferences.toBuilder().setLastUnfinishedGameId(gameId).build()
         }

@@ -1,5 +1,6 @@
 package com.sudokuMaster.ui.userpreferences
 
+import androidx.annotation.RawRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -11,7 +12,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class UserPreferencesViewModel(
-    private val userPreferencesRepository: UserPreferencesRepositoryInterface
+    private val userPreferencesRepository: UserPreferencesRepositoryInterface,
+    private val soundAndMusicPlayer: SoundAndMusicPlayer
 ) : ViewModel() {
 
     val userPreferencesFlow = userPreferencesRepository.userPreferencesFlow
@@ -39,14 +41,41 @@ class UserPreferencesViewModel(
         }
     }
 
+    fun updateMusicEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            userPreferencesRepository.updateMusicEnabled(enabled)
+        }
+    }
+
+    fun playSoundEffect(@RawRes soundResId: Int) {
+        soundAndMusicPlayer.playSoundEffect(soundResId)
+    }
+
+    fun pauseBackgroundMusic() {
+        soundAndMusicPlayer.pauseBackgroundMusic()
+    }
+
+    fun resumeBackgroundMusic() {
+        viewModelScope.launch {
+            val prefs = userPreferencesFlow.value
+            if (prefs?.musicEnabled == true) {
+                soundAndMusicPlayer.resumeBackgroundMusic()
+            }
+        }
+    }
+
+
     class UserPreferencesViewModelFactory(
-        private val userPreferencesRepository: UserPreferencesRepositoryInterface
+        private val userPreferencesRepository: UserPreferencesRepositoryInterface,
+        private val soundAndMusicPlayer: SoundAndMusicPlayer
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(UserPreferencesViewModel::class.java)) {
-                return UserPreferencesViewModel(userPreferencesRepository) as T
+                // Passa soundAndMusicPlayer al costruttore del ViewModel
+                return UserPreferencesViewModel(userPreferencesRepository, soundAndMusicPlayer) as T
             }
+
             throw IllegalArgumentException("Unknown ViewModel class")
         }
     }

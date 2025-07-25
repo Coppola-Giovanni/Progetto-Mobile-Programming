@@ -9,6 +9,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -16,6 +17,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.SudokuMaster.R
 import com.sudokuMaster.common.ProductionDispatcherProvider
 import com.sudokuMaster.data.database.AppDatabase
 import com.sudokuMaster.data.repository.GameRepositoryImpl
@@ -33,8 +35,12 @@ import com.sudokuMaster.ui.home.HomeScreen
 import com.sudokuMaster.ui.home.WinScreen
 import com.sudokuMaster.ui.stats.StatisticsScreen
 import com.sudokuMaster.ui.stats.StatisticsViewModel
+import com.sudokuMaster.ui.userpreferences.SoundAndMusicPlayer
 import com.sudokuMaster.ui.userpreferences.UserPreferencesScreen
 import com.sudokuMaster.ui.userpreferences.UserPreferencesViewModel
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -44,12 +50,16 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var gameRepository: GameRepositoryInterface
     private lateinit var userPreferencesRepository: UserPreferencesRepositoryInterface
+    private lateinit var soundAndMusicPlayer: SoundAndMusicPlayer
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val userPreferencesDataStore = applicationContext.userPreferencesDataStore
         userPreferencesRepository = UserPreferencesRepositoryImpl(userPreferencesDataStore)
+        soundAndMusicPlayer = SoundAndMusicPlayer(applicationContext)
+        soundAndMusicPlayer.setPreferencesRepository(userPreferencesRepository)
 
         val db = AppDatabase.getDatabase(applicationContext)
         val gameSessionDao = db.gameSessionDao()
@@ -69,6 +79,16 @@ class MainActivity : ComponentActivity() {
             sudokuRemoteDataSource = sudokuRemoteDataSource
         )
 
+        lifecycleScope.launch {
+            userPreferencesRepository.userPreferencesFlow.collectLatest { prefs ->
+                if (prefs?.musicEnabled == true) {
+                    soundAndMusicPlayer.playBackgroundMusic(R.raw.background_music)
+                } else {
+                    soundAndMusicPlayer.stopBackgroundMusic()
+                }
+            }
+        }
+
         setContent {
             GraphSudokuTheme(userPreferencesRepository = userPreferencesRepository) {
                 Surface(
@@ -78,24 +98,49 @@ class MainActivity : ComponentActivity() {
                     SudokuAppNavigation(
                         navController = navController,
                         gameRepository = gameRepository,
-                        userPreferencesRepository = userPreferencesRepository
+                        userPreferencesRepository = userPreferencesRepository,
+                        soundAndMusicPlayer = soundAndMusicPlayer
                     )
                 }
             }
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        lifecycleScope.launch {
+            userPreferencesRepository.userPreferencesFlow.first { true }.let { prefs ->
+                if (prefs?.musicEnabled == true) {
+                    soundAndMusicPlayer.resumeBackgroundMusic()
+                }
+            }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        soundAndMusicPlayer.pauseBackgroundMusic() // Metti in pausa la musica quando l'app non è in primo piano
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        soundAndMusicPlayer.release() // Rilascia le risorse del player quando l'attività viene distrutta
+    }
 }
+
+
 
 @Composable
 fun SudokuAppNavigation(
     navController: NavHostController,
     gameRepository: GameRepositoryInterface,
-    userPreferencesRepository: UserPreferencesRepositoryInterface
-) { val navController = rememberNavController()
-
+    userPreferencesRepository: UserPreferencesRepositoryInterface,
+    soundAndMusicPlayer: SoundAndMusicPlayer
+) {
     val userPreferencesViewModel: UserPreferencesViewModel = viewModel(
         factory = UserPreferencesViewModel.UserPreferencesViewModelFactory(
-            userPreferencesRepository
+            userPreferencesRepository,
+            soundAndMusicPlayer = soundAndMusicPlayer
         )
     )
 
@@ -151,13 +196,15 @@ fun SudokuAppNavigation(
             )
             WinScreen(
                 navController = navController,
-                activeGameViewModel = activeGameViewModel
+                activeGameViewModel = activeGameViewModel,
+                userPreferencesViewModel = userPreferencesViewModel
             )
         }
         composable(Screen.UserPreferencesScreen.route){
             val userPreferencesViewModel: UserPreferencesViewModel = viewModel(
                 factory = UserPreferencesViewModel.UserPreferencesViewModelFactory(
-                    userPreferencesRepository
+                    userPreferencesRepository,
+                    soundAndMusicPlayer
                 )
             )
             UserPreferencesScreen(
@@ -165,6 +212,5 @@ fun SudokuAppNavigation(
                 userPreferencesViewModel = userPreferencesViewModel
             )
         }
-
     }
 }

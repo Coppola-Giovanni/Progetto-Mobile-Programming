@@ -21,6 +21,7 @@ message UserPreferences {
   AppTheme appTheme = 1;
   DifficultyLevel defaultDifficulty = 2;
   bool soundEnabled = 3;
+  bool musicEnabled = 4;
   int64 lastUnfinishedGameId = 6;     // not the full info just the room related id
   int64 lastAccessTimestamp = 7;
 }

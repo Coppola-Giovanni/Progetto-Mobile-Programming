@@ -43,7 +43,8 @@ fun UserPreferencesScreen(
     modifier: Modifier = Modifier
 ) {
     val userPreferences by userPreferencesViewModel.userPreferencesFlow.collectAsState(initial = null)
-    val soundPlayer = SoundPlayer(LocalContext.current)
+    // Usa la nuova classe SoundAndMusicPlayer
+    val soundAndMusicPlayer = SoundAndMusicPlayer(LocalContext.current)
 
     Scaffold(
         topBar = {
@@ -63,7 +64,6 @@ fun UserPreferencesScreen(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    // Corrected parameter name here:
                     navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             )
@@ -81,7 +81,7 @@ fun UserPreferencesScreen(
 
                 Button(
                     onClick = {
-                        if (prefs.soundEnabled) soundPlayer.playSound(R.raw.button_click_sound)
+                        if (prefs.soundEnabled) soundAndMusicPlayer.playSoundEffect(R.raw.button_click_sound) // Usa playSoundEffect
                         val nextTheme = when (prefs.appTheme) {
                             AppTheme.LIGHT -> AppTheme.DARK
                             AppTheme.DARK -> AppTheme.SYSTEM_DEFAULT
@@ -99,7 +99,7 @@ fun UserPreferencesScreen(
                 Text(text = stringResource(R.string.difficolt_predefinita), style = MaterialTheme.typography.titleMedium)
                 Button(
                     onClick = {
-                        if (prefs.soundEnabled) soundPlayer.playSound(R.raw.button_click_sound)
+                        if (prefs.soundEnabled) soundAndMusicPlayer.playSoundEffect(R.raw.button_click_sound) // Usa playSoundEffect
                         val nextDifficulty = when (prefs.defaultDifficulty) {
                             DifficultyLevel.EASY -> DifficultyLevel.MEDIUM
                             DifficultyLevel.MEDIUM -> DifficultyLevel.HARD
@@ -123,8 +123,32 @@ fun UserPreferencesScreen(
                     Switch(
                         checked = prefs.soundEnabled,
                         onCheckedChange = {
-                            if (prefs.soundEnabled) soundPlayer.playSound(R.raw.button_click_sound)
+                            if (prefs.soundEnabled) soundAndMusicPlayer.playSoundEffect(R.raw.button_click_sound) // Usa playSoundEffect
                             userPreferencesViewModel.updateSoundEnabled(it) },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = MaterialTheme.colorScheme.primary,
+                            uncheckedThumbColor = Color.White,
+                            uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                            checkedBorderColor = Color.White
+                        )
+                    )
+                }
+                Spacer(Modifier.height(16.dp))
+
+                // NUOVO SWITCH PER LA MUSICA DI SOTTOFONDO
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(text = stringResource(R.string.musica_sottofondo), style = MaterialTheme.typography.titleMedium)
+                    Switch(
+                        checked = prefs.musicEnabled,
+                        onCheckedChange = {
+                            if (prefs.soundEnabled) soundAndMusicPlayer.playSoundEffect(R.raw.button_click_sound) // Usa playSoundEffect
+                            userPreferencesViewModel.updateMusicEnabled(it)
+                        },
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = Color.White,
                             checkedTrackColor = MaterialTheme.colorScheme.primary,

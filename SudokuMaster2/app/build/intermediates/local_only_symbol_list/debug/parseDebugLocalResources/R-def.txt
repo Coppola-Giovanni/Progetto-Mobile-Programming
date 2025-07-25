@@ -13,6 +13,7 @@ drawable ic_launcher_foreground
 drawable light_mode_background
 mipmap ic_launcher
 mipmap ic_launcher_round
+raw background_music
 raw button_click_sound
 raw win_sound
 string Difficulty
@@ -53,6 +54,7 @@ string loading_sudoku
 string logo_description
 string medium
 string migliori_tempi_per_difficolt
+string musica_sottofondo
 string nessuna_statistica_disponibile_gioca_la_tua_prima_partita
 string new_record
 string notes_mode_off

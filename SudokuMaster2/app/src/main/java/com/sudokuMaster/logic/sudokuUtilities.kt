@@ -25,7 +25,6 @@ internal fun SudokuPuzzle.isValid(): Boolean {
     }
 }
 
-
 internal fun rowsAreInvalid(puzzle: SudokuPuzzle): Boolean {
 
     (0 until puzzle.boundary).forEach { row ->
@@ -127,5 +126,44 @@ internal fun getNodesBySubgrid(
     }
     return subgridNodes
 }
+
+/**
+ * Trova la cella vuota (non in sola lettura) con il minor numero di candidati possibili
+ * e suggerisce il valore corretto dalla soluzione.
+ * Restituisce una coppia (SudokuNode, Int) che rappresenta la cella e il valore suggerito,
+ * o null se non ci sono celle vuote.
+ */
+fun SudokuPuzzle.getSmartHint(): Pair<SudokuNode, Int>? {
+    val emptyNodes = this.getEmptyNodes() // Ottiene tutte le celle vuote e modificabili
+
+    var bestNode: SudokuNode? = null
+    var minCandidates = Int.MAX_VALUE
+
+    // Trova la cella vuota con il minor numero di candidati
+    for (node in emptyNodes) {
+        val candidates = this.getPossibleCandidates(node)
+        // Se trova una cella con una singola possibilità, è il miglior suggerimento immediato
+        if (candidates.size == 1) {
+            val solutionValue = this.solutionGraph[node.y]?.find { it.x == node.x }?.color
+            if (solutionValue != null && solutionValue != 0) {
+                return Pair(node, solutionValue)
+            }
+        }
+        if (candidates.size < minCandidates) {
+            minCandidates = candidates.size
+            bestNode = node
+        }
+    }
+
+    return bestNode?.let { node ->
+        val solutionValue = this.solutionGraph[node.y]?.find { it.x == node.x }?.color
+        if (solutionValue != null && solutionValue != 0) {
+            Pair(node, solutionValue)
+        } else {
+            null // Dovrebbe sempre esserci una soluzione se la griglia è valida
+        }
+    }
+}
+
 
 

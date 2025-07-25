@@ -37,6 +37,12 @@ public interface UserPreferencesOrBuilder extends
   boolean getSoundEnabled();
 
   /**
+   * <code>bool musicEnabled = 4;</code>
+   * @return The musicEnabled.
+   */
+  boolean getMusicEnabled();
+
+  /**
    * <pre>
    * not the full info just the room related id
    * </pre>

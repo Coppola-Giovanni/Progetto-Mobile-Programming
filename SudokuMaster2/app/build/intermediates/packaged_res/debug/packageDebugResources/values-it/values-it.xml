@@ -30,6 +30,7 @@
     <string name="loading_sudoku">Caricamento Sudoku</string>
     <string name="medium">Medio</string>
     <string name="migliori_tempi_per_difficolt">Migliori Tempi per Difficoltà</string>
+    <string name="musica_sottofondo">Musica abilitata:</string>
     <string name="nessuna_statistica_disponibile_gioca_la_tua_prima_partita">Nessuna statistica disponibile. Gioca la tua prima partita!</string>
     <string name="new_record">NUOVO RECORD!</string>
     <string name="notes_mode_off">Note disattivate</string>

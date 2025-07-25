@@ -124,6 +124,32 @@ public  final class UserPreferences extends
     soundEnabled_ = false;
   }
 
+  public static final int MUSICENABLED_FIELD_NUMBER = 4;
+  private boolean musicEnabled_;
+  /**
+   * <code>bool musicEnabled = 4;</code>
+   * @return The musicEnabled.
+   */
+  @java.lang.Override
+  public boolean getMusicEnabled() {
+    return musicEnabled_;
+  }
+  /**
+   * <code>bool musicEnabled = 4;</code>
+   * @param value The musicEnabled to set.
+   */
+  private void setMusicEnabled(boolean value) {
+    
+    musicEnabled_ = value;
+  }
+  /**
+   * <code>bool musicEnabled = 4;</code>
+   */
+  private void clearMusicEnabled() {
+
+    musicEnabled_ = false;
+  }
+
   public static final int LASTUNFINISHEDGAMEID_FIELD_NUMBER = 6;
   private long lastUnfinishedGameId_;
   /**
@@ -406,6 +432,34 @@ public  final class UserPreferences extends
     }
 
     /**
+     * <code>bool musicEnabled = 4;</code>
+     * @return The musicEnabled.
+     */
+    @java.lang.Override
+    public boolean getMusicEnabled() {
+      return instance.getMusicEnabled();
+    }
+    /**
+     * <code>bool musicEnabled = 4;</code>
+     * @param value The musicEnabled to set.
+     * @return This builder for chaining.
+     */
+    public Builder setMusicEnabled(boolean value) {
+      copyOnWrite();
+      instance.setMusicEnabled(value);
+      return this;
+    }
+    /**
+     * <code>bool musicEnabled = 4;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearMusicEnabled() {
+      copyOnWrite();
+      instance.clearMusicEnabled();
+      return this;
+    }
+
+    /**
      * <pre>
      * not the full info just the room related id
      * </pre>
@@ -492,12 +546,13 @@ public  final class UserPreferences extends
             "appTheme_",
             "defaultDifficulty_",
             "soundEnabled_",
+            "musicEnabled_",
             "lastUnfinishedGameId_",
             "lastAccessTimestamp_",
           };
           java.lang.String info =
-              "\u0000\u0005\u0000\u0000\u0001\u0007\u0005\u0000\u0000\u0000\u0001\f\u0002\f\u0003" +
-              "\u0007\u0006\u0002\u0007\u0002";
+              "\u0000\u0006\u0000\u0000\u0001\u0007\u0006\u0000\u0000\u0000\u0001\f\u0002\f\u0003" +
+              "\u0007\u0004\u0007\u0006\u0002\u0007\u0002";
           return newMessageInfo(DEFAULT_INSTANCE, info, objects);
       }
       // fall through

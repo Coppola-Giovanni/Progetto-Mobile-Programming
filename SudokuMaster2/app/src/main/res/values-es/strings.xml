@@ -56,4 +56,5 @@
     <string name="invalid_numbers_message">¡Atención!</string>
     <string name="notes_mode_on">Notas activadas</string>
     <string name="notes_mode_off">Notas deshabilitadas</string>
+    <string name="musica_sottofondo">Música habilitada :</string>
 </resources>

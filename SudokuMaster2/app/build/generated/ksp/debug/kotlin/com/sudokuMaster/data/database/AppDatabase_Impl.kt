@@ -40,7 +40,7 @@ public class AppDatabase_Impl : AppDatabase() {
   }
 
   protected override fun createOpenDelegate(): RoomOpenDelegate {
-    val _openDelegate: RoomOpenDelegate = object : RoomOpenDelegate(2,
+    val _openDelegate: RoomOpenDelegate = object : RoomOpenDelegate(1,
         "e23c43b6e27609450afcb509f594de19", "39c55c3e32188b82ccbe8cf0b074cea6") {
       public override fun createAllTables(connection: SQLiteConnection) {
         connection.execSQL("CREATE TABLE IF NOT EXISTS `game_sessions` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `difficulty` TEXT NOT NULL, `initial_grid` TEXT NOT NULL, `current_grid` TEXT NOT NULL, `solution_grid` TEXT NOT NULL, `start_time_millis` INTEGER NOT NULL, `end_time_millis` INTEGER, `duration_seconds` INTEGER, `points_scored` INTEGER NOT NULL, `is_solved` INTEGER NOT NULL, `date_played_millis` INTEGER NOT NULL)")

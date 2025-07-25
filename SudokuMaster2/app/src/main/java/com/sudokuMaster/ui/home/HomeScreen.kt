@@ -21,7 +21,7 @@ import androidx.navigation.NavController
 import com.SudokuMaster.R
 import com.sudokuMaster.ui.theme.isDark
 import com.sudokuMaster.ui.userpreferences.UserPreferencesViewModel
-import com.sudokuMaster.ui.userpreferences.SoundPlayer
+import com.sudokuMaster.ui.userpreferences.SoundAndMusicPlayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.getValue
 
@@ -37,7 +37,7 @@ fun HomeScreen(
 ) {
     val isCurrentThemeDark = MaterialTheme.colorScheme.isDark()
     val prefs by userPreferencesViewModel.userPreferencesFlow.collectAsState(initial = null)
-    val soundPlayer = SoundPlayer(LocalContext.current)
+    val soundAndMusicPlayer = SoundAndMusicPlayer(LocalContext.current)
 
     Scaffold(
         topBar = {
@@ -94,7 +94,7 @@ fun HomeScreen(
 
                 Button(
                     onClick = {
-                        if (prefs?.soundEnabled == true) soundPlayer.playSound(R.raw.button_click_sound)
+                        if (prefs?.soundEnabled == true) soundAndMusicPlayer.playSoundEffect(R.raw.button_click_sound)
                         onNewGameClick()
                     },
                     modifier = Modifier.widthIn(min = 200.dp)
@@ -110,7 +110,7 @@ fun HomeScreen(
 
                 Button(
                     onClick = {
-                        if (prefs?.soundEnabled == true) soundPlayer.playSound(R.raw.button_click_sound)
+                        if (prefs?.soundEnabled == true) soundAndMusicPlayer.playSoundEffect(R.raw.button_click_sound)
                         onContinueGameClick()
                     },
                     modifier = Modifier.widthIn(min = 200.dp)
@@ -126,7 +126,7 @@ fun HomeScreen(
 
                 Button(
                     onClick = {
-                        if (prefs?.soundEnabled == true) soundPlayer.playSound(R.raw.button_click_sound)
+                        if (prefs?.soundEnabled == true) soundAndMusicPlayer.playSoundEffect(R.raw.button_click_sound)
                         onViewStatisticsClick()
                     },
                     modifier = Modifier.widthIn(min = 200.dp)

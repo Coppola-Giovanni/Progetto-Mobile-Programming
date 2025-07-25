@@ -45,6 +45,7 @@
     <string name="logo_description" translatable="false">Logo description</string>
     <string name="medium">Medium</string>
     <string name="migliori_tempi_per_difficolt">Best Times for Difficulty:</string>
+    <string name="musica_sottofondo">Music enabled:</string>
     <string name="nessuna_statistica_disponibile_gioca_la_tua_prima_partita">No statistics available. Play your first game!</string>
     <string name="new_record">New Record!</string>
     <string name="notes_mode_off">Notes OFF</string>

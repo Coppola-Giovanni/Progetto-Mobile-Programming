@@ -40,6 +40,10 @@
         "source": "com.SudokuMaster.app-main-78:/drawable/dark_mode_background.jpg"
     },
     {
+        "merged": "com.SudokuMaster.app-debug-76:/raw_background_music.mp3.flat",
+        "source": "com.SudokuMaster.app-main-78:/raw/background_music.mp3"
+    },
+    {
         "merged": "com.SudokuMaster.app-debug-76:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
         "source": "com.SudokuMaster.app-main-78:/mipmap-xxxhdpi/ic_launcher_round.webp"
     },
