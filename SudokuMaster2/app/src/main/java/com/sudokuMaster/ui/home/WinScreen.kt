@@ -103,7 +103,7 @@ fun WinScreen(
                     userPreferencesViewModel.resumeBackgroundMusic()
                     navController.navigate(Screen.StatisticsScreen.route)
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.widthIn(min = 200.dp)
             ) {
                 Text(stringResource(R.string.vedi_statistiche))
             }

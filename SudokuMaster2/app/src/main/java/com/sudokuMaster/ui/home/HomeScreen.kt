@@ -89,7 +89,7 @@ fun HomeScreen(
                         fontFamily = FontFamily.Cursive,
                         color = if (isCurrentThemeDark) Color.White else Color.Black
                     ),
-                    modifier = Modifier.padding(bottom = 48.dp)
+                    modifier = Modifier.padding(bottom = 18.dp)
                 )
 
                 Button(
