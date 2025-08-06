@@ -30,7 +30,7 @@ fun WinScreen(
     val timerState by activeGameViewModel.timerState.collectAsState()
     val isNewRecord by activeGameViewModel.isNewRecord.collectAsState()
     val activeGameScreenState by activeGameViewModel.activeGameScreenState.collectAsState()
-    val userPreferences by userPreferencesViewModel.userPreferencesFlow.collectAsState(initial = null) // Ora collezioniamo da userPreferencesViewModel
+    val userPreferences by userPreferencesViewModel.userPreferencesFlow.collectAsState(initial = null)
 
     if (activeGameScreenState == ActiveGameScreenState.COMPLETE && isSolved) {
 

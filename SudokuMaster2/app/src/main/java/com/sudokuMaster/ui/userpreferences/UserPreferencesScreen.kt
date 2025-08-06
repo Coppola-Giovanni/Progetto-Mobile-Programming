@@ -163,10 +163,6 @@ fun UserPreferencesScreen(
             }
 
             Spacer(Modifier.weight(1f))
-
-            Button(onClick = { navController.popBackStack() }) {
-                Text(stringResource(R.string.salva_e_torna_indietro))
-            }
         }
     }
 }
