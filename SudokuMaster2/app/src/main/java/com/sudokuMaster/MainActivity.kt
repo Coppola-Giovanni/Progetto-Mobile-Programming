@@ -34,7 +34,7 @@ import com.sudokuMaster.ui.activegame.ActiveGameViewModelFactory
 import com.sudokuMaster.ui.home.HomeScreen
 import com.sudokuMaster.ui.home.WinScreen
 import com.sudokuMaster.ui.stats.StatisticsScreen
-import com.sudokuMaster.ui.stats.StatisticsViewModel
+import com.sudokuMaster.ui.stats.UserStatisticsViewModel
 import com.sudokuMaster.ui.userpreferences.SoundAndMusicPlayer
 import com.sudokuMaster.ui.userpreferences.UserPreferencesScreen
 import com.sudokuMaster.ui.userpreferences.UserPreferencesViewModel
@@ -175,8 +175,8 @@ fun SudokuAppNavigation(
             )
         }
         composable(Screen.StatisticsScreen.route) {
-            val statisticsViewModel: StatisticsViewModel = viewModel(
-                factory = StatisticsViewModel.Factory(
+            val statisticsViewModel: UserStatisticsViewModel = viewModel(
+                factory = UserStatisticsViewModel.Factory(
                     gameRepository = gameRepository,
                     dispatcherProvider = ProductionDispatcherProvider
                 )

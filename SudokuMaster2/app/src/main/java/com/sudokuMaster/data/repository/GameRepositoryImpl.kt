@@ -223,44 +223,8 @@ class GameRepositoryImpl(
     }
 
 
-    override suspend fun getUserStatistics(): Flow<UserStatistics> {
-        return gameSessionDao.getAllGameSessions().map { gameSessions ->
-            val solvedGames = gameSessions.filter { it.isSolved }
-
-            var totalGamesPlayed = gameSessions.size
-            var totalGamesSolved = solvedGames.size
-
-            var totalSolveTimeMillis = 0L
-            val easySolveTimes = mutableListOf<Long>()
-            val mediumSolveTimes = mutableListOf<Long>()
-            val hardSolveTimes = mutableListOf<Long>()
-
-            solvedGames.forEach { session ->
-                session.durationSeconds?.let { duration ->
-                    val durationMillis = duration * 1000L // Converte secondi in millisecondi
-                    totalSolveTimeMillis += durationMillis
-
-                    when (session.difficulty.toDifficultyLevel()) {
-                        DifficultyLevel.EASY -> easySolveTimes.add(durationMillis)
-                        DifficultyLevel.MEDIUM -> mediumSolveTimes.add(durationMillis)
-                        DifficultyLevel.HARD -> hardSolveTimes.add(durationMillis)
-                        else -> DifficultyLevel.HARD
-                    }
-                }
-            }
-
-            val averageSolveTimeMillis =
-                if (totalGamesSolved > 0) totalSolveTimeMillis / totalGamesSolved else 0L
-
-            UserStatistics(
-                totalGamesPlayed = totalGamesPlayed,
-                totalGamesSolved = totalGamesSolved,
-                averageSolveTimeMillis = averageSolveTimeMillis,
-                bestSolveTimeEasyMillis = easySolveTimes.minOrNull(),
-                bestSolveTimeMediumMillis = mediumSolveTimes.minOrNull(),
-                bestSolveTimeHardMillis = hardSolveTimes.minOrNull()
-            )
-        }
+    override suspend fun getUserStatistics(): Flow<UserStatistics?> {
+        return userStatisticsDao.getUserStatistics()
     }
     // Funzione per calcolare il punteggio basata sul tempo e la difficoltà
     private fun calculateScore(elapsedTimeSeconds: Long, difficulty: DifficultyLevel): Int {

@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
-class StatisticsViewModel(
+class UserStatisticsViewModel(
     private val gameRepository: GameRepositoryInterface,
     private val dispatcherProvider: DispatcherProvider
 ) : ViewModel() {
@@ -52,8 +52,8 @@ class StatisticsViewModel(
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(StatisticsViewModel::class.java)) {
-                return StatisticsViewModel(gameRepository, dispatcherProvider) as T
+            if (modelClass.isAssignableFrom(UserStatisticsViewModel::class.java)) {
+                return UserStatisticsViewModel(gameRepository, dispatcherProvider) as T
             }
             throw IllegalArgumentException("Unknown ViewModel class")
         }

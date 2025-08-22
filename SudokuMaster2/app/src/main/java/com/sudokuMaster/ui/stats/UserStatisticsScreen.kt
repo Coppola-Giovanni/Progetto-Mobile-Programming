@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit
 @Composable
 fun StatisticsScreen(
     navController: NavController,
-    statisticsViewModel: StatisticsViewModel,
+    statisticsViewModel: UserStatisticsViewModel,
     modifier: Modifier = Modifier,
 ) {
     val userStatistics by statisticsViewModel.userStatistics.collectAsState()
