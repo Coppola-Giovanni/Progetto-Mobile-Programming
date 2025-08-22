@@ -11,7 +11,7 @@
     <string name="Difficulty">Difficoltà: %1$s</string>
     <string name="time">Tempo: %1$s</string>
     <string name="new_record">NUOVO RECORD!</string>
-    <string name="start_new_game">Inizia Una Nuova Partita</string>
+    <string name="start_new_game">Nuova Partita</string>
     <string name="loading_sudoku">Caricamento Sudoku</string>
     <string name="save_exit">Salva Ed Esci</string>
     <string name="difficulty_hard">Difficile</string>
