@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="black">#FF000000</color>
+    <color name="ic_launcher_background">#32EC52</color>
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
@@ -59,7 +60,7 @@
     <string name="salva_e_torna_indietro">Save and Go Back</string>
     <string name="save_exit">Save And Exit</string>
     <string name="si_verificato_un_errore_durante_il_caricamento_del_gioco">An error occurred while loading the game.</string>
-    <string name="start_new_game">Start a New Game</string>
+    <string name="start_new_game">Start New Game</string>
     <string name="statistiche_di_gioco">Game Statistics</string>
     <string name="statistiche_utente">User Statistics</string>
     <string name="suggest_move">Suggest Move</string>
